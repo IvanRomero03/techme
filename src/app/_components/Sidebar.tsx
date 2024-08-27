@@ -11,7 +11,8 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleCollapse }) => {
-  const [isOverviewOpen, setIsOverviewOpen] = React.useState(false);
+  const [isOverviewOpen, setIsOverviewOpen] = React.useState(true);
+  
 
   const toggleOverview = () => setIsOverviewOpen(!isOverviewOpen);
 
@@ -39,7 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleCollapse }) => {
           </button>
           {!isCollapsed && isOverviewOpen && (
             <div className="ml-10 mt-2">
-              <Link href="/summary" className="flex items-center px-6 py-2 hover:bg-gray-700 transition">
+              <Link href="/dashboard/admin" className="flex items-center px-6 py-2 hover:bg-gray-700 transition">
                 <FontAwesomeIcon icon={faFileAlt} className="w-4 h-4 mr-3" />
                 <span>Summary</span>
               </Link>

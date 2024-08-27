@@ -12,12 +12,7 @@ interface TopNavBarProps {
 const TopNavBar: React.FC<TopNavBarProps> = ({ session, isCollapsed }) => {
   return (
     <div
-      className={`flex items-center justify-between px-6 py-3 bg-white shadow-lg transition-all duration-300`}
-      style={{
-        width: `calc(100% - ${isCollapsed ? "80px" : "256px"})`,
-        marginLeft: isCollapsed ? "80px" : "256px",
-      }}
-    >
+      className={`flex items-center justify-between px-6 py-3 bg-white shadow-lg transition-all duration-300`}>
       <div className="flex items-center space-x-4">
         <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
           {session?.user?.name?.charAt(0) || 'G'}

@@ -11,17 +11,20 @@ interface RootClientLayoutProps {
 }
 
 const RootClientLayout: React.FC<RootClientLayoutProps> = ({ children, session }) => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   const toggleCollapse = () => setIsCollapsed(!isCollapsed);
 
   return (
     <TRPCReactProvider>
       <div className="flex h-screen">
+        {/* Sidebar with dynamic width based on collapsed state */}
         <Sidebar isCollapsed={isCollapsed} toggleCollapse={toggleCollapse} />
-        <div className={`flex flex-col w-full transition-all duration-300`}>
+        
+        {/* Main Content Area */}
+        <div className={`flex flex-col transition-all duration-300 ${isCollapsed ? 'ml-20' : 'ml-64'} w-full`}>
           <TopNavBar session={session} isCollapsed={isCollapsed} />
-          <div className="p-4 flex-grow bg-gradient-to-b from-[#2e026d] to-[#15162c] text-white">
+          <div className="p-4 flex-grow bg-gradient-to-b from-[#FFFFFF] to-[#FFFFFF] text-black">
             {children}
           </div>
         </div>

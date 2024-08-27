@@ -1,3 +1,4 @@
+// app/layout.tsx
 import { GeistSans } from "geist/font/sans";
 import 'techme/styles/globals.css';
 import { type Metadata } from "next";
