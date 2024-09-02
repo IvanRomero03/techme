@@ -34,15 +34,15 @@ const RootClientLayout: React.FC<RootClientLayoutProps> = ({
       <RoomProvider id="my-room" initialPresence={{ cursor: { x: 0, y: 0 } }}>
         <ClientSideSuspense fallback={<div>Loading…</div>}>
           <TRPCReactProvider>
-            <div className="flex h-screen">
-              {/* Sidebar with dynamic width based on collapsed state */}
-              <Sidebar
-                isCollapsed={isCollapsed}
-                toggleCollapse={toggleCollapse}
-              />
+            <LiveCursors>
+              <div className="flex h-screen">
+                {/* Sidebar with dynamic width based on collapsed state */}
+                <Sidebar
+                  isCollapsed={isCollapsed}
+                  toggleCollapse={toggleCollapse}
+                />
 
-              {/* Main Content Area */}
-              <LiveCursors>
+                {/* Main Content Area */}
                 <div
                   className={`flex flex-col transition-all duration-300 ${isCollapsed ? "ml-20" : "ml-64"} w-full`}
                 >
@@ -51,8 +51,8 @@ const RootClientLayout: React.FC<RootClientLayoutProps> = ({
                     {children}
                   </div>
                 </div>
-              </LiveCursors>
-            </div>
+              </div>
+            </LiveCursors>
           </TRPCReactProvider>
         </ClientSideSuspense>
       </RoomProvider>
