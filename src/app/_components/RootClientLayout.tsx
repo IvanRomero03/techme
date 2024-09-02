@@ -5,6 +5,14 @@ import Sidebar from "./Sidebar";
 import TopNavBar from "./TopNavBar";
 import { TRPCReactProvider } from "techme/trpc/react";
 import type { Session } from "next-auth";
+import {
+  LiveblocksProvider,
+  RoomProvider,
+  ClientSideSuspense,
+  useMyPresence,
+  useOthers,
+} from "@liveblocks/react/suspense";
+import LiveCursors from "./LiveCursors";
 
 interface RootClientLayoutProps {
   children: React.ReactNode;
@@ -20,22 +28,37 @@ const RootClientLayout: React.FC<RootClientLayoutProps> = ({
   const toggleCollapse = () => setIsCollapsed(!isCollapsed);
 
   return (
-    <TRPCReactProvider>
-      <div className="flex h-screen">
-        {/* Sidebar with dynamic width based on collapsed state */}
-        <Sidebar isCollapsed={isCollapsed} toggleCollapse={toggleCollapse} />
+    <LiveblocksProvider
+      publicApiKey={
+        "pk_dev_Tei__BHgmvZAN3MQqPIaXWi-Nd7n13VtDudQc7qOZOAAfpJIrXOZWrhq4sEEfRhy"
+      }
+    >
+      <RoomProvider id="my-room" initialPresence={{ cursor: { x: 0, y: 0 } }}>
+        <ClientSideSuspense fallback={<div>Loading…</div>}>
+          <TRPCReactProvider>
+            <div className="flex h-screen">
+              {/* Sidebar with dynamic width based on collapsed state */}
+              <Sidebar
+                isCollapsed={isCollapsed}
+                toggleCollapse={toggleCollapse}
+              />
 
-        {/* Main Content Area */}
-        <div
-          className={`flex flex-col transition-all duration-300 ${isCollapsed ? "ml-20" : "ml-64"} w-full`}
-        >
-          <TopNavBar session={session} isCollapsed={isCollapsed} />
-          <div className="flex-grow bg-gradient-to-b from-[#FFFFFF] to-[#FFFFFF] p-4 text-black">
-            {children}
-          </div>
-        </div>
-      </div>
-    </TRPCReactProvider>
+              {/* Main Content Area */}
+              <LiveCursors>
+                <div
+                  className={`flex flex-col transition-all duration-300 ${isCollapsed ? "ml-20" : "ml-64"} w-full`}
+                >
+                  <TopNavBar session={session} isCollapsed={isCollapsed} />
+                  <div className="flex-grow bg-gradient-to-b from-[#FFFFFF] to-[#FFFFFF] p-4 text-black">
+                    {children}
+                  </div>
+                </div>
+              </LiveCursors>
+            </div>
+          </TRPCReactProvider>
+        </ClientSideSuspense>
+      </RoomProvider>
+    </LiveblocksProvider>
   );
 };
 
