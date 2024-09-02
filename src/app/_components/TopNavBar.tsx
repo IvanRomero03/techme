@@ -10,7 +10,7 @@ import {
 import type { Session } from "next-auth";
 
 interface TopNavBarProps {
-  session: Session;
+  session?: Session;
   isCollapsed: boolean;
 }
 

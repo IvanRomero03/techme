@@ -8,7 +8,7 @@ import type { Session } from "next-auth";
 
 interface RootClientLayoutProps {
   children: React.ReactNode;
-  session: Session; // Replace with actual session type if available
+  session?: Session; // Replace with actual session type if available
 }
 
 const RootClientLayout: React.FC<RootClientLayoutProps> = ({
