@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faBell, faChevronDown } from '@fortawesome/free-solid-svg-icons';
 
 interface TopNavBarProps {
-  session: any; // Replace with actual session type if available
+  session: any; 
   isCollapsed: boolean;
 }
 

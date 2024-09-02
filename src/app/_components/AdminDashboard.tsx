@@ -39,7 +39,7 @@ export function AdminDashboard() {
   return (
     <div className="p-6 grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
       {/* Pending Projects Card */}
-      <Card className="shadow-lg hover:shadow-2xl transition-shadow">
+      <Card className="shadow-lg hover:shadow-2xl transition-shadow rounded-2xl">
         <CardHeader>
           <CardTitle>
             <FaProjectDiagram className="inline-block mr-2" />
@@ -62,7 +62,7 @@ export function AdminDashboard() {
       </Card>
 
       {/* Co-workers Card */}
-      <Card className="shadow-lg hover:shadow-2xl transition-shadow">
+      <Card className="shadow-lg hover:shadow-2xl transition-shadow rounded-2xl">
         <CardHeader>
           <CardTitle>
             <FaUsers className="inline-block mr-2" />
@@ -78,7 +78,7 @@ export function AdminDashboard() {
       </Card>
 
       {/* Calendar Card */}
-      <Card className="shadow-lg hover:shadow-2xl transition-shadow">
+      <Card className="shadow-lg hover:shadow-2xl transition-shadow rounded-2xl">
         <CardHeader>
           <CardTitle>
             <FaCalendarAlt className="inline-block mr-2" />
@@ -98,7 +98,7 @@ export function AdminDashboard() {
       </Card>
 
       {/* Current Project Status Card */}
-      <Card className="col-span-2 shadow-lg hover:shadow-2xl transition-shadow">
+      <Card className="col-span-2 shadow-lg hover:shadow-2xl transition-shadow rounded-2xl">
         <CardHeader>
           <CardTitle>
             <FaTasks className="inline-block mr-2" />
@@ -128,7 +128,7 @@ export function AdminDashboard() {
       </Card>
 
       {/* Top Categories Card */}
-      <Card className="shadow-lg hover:shadow-2xl transition-shadow">
+      <Card className="shadow-lg hover:shadow-2xl transition-shadow rounded-2xl">
         <CardHeader>
           <CardTitle>Top Categories</CardTitle>
         </CardHeader>
