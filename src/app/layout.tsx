@@ -1,6 +1,6 @@
 // app/layout.tsx
 import { GeistSans } from "geist/font/sans";
-import 'techme/styles/globals.css';
+import "techme/styles/globals.css";
 import { type Metadata } from "next";
 import { getServerAuthSession } from "techme/server/auth";
 import RootClientLayout from "./_components/RootClientLayout";
@@ -19,7 +19,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
       <body>
-        <RootClientLayout session={session}>
+        <RootClientLayout session={session ?? undefined}>
           {children}
         </RootClientLayout>
       </body>
