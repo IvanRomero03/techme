@@ -2,6 +2,7 @@
 import { useMyPresence, useOthers } from "@liveblocks/react/suspense";
 import React from "react";
 import Cursor from "./Cursor";
+import { Session } from "next-auth";
 
 const COLORS = [
   "#E57373",
@@ -16,8 +17,10 @@ const COLORS = [
 
 export default function LiveCursors({
   children,
+  session,
 }: {
   children: React.ReactNode;
+  session?: Session;
 }) {
   const [{ cursor }, updateMyPresence] = useMyPresence();
   const others = useOthers();
@@ -29,6 +32,7 @@ export default function LiveCursors({
           cursor: {
             x: Math.round(event.clientX),
             y: Math.round(event.clientY),
+            name: session?.user?.name?.split(" ")[0] ?? undefined,
           },
         });
       }}
@@ -54,6 +58,7 @@ export default function LiveCursors({
               // connectionId is an integer that is incremented at every new connections
               // Assigning a color with a modulo makes sure that a specific user has the same colors on every clients
               color={COLORS[connectionId % COLORS.length]!}
+              name={presence.cursor.name}
               x={presence.cursor.x}
               y={presence.cursor.y}
             />

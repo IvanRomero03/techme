@@ -34,7 +34,7 @@ const RootClientLayout: React.FC<RootClientLayoutProps> = ({
       <RoomProvider id="my-room" initialPresence={{ cursor: { x: 0, y: 0 } }}>
         <ClientSideSuspense fallback={<div>Loading…</div>}>
           <TRPCReactProvider>
-            <LiveCursors>
+            <LiveCursors session={session}>
               <div className="flex h-screen">
                 {/* Sidebar with dynamic width based on collapsed state */}
                 <Sidebar
