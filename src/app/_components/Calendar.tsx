@@ -28,17 +28,17 @@ const localizer = dateFnsLocalizer({
 // Example events
 const events = [
   {
-    title: "Meeting with John",
+    title: "Stage 1: Project A",
     start: new Date(2024, 8, 10, 10, 0), // September 10, 2024, 10:00 AM
     end: new Date(2024, 8, 10, 11, 0),   // September 10, 2024, 11:00 AM
   },
   {
-    title: "Lunch with Sarah",
+    title: "Stage 5: Project C",
     start: new Date(2024, 8, 12, 12, 30), // September 12, 2024, 12:30 PM
     end: new Date(2024, 8, 12, 13, 30),   // September 12, 2024, 1:30 PM
   },
   {
-    title: "Project Deadline",
+    title: "Final Stage: Project B",
     start: new Date(2024, 8, 15),         // September 15, 2024
     end: new Date(2024, 8, 15),           // September 15, 2024
   },
