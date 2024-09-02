@@ -4,6 +4,7 @@ import "techme/styles/globals.css";
 import { type Metadata } from "next";
 import { getServerAuthSession } from "techme/server/auth";
 import RootClientLayout from "./_components/RootClientLayout";
+import { useMyPresence, useOthers } from "@liveblocks/react/suspense";
 
 export const metadata: Metadata = {
   title: "Create T3 App",
