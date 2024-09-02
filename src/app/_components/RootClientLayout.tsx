@@ -29,9 +29,7 @@ const RootClientLayout: React.FC<RootClientLayoutProps> = ({
 
   return (
     <LiveblocksProvider
-      publicApiKey={
-        "pk_dev_Tei__BHgmvZAN3MQqPIaXWi-Nd7n13VtDudQc7qOZOAAfpJIrXOZWrhq4sEEfRhy"
-      }
+      publicApiKey={process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_API_KEY ?? ""}
     >
       <RoomProvider id="my-room" initialPresence={{ cursor: { x: 0, y: 0 } }}>
         <ClientSideSuspense fallback={<div>Loading…</div>}>
