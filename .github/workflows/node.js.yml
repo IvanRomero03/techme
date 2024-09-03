@@ -26,6 +26,11 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - name: Use secrets
+      
+      run: echo "Done loading env"
+    - run: npm install --global yarn
+    - run: yarn install
+    - name: yarn build
       env:
         DATABASE_URL: ${{ secrets.DATABASE_URL }}
         NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
@@ -35,7 +40,4 @@ jobs:
         GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         AZURE_AD_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
         NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_API_KEY: ${{ secrets.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_API_KEY }}
-      run: echo "Done loading env"
-    - run: npm install --global yarn
-    - run: yarn install
-    - run: yarn build
+      run: yarn build
