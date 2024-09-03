@@ -35,6 +35,7 @@ jobs:
         GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         AZURE_AD_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
         NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_API_KEY: ${{ secrets.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_API_KEY }}
+      run: echo "Done loading env"
     - run: npm install --global yarn
     - run: yarn install
     - run: yarn build
