@@ -1,19 +1,19 @@
-import Link from "next/link"
+import Link from "next/link";
 
-import { Button } from "t/components/ui/button"
+import { Button } from "t/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "t/components/ui/card"
-import { Input } from "t/components/ui/input"
-import { Label } from "t/components/ui/label"
+} from "t/components/ui/card";
+import { Input } from "t/components/ui/input";
+import { Label } from "t/components/ui/label";
 
 export function LoginForm() {
   return (
-    <Card className="mx-auto max-w-sm m:10">
+    <Card className="m:10 mx-auto max-w-sm">
       <CardHeader>
         <CardTitle className="text-2xl">Login</CardTitle>
         <CardDescription>
@@ -22,14 +22,14 @@ export function LoginForm() {
       </CardHeader>
       <CardContent>
         <Link href="/api/auth/callback/google" passHref>
-            <Button variant="default" className="w-full">
-                Login with Google
-            </Button>
-        </Link>
-          
-          <Button variant="outline" className="w-full mt-3">
-            Login with Microsoft
+          <Button variant="default" className="w-full">
+            Login with Google
           </Button>
+        </Link>
+
+        <Button variant="outline" className="mt-3 w-full">
+          Login with Microsoft
+        </Button>
         <div className="mt-4 text-center text-sm">
           Don&apos;t have an account?{" "}
           <Link href="#" className="underline">
@@ -38,5 +38,5 @@ export function LoginForm() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

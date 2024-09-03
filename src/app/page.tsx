@@ -2,7 +2,7 @@ import Link from "next/link";
 import { LatestPost } from "techme/app/_components/post";
 import { getServerAuthSession } from "techme/server/auth";
 import { api, HydrateClient } from "techme/trpc/server";
-import { signIn } from 'next-auth/react';
+import { signIn } from "next-auth/react";
 import { Button } from "t/components/ui/button";
 import {
   Card,
@@ -24,7 +24,7 @@ export default async function Home() {
   void api.post.getLatest.prefetch();
 
   return (
-    <Card className="mx-auto max-w-sm m:10">
+    <Card className="m:10 mx-auto max-w-sm">
       <CardHeader>
         <CardTitle className="text-2xl">Login</CardTitle>
         <CardDescription>Click the button below to Sign in</CardDescription>
@@ -40,14 +40,12 @@ export default async function Home() {
         {session && (
           <>
             <Link href={"/dashboard/admin"}>
-              <Button variant="default" className="w-full mt-4">
+              <Button variant="default" className="mt-4 w-full">
                 Go to Dashboard
               </Button>
             </Link>
-            
+
             <SignOut />
-
-
           </>
         )}
       </CardContent>

@@ -12,8 +12,19 @@ import {
   TableRow,
 } from "t/components/ui/table";
 import { Button } from "t/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "t/components/ui/card";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuItem } from "t/components/ui/dropdown-menu";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "t/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuTrigger,
+  DropdownMenuItem,
+} from "t/components/ui/dropdown-menu";
 
 const projects = [
   {
@@ -60,8 +71,8 @@ const projects = [
 
 export function ProjectView() {
   return (
-    <Card className="p-6 shadow-lg hover:shadow-2xl transition-shadow rounded-2xl">
-      <CardHeader className="flex justify-between items-center mb-4">
+    <Card className="rounded-2xl p-6 shadow-lg transition-shadow hover:shadow-2xl">
+      <CardHeader className="mb-4 flex items-center justify-between">
         <CardTitle>Projects</CardTitle>
         <div className="flex space-x-4">
           <Button variant="default" className="flex items-center space-x-2">
@@ -105,7 +116,10 @@ export function ProjectView() {
           </TableHeader>
           <TableBody>
             {projects.map((project) => (
-              <TableRow key={project.name} className="hover:bg-gray-100 cursor-pointer">
+              <TableRow
+                key={project.name}
+                className="cursor-pointer hover:bg-gray-100"
+              >
                 <TableCell className="font-medium">{project.name}</TableCell>
                 <TableCell>{project.status}</TableCell>
                 <TableCell>{project.category}</TableCell>
@@ -126,7 +140,7 @@ export function ProjectView() {
           </TableFooter>
         </Table>
       </CardContent>
-      <CardFooter className="flex justify-center mt-4">
+      <CardFooter className="mt-4 flex justify-center">
         {/* Pagination */}
         <div className="flex space-x-2">
           <Button variant="outline">1</Button>

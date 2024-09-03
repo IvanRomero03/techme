@@ -21,7 +21,12 @@ import {
 } from "t/components/ui/select";
 import { Progress } from "t/components/ui/progress";
 import { Doughnut } from "react-chartjs-2";
-import { FaProjectDiagram, FaUsers, FaCalendarAlt, FaTasks } from "react-icons/fa"; // Import icons
+import {
+  FaProjectDiagram,
+  FaUsers,
+  FaCalendarAlt,
+  FaTasks,
+} from "react-icons/fa"; // Import icons
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -33,16 +38,23 @@ import {
 } from "chart.js";
 
 // Register Chart.js components
-ChartJS.register(CategoryScale, LinearScale, ArcElement, Title, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  ArcElement,
+  Title,
+  Tooltip,
+  Legend,
+);
 
 export function AdminDashboard() {
   return (
-    <div className="p-6 grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+    <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 lg:grid-cols-3">
       {/* Pending Projects Card */}
-      <Card className="shadow-lg hover:shadow-2xl transition-shadow rounded-2xl">
+      <Card className="rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
         <CardHeader>
           <CardTitle>
-            <FaProjectDiagram className="inline-block mr-2" />
+            <FaProjectDiagram className="mr-2 inline-block" />
             Pending Projects
           </CardTitle>
           <CardDescription>2 projects</CardDescription>
@@ -50,7 +62,7 @@ export function AdminDashboard() {
         <CardContent>
           <div className="space-y-2">
             <p className="text-lg font-medium">Project A</p>
-            <p className="text-red-500 text-lg">1 Day Left</p>
+            <p className="text-lg text-red-500">1 Day Left</p>
           </div>
         </CardContent>
         <CardFooter>
@@ -62,10 +74,10 @@ export function AdminDashboard() {
       </Card>
 
       {/* Co-workers Card */}
-      <Card className="shadow-lg hover:shadow-2xl transition-shadow rounded-2xl">
+      <Card className="rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
         <CardHeader>
           <CardTitle>
-            <FaUsers className="inline-block mr-2" />
+            <FaUsers className="mr-2 inline-block" />
             Co-workers
           </CardTitle>
         </CardHeader>
@@ -78,10 +90,10 @@ export function AdminDashboard() {
       </Card>
 
       {/* Calendar Card */}
-      <Card className="shadow-lg hover:shadow-2xl transition-shadow rounded-2xl">
+      <Card className="rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
         <CardHeader>
           <CardTitle>
-            <FaCalendarAlt className="inline-block mr-2" />
+            <FaCalendarAlt className="mr-2 inline-block" />
             Calendar
           </CardTitle>
           <CardDescription>12/08/2024</CardDescription>
@@ -98,10 +110,10 @@ export function AdminDashboard() {
       </Card>
 
       {/* Current Project Status Card */}
-      <Card className="col-span-2 shadow-lg hover:shadow-2xl transition-shadow rounded-2xl">
+      <Card className="col-span-2 rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
         <CardHeader>
           <CardTitle>
-            <FaTasks className="inline-block mr-2" />
+            <FaTasks className="mr-2 inline-block" />
             Current Project Status
           </CardTitle>
         </CardHeader>
@@ -128,7 +140,7 @@ export function AdminDashboard() {
       </Card>
 
       {/* Top Categories Card */}
-      <Card className="shadow-lg hover:shadow-2xl transition-shadow rounded-2xl">
+      <Card className="rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
         <CardHeader>
           <CardTitle>Top Categories</CardTitle>
         </CardHeader>
