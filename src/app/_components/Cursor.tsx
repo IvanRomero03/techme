@@ -1,15 +1,25 @@
 import { cn } from "lib/utils 2";
-import React from "react";
+import React, { useMemo } from "react";
+import { getContrastingColor } from "techme/util/getContrastingColor";
 
 type Props = {
   color: string;
+  textColor: string;
   x: number;
   y: number;
   name?: string;
 };
 
-export default function Cursor({ color, x, y, name }: Props) {
-  console.log(color);
+export default function Cursor({ color, textColor, x, y, name }: Props) {
+  if (name != undefined) {
+    if (name.length > 0) {
+      name = name[0]?.toUpperCase() + name.slice(1);
+    }
+  }
+  const textColorCont = useMemo(
+    () => (color ? getContrastingColor(color) : undefined),
+    [color],
+  );
   return (
     <>
       <svg
@@ -32,16 +42,23 @@ export default function Cursor({ color, x, y, name }: Props) {
       </svg>
       {name != undefined && (
         <p
-          className={cn("rounded-2xl px-1 py-0.5 text-xs font-semibold")}
+          className={cn("rounded-lg px-1 py-0.5 text-xs font-semibold")}
           style={{
             position: "absolute",
             left: 0,
             top: 0,
             transform: `translateX(${x + 14}px) translateY(${y}px)`,
-            backgroundColor: color.toLowerCase(),
+            backgroundImage: `linear-gradient(to bottom right, ${color.toLowerCase()}, ${textColor.toLowerCase()})`,
           }}
         >
-          <p className="text-gray-400 backdrop-invert-0">{name}</p>
+          <p
+            className={"backdrop-invert-0"}
+            style={{
+              color: textColorCont,
+            }}
+          >
+            {name}
+          </p>
         </p>
       )}
     </>
