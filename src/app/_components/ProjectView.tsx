@@ -71,7 +71,7 @@ const projects = [
 ];
 
 export function ProjectView() {
-  const router = useRouter(); // Initialize router
+  const router = useRouter();
 
   const handleViewClick = () => {
     // Navigate to the StateMenu component

@@ -43,11 +43,11 @@ const ProjectMenu = () => {
       </div>
 
       {/* Main Content Area */}
-      <div className="w-3/4 p-6">
+      <div className="mx-6 w-3/4 rounded-2xl border p-8 shadow-md">
         {/* Estimations Section */}
         <h2 className="mb-4 text-2xl font-bold">{activeMenuItem}</h2>
 
-        <div className="mb-6 grid grid-cols-2 gap-4">
+        <div className="mb-6 grid grid-cols-2 gap-5">
           {/* Example Phase Cards */}
           <Card className="bg-gray-50">
             <CardHeader>
