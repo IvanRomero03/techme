@@ -1,3 +1,4 @@
+import { cn } from "lib/utils 2";
 import React from "react";
 
 type Props = {
@@ -8,6 +9,7 @@ type Props = {
 };
 
 export default function Cursor({ color, x, y, name }: Props) {
+  console.log(color);
   return (
     <>
       <svg
@@ -28,16 +30,20 @@ export default function Cursor({ color, x, y, name }: Props) {
           fill={color}
         />
       </svg>
-      <p
-        style={{
-          position: "absolute",
-          left: 0,
-          top: 0,
-          transform: `translateX(${x}px) translateY(${y}px)`,
-        }}
-      >
-        {name}
-      </p>
+      {name != undefined && (
+        <p
+          className={cn("rounded-2xl px-1 py-0.5 text-xs font-semibold")}
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            transform: `translateX(${x + 14}px) translateY(${y}px)`,
+            backgroundColor: color.toLowerCase(),
+          }}
+        >
+          <p className="text-gray-400 backdrop-invert-0">{name}</p>
+        </p>
+      )}
     </>
   );
 }
