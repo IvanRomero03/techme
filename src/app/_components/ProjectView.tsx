@@ -25,15 +25,16 @@ import {
   DropdownMenuTrigger,
   DropdownMenuItem,
 } from "t/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation"; // Import useRouter from Next.js
 
 const projects = [
   {
     name: "Project A",
-    status: "50%",
-    category: "Finance",
-    estimate: "$2,999.00",
-    currentStage: 1,
-    nextStage: 2,
+    status: "50%", // Represents the completion status of the project
+    category: "Finance", // Category or type of the project
+    estimate: "$2,999.00", // Cost or budget estimate for the project
+    currentStage: 1, // The current stage number the project is in
+    nextStage: 2, // The next stage number that follows
   },
   {
     name: "Project B",
@@ -70,6 +71,13 @@ const projects = [
 ];
 
 export function ProjectView() {
+  const router = useRouter(); // Initialize router
+
+  const handleViewClick = () => {
+    // Navigate to the StateMenu component
+    router.push("/projects/state");
+  };
+
   return (
     <Card className="rounded-2xl p-6 shadow-lg transition-shadow hover:shadow-2xl">
       <CardHeader className="mb-4 flex items-center justify-between">
@@ -127,7 +135,9 @@ export function ProjectView() {
                 <TableCell>{project.currentStage}</TableCell>
                 <TableCell>{project.nextStage}</TableCell>
                 <TableCell>
-                  <Button variant="link">View</Button>
+                  <Button variant="link" onClick={handleViewClick}>
+                    View
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
