@@ -43,12 +43,12 @@ export default function Cursor({ color, textColor, x, y, name }: Props) {
       </svg>
       {name != undefined && (
         <p
-          className={cn("rounded-lg p-2 text-xs font-semibold")}
+          className={cn("rounded-lg px-2 py-1 text-xs font-semibold")}
           style={{
             position: "absolute",
             left: 0,
             top: 0,
-            transform: `translateX(${x + 16}px) translateY(${y}px)`,
+            transform: `translateX(${x + 12}px) translateY(${y + 10}px)`,
             backgroundImage: `linear-gradient(to bottom right, ${color.toLowerCase()}, ${textColor.toLowerCase()})`,
           }}
         >
