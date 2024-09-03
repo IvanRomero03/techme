@@ -50,7 +50,7 @@ export function AdminDashboard() {
         <CardContent>
           <div className="space-y-2">
             <p className="text-lg font-medium">Project A</p>
-            <p className="text-sm text-red-500">Pending Review</p>
+            <p className="text-red-500 text-lg">1 Day Left</p>
           </div>
         </CardContent>
         <CardFooter>
