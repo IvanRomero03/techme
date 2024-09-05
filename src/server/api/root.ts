@@ -1,5 +1,6 @@
 import { postRouter } from "techme/server/api/routers/post";
 import { createCallerFactory, createTRPCRouter } from "techme/server/api/trpc";
+import { tablaRouter } from "./routers/tabla";
 
 /**
  * This is the primary router for your server.
@@ -8,6 +9,7 @@ import { createCallerFactory, createTRPCRouter } from "techme/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
   post: postRouter,
+  tabla: tablaRouter,
 });
 
 // export type definition of API

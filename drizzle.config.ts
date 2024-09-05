@@ -7,6 +7,11 @@ export default {
   dialect: "postgresql",
   dbCredentials: {
     url: env.DATABASE_URL,
+    database: "postgres",
+    port: 5432,
+    user: "postgres.egzfmwstzbapteywkqqq",
+    host: "aws-0-us-west-1.pooler.supabase.com",
+    password: env.DATABASE_PW,
   },
   tablesFilter: ["techme_*"],
 } satisfies Config;
