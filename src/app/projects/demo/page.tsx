@@ -10,6 +10,8 @@ import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
 import { parse } from "partial-json";
+import { Skeleton } from "t/components/ui/skeleton";
+import Markdown from "react-markdown";
 
 const openai = new OpenAI({
   apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY ?? "",
@@ -17,7 +19,7 @@ const openai = new OpenAI({
   dangerouslyAllowBrowser: true,
 });
 
-const ASSISTANT_ID = "asst_AoTYS0oMGnGEpU7qb41y83Im";
+const ASSISTANT_ID = "asst_lX1CxKABQX3ktPhmclqt3cGi";
 const schema = zodResponseFormat(
   z.object({
     fases: z.array(
@@ -55,7 +57,9 @@ export default function ProjectMenu() {
 
   const [file, setFile] = useState<File | null>(null);
   const [text, setText] = useState<string>("");
-  const [preview, setPreview] = useState<string>("");
+  const [loadingEsts, setLoadingEsts] = useState<boolean>(false);
+  const [loadingSummary, setLoadingSummary] = useState<boolean>(false);
+  const [summmary, setSummary] = useState<string>("");
   const [estimaciones, setEstimaciones] = useState<
     (typeof schema)["__output"]["fases"]
   >([]);
@@ -79,9 +83,11 @@ export default function ProjectMenu() {
     }
     setFile(file);
   };
+
   const handleGet = async () => {
     if (file && text) {
-      console.log("aqui", text);
+      setLoadingEsts(true);
+      setEstimaciones([]);
 
       const thread = await openai.beta.threads.create({
         messages: [{ role: "user", content: text }],
@@ -91,7 +97,6 @@ export default function ProjectMenu() {
           thread.id,
           {
             assistant_id: ASSISTANT_ID,
-            // stream: true,
             model: "gpt-4o-mini",
             response_format: schema,
             temperature: 1,
@@ -100,9 +105,7 @@ export default function ProjectMenu() {
           },
           { stream: true },
         )
-        // .on("messageDelta", (message, snapshot) => {})
         .on("textDelta", (message, snapshot) => {
-          // setPreview(snapshot.value);
           if (!message.value) {
             return;
           }
@@ -120,31 +123,56 @@ export default function ProjectMenu() {
                       fase.time_estimation &&
                       fase.manforce
                     ) {
-                      // console.log("fase", fase);
                       previewPrev.push(fase);
                     }
                   } catch (error) {}
                 }
+                setLoadingEsts(previewPrev.length === 0);
                 setEstimaciones(previewPrev);
               }
             }
           } catch (error) {}
-          // console.log("txtDelta[ms]", message);
-          // console.log("txtDelta[sn]", snapshot);
         })
         .on("textDone", (message, snapshot) => {
-          // console.log("txtDone[ms]", message);
           const texto = message.value;
           try {
             const respuesta = schema.$parseRaw(texto);
+            setLoadingEsts(false);
             setEstimaciones(respuesta.fases);
-            // console.log("respuesta", respuesta);
-          } catch (error) {
-            // console.log("json zod parse error", error);
-          }
-          // console.log("txtDone[sn]", snapshot);
+          } catch (error) {}
         });
+      setLoadingEsts(false);
       await res.done();
+    }
+  };
+
+  const handleGetSummary = async () => {
+    if (file && text) {
+      setLoadingSummary(true);
+      const res = openai.beta.chat.completions
+        .stream({
+          model: "gpt-4o",
+          messages: [
+            {
+              role: "system",
+              content:
+                "Tu tarea es dar un resumen detallado pero conciso de un documento de negocios. Brinda información importante y relevante que le pueda servir a un Project Manager para entender el documento y dar sus mejores contribuciones a las fases del proyecto y a la estimación de tiempo y recursos. Debes hacer el resultado lo mas corto posible. Usa algunos bullet points (con - ).",
+            },
+            { role: "user", content: text },
+          ],
+          stream: true,
+        })
+        .on("content.delta", (lis) => {
+          setLoadingSummary(false);
+          setSummary(lis.snapshot);
+        })
+        .on("content.done", (lis) => {
+          setLoadingSummary(false);
+          console.log("lisRES", lis);
+          setSummary(lis.content);
+        });
+      console.log("res", res);
+      setLoadingSummary(false);
     }
   };
 
@@ -188,7 +216,13 @@ export default function ProjectMenu() {
               <CardTitle>Upload</CardTitle>
             </CardHeader>
             <CardContent className="flex w-full space-x-4">
-              <Button disabled={!file} className="w-full" onClick={handleGet}>
+              <Button
+                disabled={!file}
+                className="w-full"
+                onClick={() => {
+                  void Promise.all([void handleGet(), void handleGetSummary()]);
+                }}
+              >
                 Get
               </Button>
             </CardContent>
@@ -200,7 +234,13 @@ export default function ProjectMenu() {
           <CardHeader>
             <CardTitle>Summary</CardTitle>
           </CardHeader>
-          <p></p>
+          <CardContent className="max-h-72 overflow-y-auto">
+            {loadingSummary ? (
+              <Skeleton className="h-8 w-[250px]" />
+            ) : (
+              <Markdown>{summmary}</Markdown>
+            )}
+          </CardContent>
         </Card>
         <Separator className="my-4" />
         <Card className="p-4">
@@ -209,6 +249,17 @@ export default function ProjectMenu() {
           </CardHeader>
 
           <div className="flex flex-wrap justify-evenly">
+            {loadingEsts && (
+              <Card className="m-4 max-w-lg bg-white">
+                <CardHeader>
+                  <Skeleton className="h-8 w-[250px]" />
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <Skeleton className="h-8 w-[250px]" />
+                  <Skeleton className="h-4 w-[250px]" />
+                </CardContent>
+              </Card>
+            )}
             {estimaciones.map((fase) => (
               <Card key={fase.nombre} className="m-4 max-w-lg bg-gray-50">
                 <CardHeader>
@@ -235,17 +286,9 @@ export default function ProjectMenu() {
               </Card>
             ))}
           </div>
-          <p>{preview}</p>
         </Card>
 
         <Separator className="my-4" />
-
-        {/* Total Estimation Section */}
-        <h3 className="mb-4 text-xl font-bold">Total Estimation</h3>
-        <div className="flex space-x-4">
-          <Button variant="outline">Time Estimation</Button>
-          <Button variant="outline">Manforce</Button>
-        </div>
       </div>
     </div>
   );
