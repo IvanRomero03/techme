@@ -85,4 +85,3 @@ export default function ProjectMenu() {
   );
 };
 
-export default ProjectMenu;
