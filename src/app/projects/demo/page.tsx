@@ -9,7 +9,7 @@ import { Separator } from "t/components/ui/separator";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
-import { Stream } from "stream";
+import { parse, Allow } from "partial-json";
 // import pdfToText from "react-pdftotext";
 // import { pdfjs } from "react-pdf";
 // // import type { PDFDocumentProxy } from "pdfjs-dist";
@@ -46,17 +46,15 @@ const schema = zodResponseFormat(
   z.object({
     fases: z.array(
       z.object({
-        fase: z.object({
-          nombre: z.string(),
-          descripcion: z.string(),
-          time_estimation: z.object({
-            tiempo: z.string(),
-            unidad: z.string(),
-          }),
-          manforce: z.array(
-            z.object({ nombre: z.string(), cantidad: z.number() }),
-          ),
+        nombre: z.string(),
+        descripcion: z.string(),
+        time_estimation: z.object({
+          tiempo: z.string(),
+          unidad: z.string(),
         }),
+        manforce: z.array(
+          z.object({ nombre: z.string(), cantidad: z.number() }),
+        ),
       }),
     ),
   }),
@@ -81,17 +79,20 @@ export default function ProjectMenu() {
 
   const [file, setFile] = useState<File | null>(null);
   const [text, setText] = useState<string>("");
+  const [preview, setPreview] = useState<string>("");
+  const [estimaciones, setEstimaciones] = useState<
+    (typeof schema)["__output"]["fases"]
+  >([]);
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!(e.target.files && e.target.files.length > 0 && e.target.files[0])) {
-      //   setFile(e.target.files[0]);
       return;
     }
     const file = e.target.files[0];
     if (!file) {
       return;
     }
-    //if .txt file
+
     if (file.type === "text/plain") {
       const reader = new FileReader();
       reader.onload = async (e) => {
@@ -100,97 +101,10 @@ export default function ProjectMenu() {
       };
       reader.readAsText(file);
     }
-    // if (file.type !== "application/pdf") {
-    //   return;
-    // }
-
-    // const reader = new FileReader();
-
-    // reader.onload = async (e) => {
-    //   const typedArray = new Uint8Array(e.target?.result as ArrayBuffer);
-    //   const pdf = await pdfjs.getDocument(typedArray).promise;
-    //   const extractedText = await PdfExtractor(pdf);
-    //   console.log(extractedText);
-    //   setText(extractedText);
-    // };
-
-    // reader.readAsArrayBuffer(file);
     setFile(file);
   };
-  const [estimaciones, setEstimaciones] = useState<
-    (typeof schema)["__output"]["fases"]
-  >([]);
   const handleGet = async () => {
     if (file && text) {
-      //   const data = new FormData();
-      //   data.append("file", file);
-
-      //   const asd = await openai.beta.assistants.list();
-      //   const stream = await openai.beta.assistants.create(
-      //     {
-      //       name: "Test PM Estimations Assistant",
-      //       model: "gpt-4o-mini",
-      //       instructions:
-      //         "Eres un asistente en un sistema de manejo de preventa. Ayuda al proyect manager a resumir la información y destacar la información más importante. Despliega todas las fases que entraran en la planificación y desarrollo en torno a las necesidades del cliente y proyecto. Crea las fases no de manera generalizada, más específica en torno a la descripción del proyecto. Preferentemente solo incluye etapas que sean relacionadas a etapas dentro del desarrollo específico del proyecto.",
-      //       temperature: 1,
-      //       top_p: 1,
-      //       response_format: zodResponseFormat(
-      //         z.object({
-      //           fases: z.array(
-      //             z.object({
-      //               fase: z.object({
-      //                 nombre: z.string(),
-      //                 descripcion: z.string(),
-      //                 time_estimation: z.object({
-      //                   tiempo: z.string(),
-      //                   unidad: z.string(),
-      //                 }),
-      //                 manforce: z.array(
-      //                   z.object({
-      //                     nombre: z.string(),
-      //                     cantidad: z.number(),
-      //                   }),
-      //                 ),
-      //               }),
-      //             }),
-      //           ),
-      //         }),
-      //         "fases_estimaciones",
-      //       ),
-      //     },
-      //     // { stream: true },
-      //   );
-      //   console.log(asd);
-      //   for await (const chunk of stream) {
-      //     process.stdout.write(chunk.choices[0]?.delta?.content || "");
-      // }
-      //   console.log("stream", stream);
-      //   for await (const chunk of stream) {
-      //     console.log("chunk", chunk);
-      //   }
-      //   const stream = await openai.beta.threads.create({
-      //     messages: [{ role: "user", content: await file.text() }],
-      //   },
-      // {
-
-      // });
-      //   const texto = await pdfToText(file)
-      //     .then((text) => {
-      //       console.log(text);
-      //       return text;
-      //     })
-      //     .catch((err) => {
-      //       console.log(err);
-      //       return "";
-      //     });
-      //   let texto = "";
-      //   try {
-      //     texto = pdfToText(file);
-      //   } catch (error) {
-      //     console.log(error);
-      //     return;
-      //   }
-
       console.log("aqui", text);
 
       const thread = await openai.beta.threads.create({
@@ -207,20 +121,38 @@ export default function ProjectMenu() {
             temperature: 1,
             top_p: 1,
             tools: [],
-            // tools: [
-            //   {
-            //     function: { name: "get_fases_estimaciones", strict: false },
-            //     type: "function",
-            //   },
-            // ],
           },
           { stream: true },
         )
-        .on("messageDelta", (message, snapshot) => {
-          // console.log("msDelta[ms]", message);
-          // console.log("msDelta[sn]", snapshot);
-        })
+        // .on("messageDelta", (message, snapshot) => {})
         .on("textDelta", (message, snapshot) => {
+          // setPreview(snapshot.value);
+          if (!message.value) {
+            return;
+          }
+          try {
+            const prev = parse(snapshot.value) as (typeof schema)["__output"];
+            console.log("prev", prev);
+            if (prev.fases) {
+              if (prev.fases.length > 0) {
+                const previewPrev = [] as (typeof schema)["__output"]["fases"];
+                for (const fase of prev.fases) {
+                  try {
+                    if (
+                      fase.descripcion &&
+                      fase.nombre &&
+                      fase.time_estimation &&
+                      fase.manforce
+                    ) {
+                      // console.log("fase", fase);
+                      previewPrev.push(fase);
+                    }
+                  } catch (error) {}
+                }
+                setEstimaciones(previewPrev);
+              }
+            }
+          } catch (error) {}
           // console.log("txtDelta[ms]", message);
           // console.log("txtDelta[sn]", snapshot);
         })
@@ -237,21 +169,6 @@ export default function ProjectMenu() {
           // console.log("txtDone[sn]", snapshot);
         });
       await res.done();
-      //   let data = [];
-      // for await (const chunk of res) {
-      //   console.log(chunk);
-      //   // data.push(chunk.data.choices[0]?.delta?.content as any);
-      //   // data.append(chunk.choices[0]?.delta?.content as any);
-      // }
-      //   console.log(data);
-      //   const response = openai.beta.threads.createAndRun(
-      //     {
-      //       assistant_id: ASSISTANT_ID,
-      //     },
-      //     {
-      //       stream: true,
-      //     },
-      //   );
     }
   };
 
@@ -263,14 +180,9 @@ export default function ProjectMenu() {
           {menuItems.map((item) => (
             <li key={item}>
               <Button
-                className={
-                  cn("my-2 w-full px-4 py-2")
-                  //   "w-full rounded-md px-4 py-2 text-left transition-colors",
-                  //   activeMenuItem === item ? "bg-gray-200" : "bg-transparent",
-                }
+                className={cn("my-2 w-full px-4 py-2")}
                 variant={activeMenuItem === item ? "default" : "outline"}
                 onClick={() => handleMenuClick(item)}
-                // disabled={activeMenuItem === item }
                 disabled={item !== "Demo"}
               >
                 {item}
@@ -319,33 +231,35 @@ export default function ProjectMenu() {
           <CardHeader>
             <CardTitle>Estimations</CardTitle>
           </CardHeader>
+
           <div className="flex flex-wrap justify-evenly">
             {estimaciones.map((fase) => (
-              <Card key={fase.fase.nombre} className="m-4 max-w-lg bg-gray-50">
+              <Card key={fase.nombre} className="m-4 max-w-lg bg-gray-50">
                 <CardHeader>
-                  <CardTitle>{fase.fase.nombre}</CardTitle>
+                  <CardTitle>{fase.nombre}</CardTitle>
                 </CardHeader>
                 <CardContent className="p-4">
                   <div className="flex w-full flex-col items-center justify-center space-y-2">
                     <div className="flex w-full">
                       <Button variant="outline">
-                        {fase.fase.time_estimation.tiempo}{" "}
-                        {fase.fase.time_estimation.unidad}{" "}
+                        {fase.time_estimation.tiempo}{" "}
+                        {fase.time_estimation.unidad}{" "}
                       </Button>
                     </div>
                     <div className="flex w-full flex-wrap space-x-2">
-                      {fase.fase.manforce.map((mf) => (
+                      {fase.manforce.map((mf) => (
                         <Button key={mf.nombre} variant="outline">
                           {mf.cantidad} {mf.nombre}
                         </Button>
                       ))}
                     </div>
                   </div>
-                  <p className="mt-2 text-sm">{fase.fase.descripcion}</p>
+                  <p className="mt-2 text-sm">{fase.descripcion}</p>
                 </CardContent>
               </Card>
             ))}
           </div>
+          <p>{preview}</p>
         </Card>
 
         <Separator className="my-4" />
