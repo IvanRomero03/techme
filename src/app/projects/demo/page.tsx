@@ -9,36 +9,12 @@ import { Separator } from "t/components/ui/separator";
 import OpenAI from "openai";
 import { zodResponseFormat } from "openai/helpers/zod";
 import { z } from "zod";
-import { parse, Allow } from "partial-json";
-// import pdfToText from "react-pdftotext";
-// import { pdfjs } from "react-pdf";
-// // import type { PDFDocumentProxy } from "pdfjs-dist";
-// import { TextItem, PDFDocumentProxy } from "pdfjs-dist/types/src/display/api";
-
-// pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
-
-// const PdfExtractor = async (file: PDFDocumentProxy) => {
-//   let text = "";
-//   const pages = file.numPages;
-
-//   for (let i = 1; i <= pages; i++) {
-//     const page = await file.getPage(i);
-//     const textContent = await page.getTextContent();
-//     textContent.items.forEach((item) => {
-//       // if item has str property, then it is a text item
-//       if ((item as TextItem).str) {
-//         text += (item as TextItem).str + " ";
-//       }
-//     });
-//   }
-//   return text;
-// };
+import { parse } from "partial-json";
 
 const openai = new OpenAI({
-  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY,
-  organization: process.env.NEXT_PUBLIC_OPENAI_ORGANIZATION,
+  apiKey: process.env.NEXT_PUBLIC_OPENAI_API_KEY ?? "",
+  organization: process.env.NEXT_PUBLIC_OPENAI_ORGANIZATION ?? "",
   dangerouslyAllowBrowser: true,
-  //   project: process.env.OPENAI_PROJECT,
 });
 
 const ASSISTANT_ID = "asst_AoTYS0oMGnGEpU7qb41y83Im";
