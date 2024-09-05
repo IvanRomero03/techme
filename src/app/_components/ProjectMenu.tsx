@@ -5,7 +5,7 @@ import { Button } from "t/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "t/components/ui/card";
 import { cn } from "lib/utils";
 
-const ProjectMenu = () => {
+export default function ProjectMenu() {
   const [activeMenuItem, setActiveMenuItem] = useState("Estimations");
 
   const menuItems = [
