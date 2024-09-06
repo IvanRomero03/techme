@@ -64,6 +64,8 @@ export default function ProjectMenu() {
     (typeof schema)["__output"]["fases"]
   >([]);
 
+  const [isStreaming, setIsStreaming] = useState<boolean>(false);
+
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!(e.target.files && e.target.files.length > 0 && e.target.files[0])) {
       return;
@@ -87,6 +89,7 @@ export default function ProjectMenu() {
   const handleGet = async () => {
     if (file && text) {
       setLoadingEsts(true);
+      setIsStreaming(true);
       setEstimaciones([]);
 
       const thread = await openai.beta.threads.create({
@@ -139,6 +142,7 @@ export default function ProjectMenu() {
             const respuesta = schema.$parseRaw(texto);
             setLoadingEsts(false);
             setEstimaciones(respuesta.fases);
+            setIsStreaming(false);
           } catch (error) {}
         });
       setLoadingEsts(false);

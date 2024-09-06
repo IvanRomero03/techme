@@ -128,3 +128,14 @@ export const verificationTokens = createTable(
     compoundKey: primaryKey({ columns: [vt.identifier, vt.token] }),
   }),
 );
+
+export const tabla = createTable(
+  "tabla",
+  {
+    id: serial("id").primaryKey(),
+    name: varchar("name", { length: 256 }),
+  },
+  (example) => ({
+    nameIndex: index("taba_name_idx").on(example.name),
+  }),
+);
