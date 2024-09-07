@@ -1,8 +1,6 @@
 name: AutoDocument
 
-on:
-  pull_request:
-    types: [opened, edited]
+on: [pull_request]
 
 jobs:
   read-pr-description:
