@@ -24,8 +24,24 @@ jobs:
       - run: echo "${{ env.PR_DESCRIPTION }}"
       - run: echo "${{ env.PR_NUMBER }}"
 
-      - name: Description Content for PR
-        run: PR_DESCRIPTION="${{ env.PR_DESCRIPTION }} Extracted from PR description" >> $GITHUB_ENV
+      #   - name: Description Content for PR
+      #     run: PR_DESCRIPTION="${{ env.PR_DESCRIPTION }} Extracted from PR description" >> $GITHUB_ENV
+
+      - name: Get PR Diff
+        run: |
+          PR_DIFF=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              "https://api.github.com/repos/${{ github.repository }}/pulls/${{ env.PR_NUMBER }}/files")
+          echo "PR_DIFF=$PR_DIFF" >> $GITHUB_ENV
+
+      - name: Display PR diff
+        run: echo "${{ env.PR_DIFF }}"
+
+        # - name: Get Chatgpt Response
+        #   run: |
+        #     RESPONSE=$(curl -X POST -H "Authorization: Bearer ${{ secrets.OPENAI_API_KEY }}" \
+        #       -H "Content-Type: application/json" \
+        #       -d "{\"model\": \"gpt-4o\", \"messages\": [{\"role\": \"system\", \"content\": \"You are a pr tool to update .\"}, {\"role\": \"user\", \"content\": \"What is the purpose of life?\"}]}" \
+        #       "https://api.openai.com/v1/engines/davinci-codex/completions")
 
       - name: Update PR description
         run: |
