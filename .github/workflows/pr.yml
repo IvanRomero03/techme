@@ -1,6 +1,6 @@
 name: AutoDocument
 
-on: [pull_request]
+on: pull_request
 
 jobs:
   read-pr-description:
