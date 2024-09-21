@@ -17,6 +17,16 @@ import {
   verificationTokens,
 } from "techme/server/db/schema";
 
+enum UserRole {
+  ProjectManager = "PM",
+  Comercial = "CM",
+  DigitalLead = "DL",
+  LeadPresales = "LP",
+  GDM = "GDM",
+  Admin = "ADMIN",
+  Unauthorized = "UNAUTH",
+}
+
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
  * object and keep type safety.
@@ -28,14 +38,14 @@ declare module "next-auth" {
     user: {
       id: string;
       // ...other properties
-      // role: UserRole;
+      role: UserRole;
     } & DefaultSession["user"];
   }
 
-  // interface User {
-  //   // ...other properties
-  //   // role: UserRole;
-  // }
+  interface User {
+    // ...other properties
+    role: UserRole;
+  }
 }
 
 /**
@@ -50,8 +60,15 @@ export const authOptions: NextAuthOptions = {
       user: {
         ...session.user,
         id: user.id,
+        role: user.role,
       },
     }),
+    signIn: ({ account, profile, user, email, credentials }) => {
+      // if (account?.type === 'oauth') {
+      // }
+      console.log("signIn", { account, profile, user, email, credentials });
+      return true;
+    },
   },
   adapter: DrizzleAdapter(db, {
     usersTable: users,
@@ -64,10 +81,12 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.AZURE_AD_CLIENT_ID ?? "",
       clientSecret: process.env.AZURE_AD_CLIENT_SECRET ?? "",
       tenantId: process.env.AZURE_AD_TENANT_ID,
+      allowDangerousEmailAccountLinking: true,
     }),
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      allowDangerousEmailAccountLinking: true,
     }),
     /**
      * ...add more providers here.

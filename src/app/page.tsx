@@ -48,6 +48,11 @@ export default async function Home() {
             <SignOut />
           </>
         )}
+        {session && (
+          <p>
+            <pre>{JSON.stringify(session, null, 4)}</pre>
+          </p>
+        )}
       </CardContent>
     </Card>
   );
