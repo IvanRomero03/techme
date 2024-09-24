@@ -118,11 +118,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleCollapse }) => {
         </Link>
 
         <Link
-          href="/customers"
+          href="/members"
           className="flex items-center px-6 py-3 transition hover:bg-gray-700"
         >
           <FontAwesomeIcon icon={faUser} className="mr-3 h-5 w-5" />
-          {!isCollapsed && <span className="flex-grow text-lg">Customers</span>}
+          {!isCollapsed && <span className="flex-grow text-lg">Members</span>}
         </Link>
 
         <Link
