@@ -9,7 +9,7 @@ import {
   SelectTrigger,
 } from "t/components/ui/select";
 import { api } from "techme/trpc/react";
-enum UserRole {
+export enum UserRole {
   ProjectManager = "PM",
   Comercial = "CM",
   DigitalLead = "DL",
@@ -26,7 +26,7 @@ export type Member = {
   role: UserRole;
 };
 
-function readableRole(role: UserRole) {
+export function readableRole(role: UserRole) {
   switch (role) {
     case UserRole.ProjectManager:
       return "Project Manager";

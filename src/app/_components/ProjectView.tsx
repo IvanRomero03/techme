@@ -26,6 +26,7 @@ import {
   DropdownMenuItem,
 } from "t/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation"; // Import useRouter from Next.js
+import { AddProject } from "./AddProject";
 
 const projects = [
   {
@@ -86,6 +87,7 @@ export function ProjectView() {
           <Button variant="default" className="flex items-center space-x-2">
             + Add Project
           </Button>
+          <AddProject />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline">Export data</Button>

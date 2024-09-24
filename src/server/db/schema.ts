@@ -19,27 +19,6 @@ import { type AdapterAccount } from "next-auth/adapters";
  */
 export const createTable = pgTableCreator((name) => `techme_${name}`);
 
-export const posts = createTable(
-  "post",
-  {
-    id: serial("id").primaryKey(),
-    name: varchar("name", { length: 256 }),
-    createdById: varchar("created_by", { length: 255 })
-      .notNull()
-      .references(() => users.id),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .default(sql`CURRENT_TIMESTAMP`)
-      .notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).$onUpdate(
-      () => new Date(),
-    ),
-  },
-  (example) => ({
-    createdByIdIdx: index("created_by_idx").on(example.createdById),
-    nameIndex: index("name_idx").on(example.name),
-  }),
-);
-
 export const users = createTable("user", {
   id: varchar("id", { length: 255 })
     .notNull()
@@ -130,13 +109,29 @@ export const verificationTokens = createTable(
   }),
 );
 
-export const tabla = createTable(
-  "tabla",
+export const projects = createTable(
+  "project",
   {
     id: serial("id").primaryKey(),
-    name: varchar("name", { length: 256 }),
+    name: varchar("name", { length: 255 }).notNull(),
+    description: text("description"),
+    startDate: timestamp("start_date", {
+      mode: "date",
+      withTimezone: true,
+    }).defaultNow(),
+    endDate: timestamp("end_date", {
+      mode: "date",
+      withTimezone: true,
+    }).default(sql`NOW() + INTERVAL '5 days'`),
+    stage: varchar("stage", { length: 255 }).default("planning"),
+    status: varchar("status", { length: 255 }).default("active"),
   },
-  (example) => ({
-    nameIndex: index("taba_name_idx").on(example.name),
+  (project) => ({
+    nameIdx: index("project_name_idx").on(project.name),
   }),
 );
+
+export const peoplePerProject = createTable("people_per_project", {
+  projectId: integer("project_id").references(() => projects.id),
+  userId: varchar("user_id", { length: 255 }).references(() => users.id),
+});

@@ -18,10 +18,7 @@ import SigninAzure from "./_components/SigninAzure";
 import SignOut from "./_components/SignOut";
 
 export default async function Home() {
-  const hello = await api.post.hello({ text: "from tRPC" });
   const session = await getServerAuthSession();
-
-  void api.post.getLatest.prefetch();
 
   return (
     <Card className="m:10 mx-auto max-w-sm">
@@ -47,11 +44,6 @@ export default async function Home() {
 
             <SignOut />
           </>
-        )}
-        {session && (
-          <p>
-            <pre>{JSON.stringify(session, null, 4)}</pre>
-          </p>
         )}
       </CardContent>
     </Card>
