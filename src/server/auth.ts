@@ -17,7 +17,7 @@ import {
   verificationTokens,
 } from "techme/server/db/schema";
 
-enum UserRole {
+export enum UserRole {
   ProjectManager = "PM",
   Comercial = "CM",
   DigitalLead = "DL",
