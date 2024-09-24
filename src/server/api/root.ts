@@ -1,6 +1,6 @@
 import { createCallerFactory, createTRPCRouter } from "techme/server/api/trpc";
 import { membersRouter } from "./routers/members";
-import { tablaRouter } from "./routers/tabla";
+import { projectsRouter } from "./routers/projects";
 
 /**
  * This is the primary router for your server.
@@ -8,8 +8,8 @@ import { tablaRouter } from "./routers/tabla";
  * All routers added in /api/routers should be manually added here.
  */
 export const appRouter = createTRPCRouter({
-  tabla: tablaRouter,
   members: membersRouter,
+  projects: projectsRouter,
 });
 
 // export type definition of API

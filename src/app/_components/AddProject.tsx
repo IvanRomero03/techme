@@ -40,9 +40,11 @@ import {
 export function AddProject() {
   const { data: members, isLoading: membersLoading } =
     api.members.getMembers.useQuery();
-
+  const { mutateAsync: createProject } =
+    api.projects.createProject.useMutation();
+  const [dialogOpen, setDialogOpen] = useState(false);
   return (
-    <Dialog>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
         <Button variant="default">+ Add Project</Button>
       </DialogTrigger>
@@ -73,11 +75,19 @@ export function AddProject() {
             >(),
             _openMembers: false,
           }}
-          onSubmit={(values) => {
-            console.log(values);
+          onSubmit={async (values) => {
+            console.log("AQUI", values);
+            const res = await createProject({
+              project_name: values.project_name,
+              project_description: values.project_description,
+              project_category: values.project_category,
+              project_members: Array.from(values._selectedMembers.keys()),
+            });
+            console.log(res);
+            setDialogOpen(false);
           }}
         >
-          {({ dirty, errors, values, setFieldValue }) => (
+          {({ dirty, errors, values, setFieldValue, submitForm }) => (
             <Form>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-1 items-center gap-1">
@@ -90,11 +100,6 @@ export function AddProject() {
                     as={Input}
                     className="col-span-3"
                   />
-                  {/* <Input
-                id="name"
-                // defaultValue="Pedro Duarte"
-                className="col-span-3"
-                /> */}
                 </div>
                 <div className="grid grid-cols-1 items-center gap-1">
                   <Label htmlFor="project_description" className="text-left">
@@ -106,7 +111,6 @@ export function AddProject() {
                     as={Textarea}
                     className="col-span-3"
                   />
-                  {/* <Textarea id="project_description" className="col-span-3" /> */}
                 </div>
                 <div className="grid grid-cols-1 items-center gap-1">
                   <Label htmlFor="project_category" className="text-left">
@@ -118,7 +122,6 @@ export function AddProject() {
                     as={Input}
                     className="col-span-3"
                   />
-                  {/* <Input id="project_category" className="col-span-3" /> */}
                 </div>
                 <div className="flex-col">
                   <Label htmlFor="project_members" className="text-left">
@@ -230,57 +233,6 @@ export function AddProject() {
                       </PopoverContent>
                     </Popover>
                   )}
-                  {/* <Select
-                    value=""
-                    onValueChange={(value) => {
-                      console.log("value changed");
-                      if (!value) return;
-                      const member = members?.find((m) => m.id === value);
-                      if (!member) return;
-                      const temp = values._selectedMembers.set(value, member);
-                      void setFieldValue("_selectedMembers", temp);
-                    }}
-                  >
-                    <SelectTrigger>Members</SelectTrigger>
-                    {membersLoading && (
-                      <SelectContent>Loading...</SelectContent>
-                    )}
-
-                    <SelectContent>
-                      {members
-                        ?.filter(
-                          (member) => !values._selectedMembers.has(member.id),
-                        )
-                        .map((member) => (
-                          <SelectItem key={member.id} value={member.id}>
-                            <div className="flex gap-x-4">
-                              <Avatar>
-                                <AvatarImage src={member.image ?? undefined} />
-                                <AvatarFallback>
-                                  {member.name !== undefined &&
-                                  member.name !== null &&
-                                  member.name.split(" ").length > 1 &&
-                                  member.name.length > 1
-                                    ? member.name[0]!.toUpperCase() +
-                                      (member.name.split(" ")[1]
-                                        ? member.name
-                                            .split(" ")[1]![0]
-                                            ?.toUpperCase()
-                                        : "")
-                                    : "Ukw"}
-                                </AvatarFallback>
-                              </Avatar>
-                              <div className="flex flex-col">
-                                <span>{member.name}</span>
-                                <span className="text-xs text-gray-500">
-                                  {member.role}
-                                </span>
-                              </div>
-                            </div>
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select> */}
                   <div className="m-8 flex flex-wrap gap-4">
                     {Array.from(values._selectedMembers.values()).map(
                       (member) => (
@@ -326,12 +278,12 @@ export function AddProject() {
                   </div>
                 </div>
               </div>
+              <DialogFooter>
+                <Button type="submit">Create Project</Button>
+              </DialogFooter>
             </Form>
           )}
         </Formik>
-        <DialogFooter>
-          <Button type="submit">Create Project</Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

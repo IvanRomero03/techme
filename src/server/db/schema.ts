@@ -115,6 +115,7 @@ export const projects = createTable(
     id: serial("id").primaryKey(),
     name: varchar("name", { length: 255 }).notNull(),
     description: text("description"),
+    category: varchar("category", { length: 255 }).notNull(),
     startDate: timestamp("start_date", {
       mode: "date",
       withTimezone: true,
