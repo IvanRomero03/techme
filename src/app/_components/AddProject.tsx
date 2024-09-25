@@ -1,4 +1,16 @@
+import { Field, Form, Formik } from "formik";
+import { XCircle } from "lucide-react";
+import { useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "t/components/ui/avatar";
 import { Button } from "t/components/ui/button";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "t/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -11,31 +23,14 @@ import {
 import { Input } from "t/components/ui/input";
 import { Label } from "t/components/ui/label";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "t/components/ui/select";
-import { Textarea } from "t/components/ui/textarea";
-import { Field, Form, Formik } from "formik";
-import { api } from "techme/trpc/react";
-import { Avatar, AvatarFallback, AvatarImage } from "t/components/ui/avatar";
-import { readableRole, UserRole } from "../members/columns";
-import { useState } from "react";
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "t/components/ui/popover";
-import { XCircle } from "lucide-react";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "t/components/ui/command";
+import { Textarea } from "t/components/ui/textarea";
+import { api } from "techme/trpc/react";
+import { readableRole, type UserRole } from "../members/columns";
+import { useSession } from "next-auth/react";
 
 export function AddProject() {
   const { data: members, isLoading: membersLoading } =
@@ -43,6 +38,8 @@ export function AddProject() {
   const { mutateAsync: createProject } =
     api.projects.createProject.useMutation();
   const [dialogOpen, setDialogOpen] = useState(false);
+  const session = useSession();
+  const utils = api.useUtils();
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
@@ -61,7 +58,9 @@ export function AddProject() {
             project_name: "",
             project_description: "",
             project_category: "",
-            project_members: [] as string[],
+            project_members: session?.data?.user
+              ? [session?.data?.user?.id]
+              : ([] as string[]),
             _selectedMembers: new Map<
               string,
               {
@@ -69,21 +68,34 @@ export function AddProject() {
                 name: string | null;
                 email: string;
                 role: string | null;
-                emailVerified: Date | null;
                 image: string | null;
               }
-            >(),
+            >(
+              session?.data?.user
+                ? [
+                    [
+                      session?.data?.user?.id,
+                      {
+                        id: session?.data?.user?.id,
+                        name: session?.data?.user?.name as string | null,
+                        email: session?.data?.user?.email ?? "",
+                        role: session?.data?.user?.role as string | null,
+                        image: session?.data?.user?.image as string | null,
+                      },
+                    ],
+                  ]
+                : [],
+            ),
             _openMembers: false,
           }}
           onSubmit={async (values) => {
-            console.log("AQUI", values);
-            const res = await createProject({
+            await createProject({
               project_name: values.project_name,
               project_description: values.project_description,
               project_category: values.project_category,
               project_members: Array.from(values._selectedMembers.keys()),
             });
-            console.log(res);
+            await utils.projects.getMyProjects.invalidate();
             setDialogOpen(false);
           }}
         >
@@ -99,6 +111,7 @@ export function AddProject() {
                     name="project_name"
                     as={Input}
                     className="col-span-3"
+                    required
                   />
                 </div>
                 <div className="grid grid-cols-1 items-center gap-1">
@@ -121,6 +134,7 @@ export function AddProject() {
                     name="project_category"
                     as={Input}
                     className="col-span-3"
+                    required
                   />
                 </div>
                 <div className="flex-col">
@@ -144,6 +158,7 @@ export function AddProject() {
                           variant="outline"
                           className=""
                           id="project_members"
+                          type="button"
                         >
                           Add Members
                         </Button>
@@ -221,7 +236,11 @@ export function AddProject() {
                                     </div>
                                   </div>
                                   {values._selectedMembers.has(member.id) && (
-                                    <Button disabled variant={"ghost"}>
+                                    <Button
+                                      disabled
+                                      variant={"ghost"}
+                                      type="button"
+                                    >
                                       <XCircle className="h-4 w-4 text-red-500" />
                                     </Button>
                                   )}

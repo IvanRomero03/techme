@@ -10,7 +10,9 @@ import { eq, sql } from "drizzle-orm";
 
 export const membersRouter = createTRPCRouter({
   getMembers: protectedProcedure.query(async ({ ctx }) => {
-    const members = await ctx.db.query.users.findMany();
+    const members = await ctx.db.query.users.findMany({
+      where: sql`role != 'UNAUTH'`,
+    });
     return members;
   }),
   updateUserRole: protectedProcedure
