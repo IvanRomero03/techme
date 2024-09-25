@@ -34,7 +34,7 @@ import { useSession } from "next-auth/react";
 
 export function AddProject() {
   const { data: members, isLoading: membersLoading } =
-    api.members.getMembers.useQuery();
+    api.members.getAuthorizedMembers.useQuery();
   const { mutateAsync: createProject } =
     api.projects.createProject.useMutation();
   const [dialogOpen, setDialogOpen] = useState(false);

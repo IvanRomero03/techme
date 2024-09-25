@@ -11,6 +11,10 @@ import { UserRole } from "techme/server/auth";
 
 export const membersRouter = createTRPCRouter({
   getMembers: protectedProcedure.query(async ({ ctx }) => {
+    const members = await ctx.db.query.users.findMany();
+    return members;
+  }),
+  getAuthorizedMembers: protectedProcedure.query(async ({ ctx }) => {
     const members = await ctx.db.query.users.findMany({
       where: sql`role != ${UserRole.Unauthorized}`,
     });
