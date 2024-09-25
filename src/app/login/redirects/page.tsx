@@ -7,7 +7,7 @@ export default async function Page({}) {
     redirect("/login");
   }
   if (session) {
-    redirect("/dashboard/" + session.user.role);
+    redirect("/dashboard/" + session.user.role.toLowerCase());
   }
   return (
     <div>
