@@ -18,6 +18,7 @@ import {
   DropdownMenuSeparator,
 } from "t/components/ui/dropdown-menu";
 import { signOut } from "next-auth/react";
+import { readableRole, UserRole } from "../members/columns";
 
 interface TopNavBarProps {
   session?: Session;
@@ -37,7 +38,9 @@ const TopNavBar: React.FC<TopNavBarProps> = ({ session, isCollapsed }) => {
           <h4 className="text-lg font-semibold text-gray-800">
             {session?.user?.name ?? "Guest"}
           </h4>
-          <p className="text-sm text-gray-500">{session?.user?.role ?? "UNAUTH"}</p> 
+          <p className="text-sm text-gray-500">
+            {readableRole(session?.user?.role ?? UserRole.Unauthorized)}
+          </p>
         </div>
       </div>
 
