@@ -37,6 +37,8 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { Navigate } from "react-big-calendar";
+import Link from "next/link";
 
 // Register Chart.js components
 ChartJS.register(
@@ -61,15 +63,11 @@ const ComercialDashboard = () => {
           <CardDescription>Initiate a new project</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button
-            className="rounded px-4 py-2 text-white"
-            onClick={() => {
-              // Navigate to the clients page
-              window.location.href = "/projects";
-            }}
-          >
-            Start Project
-          </Button>
+          <Link href={"/projects"}>
+            <Button className="rounded px-4 py-2 text-white">
+              Start Project
+            </Button>
+          </Link>
         </CardContent>
       </Card>
 
@@ -120,37 +118,22 @@ const ComercialDashboard = () => {
         <CardContent>
           <div className="space-y-4">
             <div>
-              <Button
-                variant={"ghost"}
-                // Adjust to navigate to the projects page according to ID
-                onClick={() => {
-                  window.location.href = "/projects";
-                }}
-              >
-                Project A
-              </Button>
+              <Link href={"/projects"}>
+                <Button variant={"ghost"}>Project A</Button>
+              </Link>
               <Progress value={75} className="mt-1" />
             </div>
             <div>
-              <Button
-                variant={"ghost"}
-                onClick={() => {
-                  window.location.href = "/projects";
-                }}
-              >
-                Project B
-              </Button>
+              <Link href={"/projects"}>
+                <Button variant={"ghost"}>Project B</Button>
+              </Link>
               <Progress value={45} className="mt-1" />
             </div>
             <div>
-              <Button
-                variant={"ghost"}
-                onClick={() => {
-                  window.location.href = "/projects";
-                }}
-              >
-                Project C
-              </Button>
+              {/*// Adjust to navigate to the projects page according to ID*/}
+              <Link href={"/projects"}>
+                <Button variant={"ghost"}>Project A</Button>
+              </Link>
               <Progress value={60} className="mt-1" />
             </div>
           </div>

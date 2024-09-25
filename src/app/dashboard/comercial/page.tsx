@@ -2,8 +2,6 @@
 import React from "react";
 import ComercialDashboard from "./ComercialDashboard";
 
-const AdminPage: React.FC = () => {
+export default function ComercialPage() {
   return <ComercialDashboard />;
-};
-
-export default AdminPage;
+}

@@ -2,8 +2,6 @@
 import React from "react";
 import ClientsView from "./ClientsView";
 
-const AdminPage: React.FC = () => {
+export default function ClientsPage() {
   return <ClientsView />;
-};
-
-export default AdminPage;
+}
