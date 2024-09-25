@@ -13,6 +13,7 @@ import {
   useOthers,
 } from "@liveblocks/react/suspense";
 import LiveCursors from "./LiveCursors";
+import { SessionProvider } from "next-auth/react";
 
 interface RootClientLayoutProps {
   children: React.ReactNode;
@@ -48,7 +49,9 @@ const RootClientLayout: React.FC<RootClientLayoutProps> = ({
                 >
                   <TopNavBar session={session} isCollapsed={isCollapsed} />
                   <div className="flex-grow bg-gradient-to-b from-[#FFFFFF] to-[#FFFFFF] p-4 text-black">
-                    {children}
+                    <SessionProvider session={session}>
+                      {children}
+                    </SessionProvider>
                   </div>
                 </div>
               </div>

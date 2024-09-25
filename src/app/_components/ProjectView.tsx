@@ -77,7 +77,12 @@ export function ProjectView() {
                 <TableCell>{project.project.stage}</TableCell>
                 <TableCell>{project.project.endDate?.getDay() ?? ""}</TableCell>
                 <TableCell>
-                  <Button variant="link" onClick={handleViewClick}>
+                  <Button
+                    variant="link"
+                    onClick={() =>
+                      router.push(`/projects/${project.project.id}`)
+                    }
+                  >
                     View
                   </Button>
                 </TableCell>
