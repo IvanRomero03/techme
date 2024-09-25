@@ -37,7 +37,7 @@ const TopNavBar: React.FC<TopNavBarProps> = ({ session, isCollapsed }) => {
           <h4 className="text-lg font-semibold text-gray-800">
             {session?.user?.name ?? "Guest"}
           </h4>
-          <p className="text-sm text-gray-500">Comercial</p>
+          <p className="text-sm text-gray-500">{session?.user?.role ?? "UNAUTH"}</p> 
         </div>
       </div>
 
