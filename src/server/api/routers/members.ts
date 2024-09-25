@@ -7,18 +7,19 @@ import {
 } from "techme/server/api/trpc";
 import { users } from "techme/server/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { UserRole } from "techme/server/auth";
 
 export const membersRouter = createTRPCRouter({
   getMembers: protectedProcedure.query(async ({ ctx }) => {
     const members = await ctx.db.query.users.findMany({
-      where: sql`role != 'UNAUTH'`,
+      where: sql`role != ${UserRole.Unauthorized}`,
     });
     return members;
   }),
   updateUserRole: protectedProcedure
     .input(z.object({ id: z.string(), role: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      const res = await ctx.db
+      await ctx.db
         .update(users)
         .set({ role: input.role })
         .where(eq(users.id, input.id));
