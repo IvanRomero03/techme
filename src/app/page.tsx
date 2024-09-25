@@ -1,8 +1,4 @@
 import Link from "next/link";
-import { LatestPost } from "techme/app/_components/post";
-import { getServerAuthSession } from "techme/server/auth";
-import { api, HydrateClient } from "techme/trpc/server";
-import { signIn } from "next-auth/react";
 import { Button } from "t/components/ui/button";
 import {
   Card,
@@ -11,10 +7,9 @@ import {
   CardHeader,
   CardTitle,
 } from "t/components/ui/card";
-import { Input } from "t/components/ui/input";
-import { Label } from "t/components/ui/label";
-import SigninGoogle from "./_components/SigninGoogle";
+import { getServerAuthSession } from "techme/server/auth";
 import SigninAzure from "./_components/SigninAzure";
+import SigninGoogle from "./_components/SigninGoogle";
 import SignOut from "./_components/SignOut";
 
 export default async function Home() {

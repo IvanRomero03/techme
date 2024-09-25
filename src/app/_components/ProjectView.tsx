@@ -29,49 +29,6 @@ import { useRouter } from "next/navigation"; // Import useRouter from Next.js
 import { AddProject } from "./AddProject";
 import { api } from "techme/trpc/react";
 
-// const projects = [
-//   {
-//     name: "Project A",
-//     status: "50%", // Represents the completion status of the project
-//     category: "Finance", // Category or type of the project
-//     estimate: "$2,999.00", // Cost or budget estimate for the project
-//     currentStage: 1, // The current stage number the project is in
-//     nextStage: 2, // The next stage number that follows
-//   },
-//   {
-//     name: "Project B",
-//     status: "65%",
-//     category: "Technology",
-//     estimate: "$2,999.00",
-//     currentStage: 4,
-//     nextStage: 5,
-//   },
-//   {
-//     name: "Project C",
-//     status: "70%",
-//     category: "Data",
-//     estimate: "$2,999.00",
-//     currentStage: 5,
-//     nextStage: 6,
-//   },
-//   {
-//     name: "Project D",
-//     status: "90%",
-//     category: "Technology",
-//     estimate: "$2,999.00",
-//     currentStage: 3,
-//     nextStage: 4,
-//   },
-//   {
-//     name: "Project E",
-//     status: "10%",
-//     category: "Electronics",
-//     estimate: "$2,999.00",
-//     currentStage: 7,
-//     nextStage: 8,
-//   },
-// ];
-
 export function ProjectView() {
   const router = useRouter();
 
