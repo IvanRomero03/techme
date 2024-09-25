@@ -26,49 +26,8 @@ import {
   DropdownMenuItem,
 } from "t/components/ui/dropdown-menu";
 import { useRouter } from "next/navigation"; // Import useRouter from Next.js
-
-const projects = [
-  {
-    name: "Project A",
-    status: "50%", // Represents the completion status of the project
-    category: "Finance", // Category or type of the project
-    estimate: "$2,999.00", // Cost or budget estimate for the project
-    currentStage: 1, // The current stage number the project is in
-    nextStage: 2, // The next stage number that follows
-  },
-  {
-    name: "Project B",
-    status: "65%",
-    category: "Technology",
-    estimate: "$2,999.00",
-    currentStage: 4,
-    nextStage: 5,
-  },
-  {
-    name: "Project C",
-    status: "70%",
-    category: "Data",
-    estimate: "$2,999.00",
-    currentStage: 5,
-    nextStage: 6,
-  },
-  {
-    name: "Project D",
-    status: "90%",
-    category: "Technology",
-    estimate: "$2,999.00",
-    currentStage: 3,
-    nextStage: 4,
-  },
-  {
-    name: "Project E",
-    status: "10%",
-    category: "Electronics",
-    estimate: "$2,999.00",
-    currentStage: 7,
-    nextStage: 8,
-  },
-];
+import { AddProject } from "./AddProject";
+import { api } from "techme/trpc/react";
 
 export function ProjectView() {
   const router = useRouter();
@@ -78,34 +37,15 @@ export function ProjectView() {
     router.push("/projects/state");
   };
 
+  const { data: projects, isLoading: projectsLoading } =
+    api.projects.getMyProjects.useQuery();
+
   return (
     <Card className="rounded-2xl p-6 shadow-lg transition-shadow hover:shadow-2xl">
       <CardHeader className="mb-4 flex items-center justify-between">
         <CardTitle>Projects</CardTitle>
         <div className="flex space-x-4">
-          <Button variant="default" className="flex items-center space-x-2">
-            + Add Project
-          </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">Export data</Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem>CSV</DropdownMenuItem>
-              <DropdownMenuItem>Excel</DropdownMenuItem>
-              <DropdownMenuItem>PDF</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline">Sort by: Project Name</Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem>Name</DropdownMenuItem>
-              <DropdownMenuItem>Status</DropdownMenuItem>
-              <DropdownMenuItem>Category</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <AddProject />
         </div>
       </CardHeader>
       <CardContent>
@@ -123,17 +63,19 @@ export function ProjectView() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {projects.map((project) => (
+            {projectsLoading && <div>Loading...</div>}
+            {projects?.map((project) => (
               <TableRow
-                key={project.name}
+                key={project.project.id}
                 className="cursor-pointer hover:bg-gray-100"
               >
-                <TableCell className="font-medium">{project.name}</TableCell>
-                <TableCell>{project.status}</TableCell>
-                <TableCell>{project.category}</TableCell>
-                <TableCell>{project.estimate}</TableCell>
-                <TableCell>{project.currentStage}</TableCell>
-                <TableCell>{project.nextStage}</TableCell>
+                <TableCell className="font-medium">
+                  {project.project.name}
+                </TableCell>
+                <TableCell>{project.project.status}</TableCell>
+                <TableCell>{project.project.category}</TableCell>
+                <TableCell>{project.project.stage}</TableCell>
+                <TableCell>{project.project.endDate?.getDay() ?? ""}</TableCell>
                 <TableCell>
                   <Button variant="link" onClick={handleViewClick}>
                     View
@@ -145,7 +87,7 @@ export function ProjectView() {
           <TableFooter>
             <TableRow>
               <TableCell colSpan={6}>Total Projects</TableCell>
-              <TableCell className="text-right">{projects.length}</TableCell>
+              <TableCell className="text-right">{projects?.length}</TableCell>
             </TableRow>
           </TableFooter>
         </Table>

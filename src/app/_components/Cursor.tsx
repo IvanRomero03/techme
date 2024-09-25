@@ -42,7 +42,7 @@ export default function Cursor({ color, textColor, x, y, name }: Props) {
         />
       </svg>
       {name != undefined && (
-        <p
+        <div
           className={cn("rounded-lg px-2 py-1 text-xs font-semibold")}
           style={{
             position: "absolute",
@@ -60,7 +60,7 @@ export default function Cursor({ color, textColor, x, y, name }: Props) {
           >
             {name}
           </p>
-        </p>
+        </div>
       )}
     </>
   );
