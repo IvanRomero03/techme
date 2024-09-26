@@ -38,6 +38,7 @@ import {
   Legend,
 } from "chart.js";
 import Link from "next/link";
+import { readableRole, UserRole } from "../members/columns";
 
 // Register Chart.js components
 ChartJS.register(
@@ -128,7 +129,7 @@ export function AdminDashboard() {
                     {member.name ?? "Unknown"}
                   </span>
                   <span className="text-sm text-gray-500">
-                    {member.role ?? "No role"}
+                    {readableRole(member.role as UserRole) ?? "No role"}
                   </span>
                 </li>
               ),
