@@ -85,4 +85,22 @@ export const projectsRouter = createTRPCRouter({
       .where(eq(peoplePerProject.userId, user.id));
     return res;
   }),
+
+  getMyProjectsDeadline: protectedProcedure.query(async ({ ctx }) => {
+    const user = ctx.session.user;
+    if (!user) {
+      return [];
+    }
+    const res = await ctx.db
+      .select({
+        id: projects.id,
+        name: projects.name,
+        completion_percentage: projects.completionPercentage,
+        days_left: sql`EXTRACT(DAY FROM AGE(end_date, NOW()))`.as("days_left"),
+      })
+      .from(projects)
+      .leftJoin(peoplePerProject, eq(projects.id, peoplePerProject.projectId))
+      .where(eq(peoplePerProject.userId, user.id));
+    return res;
+  }),
 });

@@ -28,4 +28,11 @@ export const membersRouter = createTRPCRouter({
         .set({ role: input.role })
         .where(eq(users.id, input.id));
     }),
+  getTopMembers: protectedProcedure.query(async ({ ctx }) => {
+    const members = await ctx.db.query.users.findMany({
+      where: sql`id != ${ctx.session.user.id}`,
+      limit: 3,
+    });
+    return members;
+  }),
 });
