@@ -49,9 +49,21 @@ ChartJS.register(
   Legend,
 );
 
+export interface ProjectDays {
+  id: number;
+  name: string;
+  completion_percentage: number | null;
+  days_left: number | null;
+}
+
 export function AdminDashboard() {
   const { data: projects, isLoading: projectsLoading } =
     api.projects.getMyProjectsStatus.useQuery();
+  const { data: members, isLoading: membersLoading } =
+    api.members.getTopMembers.useQuery();
+  const { data: projectsDays, isLoading } =
+    api.projects.getMyProjectsDeadline.useQuery();
+
   return (
     <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 lg:grid-cols-3">
       {/* Pending Projects Card */}
@@ -61,12 +73,27 @@ export function AdminDashboard() {
             <FaProjectDiagram className="mr-2 inline-block" />
             Pending Projects
           </CardTitle>
-          <CardDescription>2 projects</CardDescription>
+          <CardDescription>
+            {projectsDays?.length ?? 0} projects
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <p className="text-lg font-medium">Project A</p>
-            <p className="text-lg text-red-500">1 Day Left</p>
+            {isLoading ? (
+              <p>Loading...</p>
+            ) : (
+              projectsDays?.map((projectDays) => (
+                <div key={projectDays.id}>
+                  <p className="text-lg font-medium">{projectDays.name}</p>
+                  <p
+                    className={`text-lg ${typeof projectDays.days_left === "number" && projectDays.days_left <= 1 ? "text-red-500" : "text-yellow-500"}`}
+                  >
+                    {String(projectDays.days_left ?? "Undefined")}{" "}
+                    {projectDays.days_left === 1 ? "Day" : "Days"} Left
+                  </p>
+                </div>
+              ))
+            )}
           </div>
         </CardContent>
         <CardFooter>
@@ -80,16 +107,33 @@ export function AdminDashboard() {
       {/* Co-workers Card */}
       <Card className="rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
         <CardHeader>
-          <CardTitle>
-            <FaUsers className="mr-2 inline-block" />
-            Co-workers
-          </CardTitle>
+          <CardTitle>Co-workers</CardTitle>
         </CardHeader>
         <CardContent>
-          <Button variant="link" className="flex items-center space-x-2">
-            <FaUsers />
-            <span>View Co-workers</span>
-          </Button>
+          <ul className="space-y-2">
+            {members?.map(
+              (
+                member: {
+                  id: string;
+                  role: string | null;
+                  image: string | null;
+                  name: string | null;
+                  email: string;
+                  emailVerified: Date | null;
+                },
+                index: number,
+              ) => (
+                <li key={index} className="flex items-center space-x-2">
+                  <span className="font-medium">
+                    {member.name ?? "Unknown"}
+                  </span>
+                  <span className="text-sm text-gray-500">
+                    {member.role ?? "No role"}
+                  </span>
+                </li>
+              ),
+            )}
+          </ul>
         </CardContent>
       </Card>
 
