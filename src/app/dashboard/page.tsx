@@ -1,9 +1,8 @@
 // app/dashboard/admin.tsx
-import React from 'react';
-import { AdminDashboard } from "techme/app/_components/AdminDashboard"
+import React from "react";
 
 const AdminPage: React.FC = () => {
-  return <AdminDashboard />;
+  return <h1>Please Login with a Registered Account with valid role</h1>;
 };
 
 export default AdminPage;

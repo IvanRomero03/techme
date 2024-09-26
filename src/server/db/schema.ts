@@ -116,6 +116,7 @@ export const projects = createTable(
     name: varchar("name", { length: 255 }).notNull(),
     description: text("description"),
     category: varchar("category", { length: 255 }).notNull(),
+    completionPercentage: integer("completion_percentage").default(0),
     startDate: timestamp("start_date", {
       mode: "date",
       withTimezone: true,

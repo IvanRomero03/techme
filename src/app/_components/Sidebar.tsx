@@ -18,6 +18,7 @@ import {
   faEnvelope,
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -153,8 +154,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleCollapse }) => {
           </Link>
 
           <Link
-            href="/logout"
+            href="/"
             className="flex items-center px-6 py-3 transition hover:bg-gray-700"
+            onClick={() => signOut({ callbackUrl: "/" })}
           >
             <FontAwesomeIcon icon={faSignOutAlt} className="mr-3 h-5 w-5" />
             {!isCollapsed && <span className="flex-grow text-lg">Log Out</span>}

@@ -2,7 +2,6 @@
 // app/_components/AdminDashboard.tsx
 import * as React from "react";
 import { Button } from "t/components/ui/button";
-import { api } from "techme/trpc/react";
 import {
   Card,
   CardContent,
@@ -27,6 +26,7 @@ import {
   FaUsers,
   FaCalendarAlt,
   FaTasks,
+  FaChartPie,
 } from "react-icons/fa"; // Import icons
 import {
   Chart as ChartJS,
@@ -37,7 +37,9 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import { Navigate } from "react-big-calendar";
 import Link from "next/link";
+import { api } from "techme/trpc/react";
 
 // Register Chart.js components
 ChartJS.register(
@@ -49,72 +51,67 @@ ChartJS.register(
   Legend,
 );
 
-export function AdminDashboard() {
+const ComercialDashboard = () => {
   const { data: projects, isLoading: projectsLoading } =
     api.projects.getMyProjectsStatus.useQuery();
   return (
     <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 lg:grid-cols-3">
-      {/* Pending Projects Card */}
+      {/* Start New Project Card */}
       <Card className="rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
         <CardHeader>
           <CardTitle>
             <FaProjectDiagram className="mr-2 inline-block" />
-            Pending Projects
+            Start New Project
           </CardTitle>
-          <CardDescription>2 projects</CardDescription>
+          <CardDescription>Initiate a new project</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-2">
-            <p className="text-lg font-medium">Project A</p>
-            <p className="text-lg text-red-500">1 Day Left</p>
-          </div>
+          <Link href={"/projects"}>
+            <Button className="rounded px-4 py-2 text-white">
+              Start Project
+            </Button>
+          </Link>
         </CardContent>
-        <CardFooter>
-          <Button variant="link" className="flex items-center space-x-2">
-            <FaTasks />
-            <span>View Details</span>
-          </Button>
-        </CardFooter>
       </Card>
 
-      {/* Co-workers Card */}
+      {/* Analyze Projects Card */}
+      <Card className="rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
+        <CardHeader>
+          <CardTitle>
+            <FaChartPie className="mr-2 inline-block" />
+            Analyze Projects
+          </CardTitle>
+          <CardDescription>View project analytics</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button className="rounded px-4 py-2 text-white">Analyze</Button>
+        </CardContent>
+      </Card>
+
+      {/* View Clients Card */}
       <Card className="rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
         <CardHeader>
           <CardTitle>
             <FaUsers className="mr-2 inline-block" />
-            Co-workers
+            View Clients
           </CardTitle>
+          <CardDescription>Manage your clients</CardDescription>
         </CardHeader>
         <CardContent>
-          <Button variant="link" className="flex items-center space-x-2">
-            <FaUsers />
-            <span>View Co-workers</span>
+          <Button
+            className="rounded px-4 py-2 text-white"
+            onClick={() => {
+              window.location.href = "/clients";
+            }}
+          >
+            View Clients
           </Button>
         </CardContent>
-      </Card>
-
-      {/* Calendar Card */}
-      <Card className="rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
-        <CardHeader>
-          <CardTitle>
-            <FaCalendarAlt className="mr-2 inline-block" />
-            Calendar
-          </CardTitle>
-          <CardDescription>12/08/2024</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-gray-500">2 events today</p>
-        </CardContent>
-        <CardFooter>
-          <Button variant="link" className="flex items-center space-x-2">
-            <FaCalendarAlt />
-            <span>View Calendar</span>
-          </Button>
-        </CardFooter>
       </Card>
 
       {/* Current Project Status Card */}
-      <Card className="col-span-2 rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
+      {/*Modify to make dynamic*/}
+      <Card className="col-span-3 rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
         <CardHeader>
           <CardTitle>
             <FaTasks className="mr-2 inline-block" />
@@ -141,28 +138,8 @@ export function AdminDashboard() {
           <Button variant="outline">Last 10 Projects</Button>
         </CardFooter>
       </Card>
-
-      {/* Top Categories Card */}
-      <Card className="rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
-        <CardHeader>
-          <CardTitle>Top Categories</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Doughnut
-            data={{
-              labels: ["Electronics", "Laptops", "Phones"],
-              datasets: [
-                {
-                  data: [60, 25, 15],
-                  backgroundColor: ["#4b5563", "#9ca3af", "#d1d5db"],
-                },
-              ],
-            }}
-          />
-        </CardContent>
-      </Card>
     </div>
   );
-}
+};
 
-export default AdminDashboard;
+export default ComercialDashboard;
