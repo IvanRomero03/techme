@@ -33,9 +33,15 @@ import { Ellipsis, Option } from "lucide-react";
 export function ProjectView() {
   const router = useRouter();
 
-  const handleViewClick = () => {
-    // Navigate to the StateMenu component
-    router.push("/projects/state");
+  const { mutateAsync: deleteProject } =
+    api.projects.deleteProject.useMutation();
+  const utils = api.useUtils();
+
+  const handleRemove = async (id: number) => {
+    await deleteProject({
+      projectId: id,
+    });
+    await utils.projects.invalidate();
   };
 
   const { data: projects, isLoading: projectsLoading } =
@@ -95,7 +101,13 @@ export function ProjectView() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
-                      <DropdownMenuItem>Delete</DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={async () =>
+                          await handleRemove(project.project.id)
+                        }
+                      >
+                        Delete
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>

@@ -134,6 +134,8 @@ export const projects = createTable(
 );
 
 export const peoplePerProject = createTable("people_per_project", {
-  projectId: integer("project_id").references(() => projects.id),
+  projectId: integer("project_id").references(() => projects.id, {
+    onDelete: "cascade",
+  }),
   userId: varchar("user_id", { length: 255 }).references(() => users.id),
 });

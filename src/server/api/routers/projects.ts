@@ -117,6 +117,7 @@ export const projectsRouter = createTRPCRouter({
         project_status: z.string(),
         project_category: z.string(),
         project_members: z.array(z.string()),
+        project_percentage: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -128,6 +129,7 @@ export const projectsRouter = createTRPCRouter({
           stage: input.project_stage,
           status: input.project_status,
           category: input.project_category,
+          completionPercentage: input.project_percentage,
         })
         .where(eq(projects.id, input.project_id));
       await ctx.db
@@ -139,5 +141,11 @@ export const projectsRouter = createTRPCRouter({
           userId,
         })),
       );
+    }),
+
+  deleteProject: protectedProcedure
+    .input(z.object({ projectId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.delete(projects).where(eq(projects.id, input.projectId));
     }),
 });
