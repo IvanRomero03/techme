@@ -28,13 +28,20 @@ import {
 import { useRouter } from "next/navigation"; // Import useRouter from Next.js
 import { AddProject } from "./AddProject";
 import { api } from "techme/trpc/react";
+import { Ellipsis, Option } from "lucide-react";
 
 export function ProjectView() {
   const router = useRouter();
 
-  const handleViewClick = () => {
-    // Navigate to the StateMenu component
-    router.push("/projects/state");
+  const { mutateAsync: deleteProject } =
+    api.projects.deleteProject.useMutation();
+  const utils = api.useUtils();
+
+  const handleRemove = async (id: number) => {
+    await deleteProject({
+      projectId: id,
+    });
+    await utils.projects.invalidate();
   };
 
   const { data: projects, isLoading: projectsLoading } =
@@ -59,7 +66,7 @@ export function ProjectView() {
               <TableHead>Estimate</TableHead>
               <TableHead>Current Stage</TableHead>
               <TableHead>Next Stage</TableHead>
-              <TableHead>Action</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -85,6 +92,24 @@ export function ProjectView() {
                   >
                     View
                   </Button>
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <Button variant="outline">
+                        <Ellipsis className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem
+                        onClick={async () =>
+                          await handleRemove(project.project.id)
+                        }
+                      >
+                        Delete
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}

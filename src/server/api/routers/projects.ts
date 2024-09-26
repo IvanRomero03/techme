@@ -9,21 +9,6 @@ import { users, projects, peoplePerProject } from "techme/server/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { getBinaryMetadata } from "next/dist/build/swc";
 
-/**
- * project_name: string;
-    project_description: string;
-    project_category: string;
-    project_members: string[];
-    _selectedMembers: Map<string, {
-        id: string;
-        name: string | null;
-        email: string;
-        role: string | null;
-        emailVerified: Date | null;
-        image: string | null;
-    }>;
- */
-
 export const projectsRouter = createTRPCRouter({
   createProject: protectedProcedure
     .input(
@@ -51,10 +36,6 @@ export const projectsRouter = createTRPCRouter({
           userId,
         })),
       );
-      // .values({
-      //   projectId: project[0]?.id,
-      //   userId: input.project_members[0],
-      // });
       return project;
     }),
   getMyProjects: protectedProcedure.query(async ({ ctx }) => {
@@ -103,4 +84,68 @@ export const projectsRouter = createTRPCRouter({
       .where(eq(peoplePerProject.userId, user.id));
     return res;
   }),
+
+  getProyectInfo: protectedProcedure
+    .input(z.object({ projectId: z.number() }))
+    .query(async ({ ctx, input }) => {
+      if (!ctx.session.user) {
+        return null;
+      }
+      const project = await ctx.db
+        .select()
+        .from(projects)
+        .where(eq(projects.id, input.projectId))
+        .limit(1);
+      if (!project[0]) {
+        return null;
+      }
+      const members = await ctx.db
+        .select()
+        .from(users)
+        .leftJoin(peoplePerProject, eq(users.id, peoplePerProject.userId))
+        .where(eq(peoplePerProject.projectId, input.projectId));
+      return { project: project[0], members };
+    }),
+
+  updateProjectDetails: protectedProcedure
+    .input(
+      z.object({
+        project_id: z.number(),
+        project_name: z.string(),
+        project_description: z.string(),
+        project_stage: z.string(),
+        project_status: z.string(),
+        project_category: z.string(),
+        project_members: z.array(z.string()),
+        project_percentage: z.number(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db
+        .update(projects)
+        .set({
+          name: input.project_name,
+          description: input.project_description,
+          stage: input.project_stage,
+          status: input.project_status,
+          category: input.project_category,
+          completionPercentage: input.project_percentage,
+        })
+        .where(eq(projects.id, input.project_id));
+      await ctx.db
+        .delete(peoplePerProject)
+        .where(eq(peoplePerProject.projectId, input.project_id));
+      await ctx.db.insert(peoplePerProject).values(
+        input.project_members.map((userId) => ({
+          projectId: input.project_id,
+          userId,
+        })),
+      );
+    }),
+
+  deleteProject: protectedProcedure
+    .input(z.object({ projectId: z.number() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.db.delete(projects).where(eq(projects.id, input.projectId));
+    }),
 });

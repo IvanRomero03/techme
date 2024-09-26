@@ -1,4 +1,4 @@
-import { cn } from "lib/utils 2";
+import { cn } from "lib/utils";
 import React, { useMemo } from "react";
 import { getContrastingColor } from "techme/util/getContrastingColor";
 
