@@ -2,6 +2,7 @@
 // app/_components/AdminDashboard.tsx
 import * as React from "react";
 import { Button } from "t/components/ui/button";
+import { api } from "techme/trpc/react";
 import {
   Card,
   CardContent,
@@ -36,6 +37,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
+import Link from "next/link";
 
 // Register Chart.js components
 ChartJS.register(
@@ -48,6 +50,8 @@ ChartJS.register(
 );
 
 export function AdminDashboard() {
+  const { data: projects, isLoading: projectsLoading } =
+    api.projects.getMyProjectsStatus.useQuery();
   return (
     <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 lg:grid-cols-3">
       {/* Pending Projects Card */}
@@ -119,18 +123,17 @@ export function AdminDashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div>
-              <Label>Project A</Label>
-              <Progress value={75} className="mt-1" />
-            </div>
-            <div>
-              <Label>Project B</Label>
-              <Progress value={45} className="mt-1" />
-            </div>
-            <div>
-              <Label>Project C</Label>
-              <Progress value={60} className="mt-1" />
-            </div>
+            {projects?.map((project, index) => (
+              <div key={index}>
+                <Link href={`/projects/${project.id}`}>
+                  <Button variant={"ghost"}>{project.name}</Button>
+                </Link>
+                <Progress
+                  value={project.completion_percentage ?? 0}
+                  className="mt-1"
+                />
+              </div>
+            ))}
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">

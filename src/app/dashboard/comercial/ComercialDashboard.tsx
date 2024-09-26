@@ -39,6 +39,7 @@ import {
 } from "chart.js";
 import { Navigate } from "react-big-calendar";
 import Link from "next/link";
+import { api } from "techme/trpc/react";
 
 // Register Chart.js components
 ChartJS.register(
@@ -51,6 +52,8 @@ ChartJS.register(
 );
 
 const ComercialDashboard = () => {
+  const { data: projects, isLoading: projectsLoading } =
+    api.projects.getMyProjectsStatus.useQuery();
   return (
     <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 lg:grid-cols-3">
       {/* Start New Project Card */}
@@ -117,25 +120,17 @@ const ComercialDashboard = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div>
-              <Link href={"/projects"}>
-                <Button variant={"ghost"}>Project A</Button>
-              </Link>
-              <Progress value={75} className="mt-1" />
-            </div>
-            <div>
-              <Link href={"/projects"}>
-                <Button variant={"ghost"}>Project B</Button>
-              </Link>
-              <Progress value={45} className="mt-1" />
-            </div>
-            <div>
-              {/*// Adjust to navigate to the projects page according to ID*/}
-              <Link href={"/projects"}>
-                <Button variant={"ghost"}>Project A</Button>
-              </Link>
-              <Progress value={60} className="mt-1" />
-            </div>
+            {projects?.map((project, index) => (
+              <div key={index}>
+                <Link href={`/projects/${project.id}`}>
+                  <Button variant={"ghost"}>{project.name}</Button>
+                </Link>
+                <Progress
+                  value={project.completion_percentage ?? 0}
+                  className="mt-1"
+                />
+              </div>
+            ))}
           </div>
         </CardContent>
         <CardFooter className="flex justify-between">

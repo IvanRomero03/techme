@@ -69,4 +69,20 @@ export const projectsRouter = createTRPCRouter({
       .where(eq(peoplePerProject.userId, user.id));
     return res;
   }),
+  getMyProjectsStatus: protectedProcedure.query(async ({ ctx }) => {
+    const user = ctx.session.user;
+    if (!user) {
+      return [];
+    }
+    const res = await ctx.db
+      .select({
+        id: projects.id,
+        name: projects.name,
+        completion_percentage: projects.completionPercentage,
+      })
+      .from(projects)
+      .leftJoin(peoplePerProject, eq(projects.id, peoplePerProject.projectId))
+      .where(eq(peoplePerProject.userId, user.id));
+    return res;
+  }),
 });
