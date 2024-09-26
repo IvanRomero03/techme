@@ -28,6 +28,7 @@ import {
 import { useRouter } from "next/navigation"; // Import useRouter from Next.js
 import { AddProject } from "./AddProject";
 import { api } from "techme/trpc/react";
+import { Ellipsis, Option } from "lucide-react";
 
 export function ProjectView() {
   const router = useRouter();
@@ -59,7 +60,7 @@ export function ProjectView() {
               <TableHead>Estimate</TableHead>
               <TableHead>Current Stage</TableHead>
               <TableHead>Next Stage</TableHead>
-              <TableHead>Action</TableHead>
+              <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -85,6 +86,18 @@ export function ProjectView() {
                   >
                     View
                   </Button>
+                </TableCell>
+                <TableCell>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger>
+                      <Button variant="outline">
+                        <Ellipsis className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                      <DropdownMenuItem>Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </TableCell>
               </TableRow>
             ))}
