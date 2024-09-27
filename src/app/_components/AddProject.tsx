@@ -29,7 +29,8 @@ import {
 } from "t/components/ui/popover";
 import { Textarea } from "t/components/ui/textarea";
 import { api } from "techme/trpc/react";
-import { readableRole, type UserRole } from "../members/columns";
+import { readableRole } from "../members/columns";
+import type { UserRole } from "techme/util/UserRole";
 import { useSession } from "next-auth/react";
 
 export function AddProject() {
