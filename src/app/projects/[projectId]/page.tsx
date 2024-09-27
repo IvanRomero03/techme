@@ -24,7 +24,8 @@ import {
   CommandItem,
   CommandList,
 } from "t/components/ui/command";
-import { readableRole, UserRole } from "techme/app/members/columns";
+import { readableRole } from "techme/app/members/columns";
+import type { UserRole } from "techme/util/UserRole";
 import { Avatar, AvatarFallback, AvatarImage } from "t/components/ui/avatar";
 import { XCircle } from "lucide-react";
 

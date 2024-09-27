@@ -18,7 +18,8 @@ import {
   DropdownMenuSeparator,
 } from "t/components/ui/dropdown-menu";
 import { signOut } from "next-auth/react";
-import { readableRole, UserRole } from "../members/columns";
+import { readableRole } from "../members/columns";
+import { UserRole } from "techme/util/UserRole";
 
 interface TopNavBarProps {
   session?: Session;

@@ -9,17 +9,9 @@ import {
   SelectTrigger,
 } from "t/components/ui/select";
 import { api } from "techme/trpc/react";
-export enum UserRole {
-  ProjectManager = "PM",
-  Comercial = "CM",
-  DigitalLead = "DL",
-  LeadPresales = "LP",
-  GDM = "GDM",
-  Admin = "ADMIN",
-  Unauthorized = "UNAUTH",
-}
+import { UserRole } from "techme/util/UserRole";
 
-export type Member = {
+type Member = {
   id: string;
   name: string;
   email: string;

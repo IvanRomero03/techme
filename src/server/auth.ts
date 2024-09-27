@@ -7,7 +7,7 @@ import {
 import { type Adapter } from "next-auth/adapters";
 import AzureADProvider from "next-auth/providers/azure-ad";
 import GoogleProvider from "next-auth/providers/google";
-
+import type { UserRole } from "techme/util/UserRole";
 import { env } from "techme/env";
 import { db } from "techme/server/db";
 import {
@@ -16,16 +16,6 @@ import {
   users,
   verificationTokens,
 } from "techme/server/db/schema";
-
-export enum UserRole {
-  ProjectManager = "PM",
-  Comercial = "CM",
-  DigitalLead = "DL",
-  LeadPresales = "LP",
-  GDM = "GDM",
-  Admin = "ADMIN",
-  Unauthorized = "UNAUTH",
-}
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
