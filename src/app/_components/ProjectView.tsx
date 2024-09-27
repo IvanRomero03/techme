@@ -1,6 +1,21 @@
 "use client";
 
-import React from "react";
+import { Ellipsis } from "lucide-react";
+import { useRouter } from "next/navigation"; // Import useRouter from Next.js
+import { Button } from "t/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "t/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "t/components/ui/dropdown-menu";
 import {
   Table,
   TableBody,
@@ -11,24 +26,16 @@ import {
   TableHeader,
   TableRow,
 } from "t/components/ui/table";
-import { Button } from "t/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "t/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-  DropdownMenuItem,
-} from "t/components/ui/dropdown-menu";
-import { useRouter } from "next/navigation"; // Import useRouter from Next.js
-import { AddProject } from "./AddProject";
 import { api } from "techme/trpc/react";
-import { Ellipsis, Option } from "lucide-react";
+import { AddProject } from "./AddProject";
+import { format } from "date-fns";
+import {
+  ProjectStage,
+  ProjectStatus,
+  readableProjectStage,
+  readableProjectStatus,
+} from "techme/util/Readables";
+import Link from "next/link";
 
 export function ProjectView() {
   const router = useRouter();
@@ -63,9 +70,9 @@ export function ProjectView() {
               <TableHead className="w-[150px]">Project Name</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Category</TableHead>
-              <TableHead>Estimate</TableHead>
               <TableHead>Current Stage</TableHead>
-              <TableHead>Next Stage</TableHead>
+              <TableHead>End date</TableHead>
+              <TableHead>View</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -75,14 +82,24 @@ export function ProjectView() {
               <TableRow
                 key={project.project.id}
                 className="cursor-pointer hover:bg-gray-100"
+                onClick={() => router.push(`/projects/${project.project.id}`)}
               >
                 <TableCell className="font-medium">
                   {project.project.name}
                 </TableCell>
-                <TableCell>{project.project.status}</TableCell>
+                <TableCell>
+                  {readableProjectStatus(
+                    project.project.status as ProjectStatus,
+                  )}
+                </TableCell>
                 <TableCell>{project.project.category}</TableCell>
-                <TableCell>{project.project.stage}</TableCell>
-                <TableCell>{project.project.endDate?.getDay() ?? ""}</TableCell>
+                <TableCell>
+                  {readableProjectStage(project.project.stage as ProjectStage)}
+                </TableCell>
+                <TableCell>
+                  {project.project.endDate != null &&
+                    format(project.project.endDate, "MMM dd, yyyy")}
+                </TableCell>
                 <TableCell>
                   <Button
                     variant="link"
