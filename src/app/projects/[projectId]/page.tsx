@@ -28,6 +28,19 @@ import { readableRole } from "techme/app/members/columns";
 import type { UserRole } from "techme/util/UserRole";
 import { Avatar, AvatarFallback, AvatarImage } from "t/components/ui/avatar";
 import { XCircle } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "t/components/ui/select";
+import {
+  ProjectStatus,
+  ProjectStage,
+  readableProjectStage,
+  readableProjectStatus,
+} from "techme/util/Readables";
 
 export default function Page({ params }: { params: { projectId: string } }) {
   const [activeMenuItem, setActiveMenuItem] = useState("Details");
@@ -205,23 +218,59 @@ export default function Page({ params }: { params: { projectId: string } }) {
                         </div>
                         <div className="flex w-full flex-col gap-2">
                           <Label htmlFor="stage">Stage</Label>
-                          <Field
-                            id="stage"
-                            name="stage"
-                            as={Input}
-                            type="text"
-                            className="w-full rounded-md border p-2"
-                          />
+                          <Select
+                            value={values.stage}
+                            onValueChange={(v) => {
+                              void setFieldValue("stage", v);
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue
+                                className="w-full rounded-md border p-2"
+                                placeholder="Select a stage"
+                              >
+                                {readableProjectStage(
+                                  values.stage as ProjectStage,
+                                )}
+                              </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Object.values(ProjectStage).map((stage) => (
+                                <SelectItem key={stage} value={stage}>
+                                  {readableProjectStage(stage as ProjectStage)}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="flex w-full flex-col gap-2">
                           <Label htmlFor="status">Status</Label>
-                          <Field
-                            id="status"
-                            name="status"
-                            as={Input}
-                            type="text"
-                            className="w-full rounded-md border p-2"
-                          />
+                          <Select
+                            value={values.status}
+                            onValueChange={(v) => {
+                              void setFieldValue("status", v);
+                            }}
+                          >
+                            <SelectTrigger>
+                              <SelectValue
+                                className="w-full rounded-md border p-2"
+                                placeholder="Select a status"
+                              >
+                                {readableProjectStatus(
+                                  values.status as ProjectStatus,
+                                )}
+                              </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Object.values(ProjectStatus).map((status) => (
+                                <SelectItem key={status} value={status}>
+                                  {readableProjectStatus(
+                                    status as ProjectStatus,
+                                  )}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="flex w-full flex-col gap-2">
                           <Label htmlFor="category">Category</Label>
