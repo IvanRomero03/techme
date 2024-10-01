@@ -5,7 +5,6 @@ import { Button } from "t/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "t/components/ui/card";
 import { cn } from "lib/utils";
 import { api } from "techme/trpc/react";
-import { useSession } from "next-auth/react";
 import { Field, Form, Formik } from "formik";
 import { Label } from "t/components/ui/label";
 import { Input } from "t/components/ui/input";
@@ -53,6 +52,7 @@ const menuItems = [
   "Proposals",
   "Validation",
 ];
+import Requirements from "./Requirements";
 
 export default function Page({ params }: { params: { projectId: string } }) {
   const [activeMenuItem, setActiveMenuItem] = useState(menuItems[0]);
@@ -60,7 +60,6 @@ export default function Page({ params }: { params: { projectId: string } }) {
     api.projects.getProyectInfo.useQuery({
       projectId: Number(params.projectId),
     });
-  const session = useSession();
   const utils = api.useUtils();
   const { mutateAsync: updateProject } =
     api.projects.updateProjectDetails.useMutation();
@@ -207,7 +206,7 @@ export default function Page({ params }: { params: { projectId: string } }) {
                   }}
                 >
                   {({ values, setFieldValue }) => (
-                    <Form>
+                    <Form className="">
                       <div className="flex w-full flex-col gap-2">
                         <div className="flex w-full flex-col gap-2">
                           <Label htmlFor="name">Name</Label>
@@ -326,7 +325,7 @@ export default function Page({ params }: { params: { projectId: string } }) {
                           <div className="flex-col">
                             <Label
                               htmlFor="project_members"
-                              className="text-left"
+                              className="mx-3 text-left text-lg"
                             >
                               Members
                             </Label>
@@ -377,7 +376,6 @@ export default function Page({ params }: { params: { projectId: string } }) {
                                               )
                                             }
                                             onSelect={(v) => {
-                                              // console.log("value changed", v);
                                               const [name, id, role] =
                                                 v.split(":");
                                               if (!id || !name || !role) return;
@@ -538,6 +536,10 @@ export default function Page({ params }: { params: { projectId: string } }) {
                 </Markdown>
               }
             </div>
+          ) : activeMenuItem === "Requirements" ? (
+            <>
+              <Requirements projectId={Number(params.projectId)} />
+            </>
           ) : (
             <></>
           )}

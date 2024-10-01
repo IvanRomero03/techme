@@ -2,6 +2,7 @@ import { createCallerFactory, createTRPCRouter } from "techme/server/api/trpc";
 import { membersRouter } from "./routers/members";
 import { projectsRouter } from "./routers/projects";
 import { projectsRouterSummary } from "./routers/projectSummary";
+import { requirementsRouter } from "./routers/requirements";
 
 /**
  * This is the primary router for your server.
@@ -12,6 +13,7 @@ export const appRouter = createTRPCRouter({
   members: membersRouter,
   projects: projectsRouter,
   projectsSummary: projectsRouterSummary,
+  requirements: requirementsRouter,
 });
 
 // export type definition of API

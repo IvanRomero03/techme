@@ -146,3 +146,27 @@ export const peoplePerProject = createTable("people_per_project", {
   }),
   userId: varchar("user_id", { length: 255 }).references(() => users.id),
 });
+
+export const requirements = createTable(
+  "requirements",
+  {
+    id: serial("id").primaryKey(),
+    projectId: integer("project_id").references(() => projects.id, {
+      onDelete: "cascade",
+    }),
+    title: varchar("name", { length: 255 }).notNull(),
+    description: text("description"),
+    status: varchar("status", { length: 255 }).default("active"),
+    priority: integer("priority").default(0),
+    createdAt: timestamp("created_at", {
+      mode: "date",
+      withTimezone: true,
+    }).defaultNow(),
+    lastModifiedBy: varchar("last_modified_by", { length: 255 }).references(
+      () => users.id,
+    ),
+  },
+  (requirement) => ({
+    projectIdIdx: index("requirement_project_id_idx").on(requirement.projectId),
+  }),
+);
