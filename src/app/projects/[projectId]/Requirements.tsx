@@ -5,7 +5,7 @@ import { Button } from "t/components/ui/button";
 import { Label } from "t/components/ui/label";
 import { Textarea } from "t/components/ui/textarea";
 import { Input } from "t/components/ui/input";
-import { api } from "techme/trpc/react"; // Your TRPC client
+import { api } from "techme/trpc/react";
 import React, { useState } from "react";
 import { useSession } from "next-auth/react";
 
@@ -30,7 +30,7 @@ const Requirements: React.FC<RequirementsProps> = ({ projectId }) => {
     isError,
   } = api.requirements.getAllRequirements.useQuery({ projectId });
 
-  const utils = api.useUtils(); // To use for cache invalidation
+  const utils = api.useUtils();
 
   const { data: session } = useSession();
   const userId = session?.user?.id;
@@ -62,16 +62,16 @@ const Requirements: React.FC<RequirementsProps> = ({ projectId }) => {
   };
 
   const handleUpdateRequirement = async (requirement: Requirement) => {
-    if (!requirement.id) return; // Ensure the requirement has an ID
+    if (!requirement.id) return;
 
     await updateRequirement({
       id: requirement.id,
-      title: requirement.title, // Only pass the fields required by the mutation
-      projectId: projectId, // Ensure the project ID is not changed
+      title: requirement.title,
+      projectId: projectId,
       description: requirement.description,
       status: requirement.status,
       priority: requirement.priority,
-      lastModifiedBy: requirement.lastModifiedBy ?? userId ?? "", // Use the current user's ID
+      lastModifiedBy: requirement.lastModifiedBy ?? userId ?? "",
     });
   };
 
@@ -214,10 +214,10 @@ const Requirements: React.FC<RequirementsProps> = ({ projectId }) => {
                   {/* Form for editing the requirement */}
                   <Formik
                     initialValues={{
-                      title: requirement.title || "", // Fallback to empty string
-                      description: requirement.description ?? "", // Fallback to empty string
-                      status: requirement.status ?? "active", // Default to "active"
-                      priority: requirement.priority ?? 0, // Fallback to 0
+                      title: requirement.title || "",
+                      description: requirement.description ?? "",
+                      status: requirement.status ?? "active",
+                      priority: requirement.priority ?? 0,
                     }}
                     onSubmit={async (values) => {
                       await handleUpdateRequirement({
@@ -226,7 +226,7 @@ const Requirements: React.FC<RequirementsProps> = ({ projectId }) => {
                         projectId,
                         lastModifiedBy: userId ?? "",
                       });
-                      setEditIndex(null); // Close the edit form after saving
+                      setEditIndex(null);
                     }}
                   >
                     {() => (

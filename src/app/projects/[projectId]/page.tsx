@@ -363,7 +363,6 @@ export default function Page({ params }: { params: { projectId: string } }) {
                                               )
                                             }
                                             onSelect={(v) => {
-                                              // console.log("value changed", v);
                                               const [name, id, role] =
                                                 v.split(":");
                                               if (!id || !name || !role) return;

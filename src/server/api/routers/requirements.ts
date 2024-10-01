@@ -8,13 +8,12 @@ import { requirements } from "techme/server/db/schema";
 import { eq } from "drizzle-orm";
 
 export const requirementsRouter = createTRPCRouter({
-  // Create a new requirement
   createRequirement: protectedProcedure
     .input(
       z.object({
         projectId: z.number(),
         title: z.string(),
-        description: z.string().optional().nullable(), // Nullable if allowed
+        description: z.string().optional().nullable(),
         status: z.string().default("active"),
         priority: z.number().default(0),
         lastModifiedBy: z.string(),
@@ -26,7 +25,7 @@ export const requirementsRouter = createTRPCRouter({
         .values({
           projectId: input.projectId,
           title: input.title,
-          description: input.description ?? null, // Set null if undefined
+          description: input.description ?? null,
           status: input.status ?? "active",
           priority: input.priority ?? 0,
           lastModifiedBy: input.lastModifiedBy,
@@ -35,7 +34,6 @@ export const requirementsRouter = createTRPCRouter({
       return requirement;
     }),
 
-  // Get all requirements for a project
   getAllRequirements: publicProcedure
     .input(z.object({ projectId: z.number() }))
     .query(async ({ ctx, input }) => {
@@ -46,7 +44,6 @@ export const requirementsRouter = createTRPCRouter({
       return allRequirements;
     }),
 
-  // Update a requirement
   updateRequirement: protectedProcedure
     .input(
       z.object({
@@ -56,16 +53,16 @@ export const requirementsRouter = createTRPCRouter({
         description: z.string().optional(),
         status: z.string().optional(),
         priority: z.number().optional(),
-        lastModifiedBy: z.string(), // Required for tracking updates
+        lastModifiedBy: z.string(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
       const updatedRequirement = await ctx.db
         .update(requirements)
         .set({
-          title: input.title ?? undefined, // Only update fields if present
+          title: input.title ?? undefined,
           projectId: input.projectId ?? undefined,
-          description: input.description ?? undefined, // Handle optional fields
+          description: input.description ?? undefined,
           status: input.status ?? undefined,
           priority: input.priority ?? undefined,
           lastModifiedBy: input.lastModifiedBy,
@@ -75,7 +72,6 @@ export const requirementsRouter = createTRPCRouter({
       return updatedRequirement;
     }),
 
-  // Delete a requirement
   deleteRequirement: protectedProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
