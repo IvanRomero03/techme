@@ -12,11 +12,10 @@ export async function getCacheClient() {
     })
     .catch((err) => {
       console.error("Failed to connect to Redis", err);
-      if (env.NODE_ENV === "production") {
-        // process.exit(1);
-        throw err;
+      if (env.NODE_ENV === "test") {
+        return client;
       }
-      // throw err;
+      throw err;
     });
 }
 type RedisClient = ReturnType<typeof createClient>;
