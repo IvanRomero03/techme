@@ -27,7 +27,8 @@ jobs:
           cmd: install
       - name: Run build
         uses: borales/actions-yarn@v5.0.0
+        env:
+          REDIS_URL: ${{ secrets.REDIS_URL }}
+          SKIP_ENV_VALIDATION: true
         with:
           cmd: build
-        env:
-          SKIP_ENV_VALIDATION: true

@@ -13,6 +13,7 @@ import { ZodError } from "zod";
 
 import { getServerAuthSession } from "techme/server/auth";
 import { db } from "techme/server/db";
+import { cache } from "techme/server/db/cache";
 
 /**
  * 1. CONTEXT
@@ -31,6 +32,7 @@ export const createTRPCContext = async (opts: { headers: Headers }) => {
 
   return {
     db,
+    cache: await cache,
     session,
     ...opts,
   };
