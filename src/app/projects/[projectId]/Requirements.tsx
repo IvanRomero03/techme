@@ -5,7 +5,7 @@ import { Button } from "t/components/ui/button";
 import { Label } from "t/components/ui/label";
 import { Textarea } from "t/components/ui/textarea";
 import { Input } from "t/components/ui/input";
-import { api } from "techme/trpc/react"; // Your TRPC client
+import { api } from "techme/trpc/react"; 
 import React, { useState } from "react";
 import { useSession } from "next-auth/react";
 
