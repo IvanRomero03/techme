@@ -35,7 +35,6 @@ import {
   readableProjectStage,
   readableProjectStatus,
 } from "techme/util/Readables";
-import Link from "next/link";
 
 export function ProjectView() {
   const router = useRouter();
