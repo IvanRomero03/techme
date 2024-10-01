@@ -22,16 +22,14 @@ export const projectsRouterSummary = createTRPCRouter({
       }
       const QueryKey = "project_summary_" + project[0]!.id;
 
-      console.log("QueryKey", QueryKey);
       try {
         const cachedSummary = await ctx.cache.get(QueryKey);
-        console.log("aqui falied to get", cachedSummary);
         if (cachedSummary) {
           yield cachedSummary;
           return cachedSummary;
         }
       } catch (error) {
-        console.log("error", error);
+        // console.log("error", error);
       }
 
       const openai = getOpenAI();
@@ -63,12 +61,9 @@ export const projectsRouterSummary = createTRPCRouter({
       for await (const response of summary) {
         if (response.choices[0]?.delta?.content) {
           snapshot += response.choices[0]?.delta?.content;
-          // yield snapshot;
           yield response.choices[0]?.delta?.content;
         }
       }
-      // console.log("snapshot", snapshot);
-      // console.log("QueryKey", typeof QueryKey);
       await ctx.cache.set(QueryKey, snapshot, {
         EX: 60 * 60 * 24 * 7,
       });
