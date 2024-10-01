@@ -5,11 +5,7 @@ import { Button } from "t/components/ui/button";
 import { Label } from "t/components/ui/label";
 import { Textarea } from "t/components/ui/textarea";
 import { Input } from "t/components/ui/input";
-<<<<<<< HEAD
 import { api } from "techme/trpc/react";
-=======
-import { api } from "techme/trpc/react"; 
->>>>>>> refs/remotes/origin/EstebanAleman21/feature/requirements
 import React, { useState } from "react";
 import { useSession } from "next-auth/react";
 
@@ -27,7 +23,7 @@ interface RequirementsProps {
   projectId: number;
 }
 
-const Requirements: React.FC<RequirementsProps> = ({ projectId }) => {
+export default function Requirements({ projectId }: RequirementsProps) {
   const {
     data: requirements,
     isLoading,
@@ -322,6 +318,4 @@ const Requirements: React.FC<RequirementsProps> = ({ projectId }) => {
       )}
     </>
   );
-};
-
-export default Requirements;
+}
