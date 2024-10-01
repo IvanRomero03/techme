@@ -7,7 +7,6 @@ import {
 } from "techme/server/api/trpc";
 import { users, projects, peoplePerProject } from "techme/server/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { getBinaryMetadata } from "next/dist/build/swc";
 
 export const projectsRouter = createTRPCRouter({
   createProject: protectedProcedure

@@ -19,20 +19,27 @@ import { type AdapterAccount } from "next-auth/adapters";
  */
 export const createTable = pgTableCreator((name) => `techme_${name}`);
 
-export const users = createTable("user", {
-  id: varchar("id", { length: 255 })
-    .notNull()
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  name: varchar("name", { length: 255 }),
-  email: varchar("email", { length: 255 }).notNull(),
-  role: varchar("role", { length: 255 }).default("UNAUTH"),
-  emailVerified: timestamp("email_verified", {
-    mode: "date",
-    withTimezone: true,
-  }).default(sql`CURRENT_TIMESTAMP`),
-  image: varchar("image", { length: 255 }),
-});
+export const users = createTable(
+  "user",
+  {
+    id: varchar("id", { length: 255 })
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    name: varchar("name", { length: 255 }),
+    email: varchar("email", { length: 255 }).notNull(),
+    role: varchar("role", { length: 255 }).default("UNAUTH"),
+    emailVerified: timestamp("email_verified", {
+      mode: "date",
+      withTimezone: true,
+    }).default(sql`CURRENT_TIMESTAMP`),
+    image: varchar("image", { length: 255 }),
+  },
+  (user) => ({
+    emailIdx: index("user_email_idx").on(user.email),
+    nameIdx: index("user_name_idx").on(user.name),
+  }),
+);
 
 export const usersRelations = relations(users, ({ many }) => ({
   accounts: many(accounts),

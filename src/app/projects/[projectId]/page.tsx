@@ -41,9 +41,21 @@ import {
   readableProjectStage,
   readableProjectStatus,
 } from "techme/util/Readables";
+import Markdown from "react-markdown";
+
+const menuItems = [
+  "Summary",
+  "Details",
+  "Requirements",
+  "Planning",
+  "Analysis",
+  "Estimations",
+  "Proposals",
+  "Validation",
+];
 
 export default function Page({ params }: { params: { projectId: string } }) {
-  const [activeMenuItem, setActiveMenuItem] = useState("Details");
+  const [activeMenuItem, setActiveMenuItem] = useState(menuItems[0]);
   const { data: proyectDetails, isLoading: isLoadingProyectDetails } =
     api.projects.getProyectInfo.useQuery({
       projectId: Number(params.projectId),
@@ -55,15 +67,16 @@ export default function Page({ params }: { params: { projectId: string } }) {
 
   const { data: members, isLoading: membersLoading } =
     api.members.getAuthorizedMembers.useQuery();
-  const menuItems = [
-    "Details",
-    "Requirements",
-    "Planning",
-    "Analysis",
-    "Estimations",
-    "Proposals",
-    "Validation",
-  ];
+
+  const {
+    data: summary,
+    isFetching: fetchingStatus,
+    status: summaryStatus,
+  } = api.projectsSummary.getProjectSummary.useQuery({
+    projectId: Number(params.projectId),
+  });
+
+  // console.log("summary", summary);
 
   const handleMenuClick = (item: string) => {
     setActiveMenuItem(item);
@@ -506,6 +519,25 @@ export default function Page({ params }: { params: { projectId: string } }) {
                 </Formik>
               )}
             </>
+          ) : activeMenuItem === "Summary" ? (
+            <div className="flex w-full flex-col">
+              {fetchingStatus && <p>Loading...</p>}
+              {
+                <Markdown
+                  components={{
+                    ul: ({ children }) => (
+                      <ul className="list-disc pl-4">{children}</ul>
+                    ),
+                  }}
+                >
+                  {summary != undefined || summary != null
+                    ? typeof summary === "string"
+                      ? summary
+                      : summary.join("")
+                    : "..."}
+                </Markdown>
+              }
+            </div>
           ) : (
             <></>
           )}
