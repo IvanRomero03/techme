@@ -21,10 +21,10 @@ export async function getCacheClient() {
 type RedisClient = ReturnType<typeof createClient>;
 
 const globalForCache = globalThis as unknown as {
-  cache: RedisClient | undefined;
+  cache: Promise<RedisClient>;
 };
 
-const cache = globalForCache.cache ?? (await getCacheClient());
+const cache = globalForCache.cache ?? getCacheClient();
 if (env.NODE_ENV !== "production") globalForCache.cache = cache;
 
 export { cache };
