@@ -9,8 +9,6 @@ import {
   LiveblocksProvider,
   RoomProvider,
   ClientSideSuspense,
-  useMyPresence,
-  useOthers,
 } from "@liveblocks/react/suspense";
 import LiveCursors from "./LiveCursors";
 import { SessionProvider } from "next-auth/react";
