@@ -1,4 +1,4 @@
-"use client"; // If this is a client-side component
+"use client";
 
 import { Field, Form, Formik, FieldArray } from "formik";
 import { Button } from "t/components/ui/button";
