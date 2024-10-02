@@ -1,7 +1,7 @@
 "use client";
 
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faAt,
@@ -37,13 +37,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleCollapse, session 
   const router = useRouter();
 
   const toggleOverview = () => setIsOverviewOpen(!isOverviewOpen);
-  // Obtain session and user role
+  
 
-  // Redirect Dashboard
-
-  const handleRedirect = () => {
-    router.push(`/dashboard/${session?.user.role.toLowerCase()}`);
-  };
+  
 
  
 
@@ -86,13 +82,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleCollapse, session 
           </button>
           {!isCollapsed && isOverviewOpen && (
             <div className="ml-10 mt-2">
-             <button
-                  onClick={handleRedirect}
+             <Link
+                    href={`/dashboard/${session?.user.role.toLowerCase()}`}
                   className="flex items-center px-6 py-2 transition hover:bg-gray-700"
-                  >
+                  >         
                   <FontAwesomeIcon icon={faFileAlt} className="mr-3 h-4 w-4" />
                   <span>Summary</span>
-                  </button>
+                  </Link>
 
               <Link
                 href="/projects"
