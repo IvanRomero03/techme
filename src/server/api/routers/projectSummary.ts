@@ -1,13 +1,10 @@
 import { z } from "zod";
 
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "techme/server/api/trpc";
-import { users, projects, peoplePerProject } from "techme/server/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
+import { readableRole } from "techme/app/members/columns";
+import { createTRPCRouter, protectedProcedure } from "techme/server/api/trpc";
 import getOpenAI from "techme/server/chatgpt/openai";
+import { projects } from "techme/server/db/schema";
 
 export const projectsRouterSummary = createTRPCRouter({
   getProjectSummary: protectedProcedure
@@ -20,7 +17,8 @@ export const projectsRouterSummary = createTRPCRouter({
       if (!(project.length > 0) && project[0] !== undefined) {
         return [];
       }
-      const QueryKey = "project_summary_" + project[0]!.id;
+      const QueryKey =
+        "project_summary_" + project[0]!.id + "_" + ctx.session.user.role;
 
       try {
         const cachedSummary = await ctx.cache.get(QueryKey);
@@ -28,9 +26,7 @@ export const projectsRouterSummary = createTRPCRouter({
           yield cachedSummary;
           return cachedSummary;
         }
-      } catch (error) {
-        // console.log("error", error);
-      }
+      } catch (error) {}
 
       const openai = getOpenAI();
       const summary = await openai.chat.completions.create({
@@ -40,7 +36,7 @@ export const projectsRouterSummary = createTRPCRouter({
             role: "system",
             content:
               "Eres un robot que ayuda a un " +
-              ctx.session.user.role.toLowerCase() +
+              readableRole(ctx.session.user.role) +
               " para resumir su proyecto, tu tarea es dar la información más relevante y concisa sobre el proyecto." +
               " Ayudalo a cumplir con sus objetivos para poder desarrollar una preventa del proyecto." +
               " Por favor intenta hacer el resumen lo más corto posible y usa bullet points (-) para hacerlo más legible." +

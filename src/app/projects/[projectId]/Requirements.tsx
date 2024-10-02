@@ -83,7 +83,6 @@ export default function Requirements({ projectId }: RequirementsProps) {
 
   return (
     <>
-      {/* Form to create a new requirement */}
       <Formik
         initialValues={{
           requirements: [
@@ -195,8 +194,6 @@ export default function Requirements({ projectId }: RequirementsProps) {
           </Form>
         )}
       </Formik>
-
-      {/* Display existing requirements and update/delete options */}
       <h2 className="mt-8 text-xl font-bold">Existing Requirements</h2>
       {isLoading ? (
         <p>Loading requirements...</p>
@@ -211,7 +208,6 @@ export default function Requirements({ projectId }: RequirementsProps) {
             >
               {editIndex === index ? (
                 <>
-                  {/* Form for editing the requirement */}
                   <Formik
                     initialValues={{
                       title: requirement.title || "",
