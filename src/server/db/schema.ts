@@ -170,3 +170,54 @@ export const requirements = createTable(
     projectIdIdx: index("requirement_project_id_idx").on(requirement.projectId),
   }),
 );
+
+
+// Save Schema from Planning Section
+
+
+
+
+
+
+
+// POSSIBLY ANALISIS SCHEMAS- DATABASE
+
+
+// export const meetings = createTable(
+//   "meeting",
+//   {
+//     id: serial("id").primaryKey(),
+//     projectId: integer("project_id").references(() => projects.id, {
+//       onDelete: "cascade",
+//     }),
+//     organizerId: varchar("organizer_id", { length: 255 }).references(() => users.id),
+//     scheduledAt: timestamp("scheduled_at", { mode: "date", withTimezone: true }),
+//     meetingNotes: text("meeting_notes"),
+//     status: varchar("status", { length: 255 }).default("planned"),
+//   },
+// );
+
+// export const contracts = createTable(
+//   "contract",
+//   {
+//     id: serial("id").primaryKey(),
+//     name: varchar("name", { length: 255 }).notNull(),
+//     description: text("description"),
+//     isActive: boolean("is_active").default(true),
+//   },
+// );
+
+// export const proposals = createTable(
+//   "proposal",
+//   {
+//     id: serial("id").primaryKey(),
+//     projectId: integer("project_id").references(() => projects.id, {
+//       onDelete: "cascade",
+//     }),
+//     teamId: integer("team_id").references(() => teams.id),
+//     estimatedTime: integer("estimated_time"), // in days or hours
+//     estimatedCost: integer("estimated_cost"),
+//     status: varchar("status", { length: 255 }).default("planning"),
+//   },
+// );
+
