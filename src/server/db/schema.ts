@@ -170,3 +170,5 @@ export const requirements = createTable(
     projectIdIdx: index("requirement_project_id_idx").on(requirement.projectId),
   }),
 );
+
+

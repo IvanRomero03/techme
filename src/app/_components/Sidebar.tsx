@@ -1,5 +1,6 @@
 "use client";
 
+
 import React from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -18,17 +19,29 @@ import {
   faEnvelope,
 } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import type { Session } from "next-auth";
+
 
 interface SidebarProps {
   isCollapsed: boolean;
   toggleCollapse: () => void;
+  session?: Session
+  
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleCollapse }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleCollapse, session }) => {
   const [isOverviewOpen, setIsOverviewOpen] = React.useState(true);
 
+  const router = useRouter();
+
   const toggleOverview = () => setIsOverviewOpen(!isOverviewOpen);
+  
+
+  
+
+ 
 
   return (
     <div
@@ -69,13 +82,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isCollapsed, toggleCollapse }) => {
           </button>
           {!isCollapsed && isOverviewOpen && (
             <div className="ml-10 mt-2">
-              <Link
-                href="/dashboard/admin"
-                className="flex items-center px-6 py-2 transition hover:bg-gray-700"
-              >
-                <FontAwesomeIcon icon={faFileAlt} className="mr-3 h-4 w-4" />
-                <span>Summary</span>
-              </Link>
+             <Link
+                    href={`/dashboard/${session?.user.role.toLowerCase()}`}
+                  className="flex items-center px-6 py-2 transition hover:bg-gray-700"
+                  >         
+                  <FontAwesomeIcon icon={faFileAlt} className="mr-3 h-4 w-4" />
+                  <span>Summary</span>
+                  </Link>
+
               <Link
                 href="/projects"
                 className="flex items-center px-6 py-2 transition hover:bg-gray-700"

@@ -39,6 +39,7 @@ const RootClientLayout: React.FC<RootClientLayoutProps> = ({
                 <Sidebar
                   isCollapsed={isCollapsed}
                   toggleCollapse={toggleCollapse}
+                  session={session}
                 />
 
                 {/* Main Content Area */}
