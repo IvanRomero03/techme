@@ -28,12 +28,36 @@ export const projectsRouterTasks = createTRPCRouter({
         userId: user,
         lastModifiedBy: user,
       });
+      try {
+        await ctx.cache.del("project_tasks_" + input.projectId + "_" + user);
+      } catch (error) {}
       return task;
     }),
   getProjectTasks: protectedProcedure
     .input(z.object({ projectId: z.number() }))
     .query(async function ({ ctx, input }) {
       const user = ctx.session.user.id;
+      try {
+        const tasks = await ctx.cache.get(
+          "project_tasks_" + input.projectId + "_" + user,
+        );
+        if (tasks) {
+          return JSON.parse(tasks) as Record<
+            "todo" | "in-progress" | "done",
+            {
+              projectId: number | null;
+              id: number;
+              description: string;
+              userId: string | null;
+              status: string;
+              title: string;
+              priority: number | null;
+              createdAt: Date | null;
+              lastModifiedBy: string | null;
+            }[]
+          >;
+        }
+      } catch (error) {}
       const tasks = await ctx.db
         .select()
         .from(projectTasks)
@@ -52,6 +76,14 @@ export const projectsRouterTasks = createTRPCRouter({
       for (const task of tasks) {
         tasksGrouped[task.status as "todo" | "in-progress" | "done"].push(task);
       }
+      try {
+        await ctx.cache.set(
+          "project_tasks_" + input.projectId + "_" + user,
+          JSON.stringify(tasksGrouped),
+          { EX: 60 * 60 },
+        );
+      } catch (error) {}
+
       return tasksGrouped;
     }),
   updateTaskStatus: protectedProcedure
@@ -69,6 +101,11 @@ export const projectsRouterTasks = createTRPCRouter({
         .where(
           and(eq(projectTasks.id, input.id), eq(projectTasks.userId, user)),
         );
+      try {
+        const task = await ctx.cache.del(
+          "project_tasks_" + input.id + "_" + user,
+        );
+      } catch (error) {}
       return task;
     }),
   updateTask: protectedProcedure
@@ -83,6 +120,11 @@ export const projectsRouterTasks = createTRPCRouter({
     )
     .mutation(async function ({ ctx, input }) {
       const user = ctx.session.user.id;
+      try {
+        const task = await ctx.cache.del(
+          "project_tasks_" + input.id + "_" + user,
+        );
+      } catch (error) {}
       const task = await ctx.db
         .update(projectTasks)
         .set({
