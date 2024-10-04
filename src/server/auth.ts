@@ -7,8 +7,6 @@ import {
 import { type Adapter } from "next-auth/adapters";
 import AzureADProvider from "next-auth/providers/azure-ad";
 import GoogleProvider from "next-auth/providers/google";
-import type { UserRole } from "techme/util/UserRole";
-import { env } from "techme/env";
 import { db } from "techme/server/db";
 import {
   accounts,
@@ -16,6 +14,7 @@ import {
   users,
   verificationTokens,
 } from "techme/server/db/schema";
+import type { UserRole } from "techme/util/UserRole";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -53,12 +52,6 @@ export const authOptions: NextAuthOptions = {
         role: user.role,
       },
     }),
-    signIn: ({ account, profile, user, email, credentials }) => {
-      // if (account?.type === 'oauth') {
-      // }
-      console.log("signIn", { account, profile, user, email, credentials });
-      return true;
-    },
   },
   adapter: DrizzleAdapter(db, {
     usersTable: users,

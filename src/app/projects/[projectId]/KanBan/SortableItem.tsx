@@ -49,15 +49,7 @@ export default function SortableItem({ task }: { task: Task }) {
   };
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      onClick={(e) => {
-        console.log("clicked", task);
-      }}
-    >
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <Item task={task} />
     </div>
   );

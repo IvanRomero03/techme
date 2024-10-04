@@ -2,7 +2,7 @@
 import { useMyPresence, useOthers } from "@liveblocks/react/suspense";
 import React from "react";
 import Cursor from "./Cursor";
-import { Session } from "next-auth";
+import type { Session } from "next-auth";
 
 const COLORS = [
   ["#FF0099", "#FF7A00"],
@@ -43,7 +43,7 @@ export default function LiveCursors({
   children: React.ReactNode;
   session?: Session;
 }) {
-  const [{ cursor }, updateMyPresence] = useMyPresence();
+  const [{}, updateMyPresence] = useMyPresence();
   const others = useOthers();
   return (
     <div

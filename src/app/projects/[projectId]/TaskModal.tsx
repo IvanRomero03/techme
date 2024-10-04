@@ -23,7 +23,7 @@ import { Textarea } from "t/components/ui/textarea";
 import { api } from "techme/trpc/react";
 import { z } from "zod";
 import { toFormikValidationSchema } from "zod-formik-adapter";
-import { Task } from "./KanBan/KanBan";
+import type { Task } from "./KanBan/KanBan";
 import { LoaderCircle } from "lucide-react";
 
 export default function TaskModal({
@@ -77,7 +77,6 @@ export default function TaskModal({
               setOpen(false);
               return;
             }
-            console.log(values);
             await createTask({
               ...values,
               projectId: proyectId,

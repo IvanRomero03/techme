@@ -1,10 +1,8 @@
-// app/layout.tsx
 import { GeistSans } from "geist/font/sans";
-import "techme/styles/globals.css";
 import { type Metadata } from "next";
 import { getServerAuthSession } from "techme/server/auth";
+import "techme/styles/globals.css";
 import RootClientLayout from "./_components/RootClientLayout";
-import { useMyPresence, useOthers } from "@liveblocks/react/suspense";
 
 export const metadata: Metadata = {
   title: "TechMe",

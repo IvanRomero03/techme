@@ -9,7 +9,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import type { Session } from "next-auth";
 
-// Import Shadcn UI components
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -25,7 +24,7 @@ interface TopNavBarProps {
   isCollapsed: boolean;
 }
 
-const TopNavBar: React.FC<TopNavBarProps> = ({ session, isCollapsed }) => {
+const TopNavBar: React.FC<TopNavBarProps> = ({ session }) => {
   return (
     <div
       className={`flex items-center justify-between bg-white px-6 py-3 shadow-lg transition-all duration-300`}
@@ -60,7 +59,6 @@ const TopNavBar: React.FC<TopNavBarProps> = ({ session, isCollapsed }) => {
           </span>
         </button>
 
-        {/* Dropdown Menu for Profile */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <div className="flex cursor-pointer items-center space-x-2 p-2">

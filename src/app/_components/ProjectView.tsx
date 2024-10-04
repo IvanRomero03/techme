@@ -30,8 +30,8 @@ import { api } from "techme/trpc/react";
 import { AddProject } from "./AddProject";
 import { format } from "date-fns";
 import {
-  ProjectStage,
-  ProjectStatus,
+  type ProjectStage,
+  type ProjectStatus,
   readableProjectStage,
   readableProjectStatus,
 } from "techme/util/Readables";

@@ -1,10 +1,8 @@
 import { z } from "zod";
 
-import { eq, and } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { createTRPCRouter, protectedProcedure } from "techme/server/api/trpc";
-// import getOpenAI from "techme/server/chatgpt/openai";
-import { projects, projectTasks } from "techme/server/db/schema";
-import { readableRole } from "techme/util/UserRole";
+import { projectTasks } from "techme/server/db/schema";
 
 function getProyectsTasksQueryKey(projectId: number, userId: string) {
   return "project_tasks_" + projectId + "_" + userId;
@@ -35,7 +33,7 @@ export const projectsRouterTasks = createTRPCRouter({
       try {
         await ctx.cache.del(getProyectsTasksQueryKey(input.projectId, user));
       } catch (error) {
-        console.error(error, "error creating task");
+        console.error("Failed to delete cache on createTask", error);
       }
       return task;
     }),
@@ -44,11 +42,9 @@ export const projectsRouterTasks = createTRPCRouter({
     .query(async function ({ ctx, input }) {
       const user = ctx.session.user.id;
       try {
-        console.log("getProjectTasks");
         const tasks = await ctx.cache.get(
           getProyectsTasksQueryKey(input.projectId, user),
         );
-        console.log(tasks, "tasks");
         if (tasks) {
           return JSON.parse(tasks) as Record<
             "todo" | "in-progress" | "done",
@@ -65,7 +61,9 @@ export const projectsRouterTasks = createTRPCRouter({
             }[]
           >;
         }
-      } catch (error) {}
+      } catch (error) {
+        console.error("Failed to get cache on getProjectTasks", error);
+      }
       const tasks = await ctx.db
         .select()
         .from(projectTasks)
@@ -89,7 +87,9 @@ export const projectsRouterTasks = createTRPCRouter({
           JSON.stringify(tasksGrouped),
           { EX: 60 * 60 },
         );
-      } catch (error) {}
+      } catch (error) {
+        console.error("Failed to set cache on getProjectTasks", error);
+      }
 
       return tasksGrouped;
     }),
@@ -111,7 +111,9 @@ export const projectsRouterTasks = createTRPCRouter({
         );
       try {
         await ctx.cache.del(getProyectsTasksQueryKey(input.projectId, user));
-      } catch (error) {}
+      } catch (error) {
+        console.error("Failed to delete cache on updateTaskStatus", error);
+      }
       return task;
     }),
   updateTask: protectedProcedure
@@ -140,10 +142,10 @@ export const projectsRouterTasks = createTRPCRouter({
           and(eq(projectTasks.id, input.id), eq(projectTasks.userId, user)),
         );
       try {
-        const task = await ctx.cache.del(
-          getProyectsTasksQueryKey(input.projectId, user),
-        );
-      } catch (error) {}
+        await ctx.cache.del(getProyectsTasksQueryKey(input.projectId, user));
+      } catch (error) {
+        console.error("Failed to delete cache on updateTask", error);
+      }
       return task;
     }),
 });

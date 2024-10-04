@@ -2,10 +2,10 @@
 import {
   closestCorners,
   DndContext,
-  DragEndEvent,
-  DragOverEvent,
+  type DragEndEvent,
+  type DragOverEvent,
   DragOverlay,
-  DragStartEvent,
+  type DragStartEvent,
   MouseSensor,
   PointerSensor,
   useSensor,
@@ -31,8 +31,9 @@ export interface Task {
 }
 
 export default function KanBan({ projectId }: { projectId: number }) {
-  const { data: tasks, isFetching: fetchingTasks } =
-    api.prjectTasks.getProjectTasks.useQuery({ projectId });
+  const { data: tasks } = api.prjectTasks.getProjectTasks.useQuery({
+    projectId,
+  });
   const { mutateAsync: updateTaskStatus } =
     api.prjectTasks.updateTaskStatus.useMutation();
   const utils = api.useUtils();
@@ -46,7 +47,6 @@ export default function KanBan({ projectId }: { projectId: number }) {
       .find((item) => item.id === Number(activeId));
 
   useEffect(() => {
-    // console.log("tasks", tasks);
     setItems(tasks);
   }, [tasks]);
 
@@ -217,7 +217,6 @@ export default function KanBan({ projectId }: { projectId: number }) {
         }
 
         const activeItems = items[activeContainer];
-        const overItems = items[overContainer];
 
         const newItems = {
           ...items,

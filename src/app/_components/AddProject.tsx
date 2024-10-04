@@ -99,7 +99,7 @@ export function AddProject() {
             setDialogOpen(false);
           }}
         >
-          {({ dirty, errors, values, setFieldValue, submitForm }) => (
+          {({ values, setFieldValue }) => (
             <Form>
               <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-1 items-center gap-1">
@@ -184,7 +184,6 @@ export function AddProject() {
                                     readableRole(member.role as UserRole)
                                   }
                                   onSelect={(v) => {
-                                    // console.log("value changed", v);
                                     const [name, id, role] = v.split(":");
                                     if (!id || !name || !role) return;
                                     if (values._selectedMembers.has(id)) {
