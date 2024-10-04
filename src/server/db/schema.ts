@@ -171,4 +171,29 @@ export const requirements = createTable(
   }),
 );
 
-
+export const projectTasks = createTable(
+  "project_tasks",
+  {
+    id: serial("id").primaryKey(),
+    projectId: integer("project_id").references(() => projects.id, {
+      onDelete: "cascade",
+    }),
+    title: varchar("name", { length: 255 }).notNull(),
+    description: text("description").notNull(),
+    status: varchar("status", { length: 255 }).default("todo").notNull(),
+    priority: integer("priority").default(0),
+    userId: varchar("user_id", { length: 255 }).references(() => users.id),
+    createdAt: timestamp("created_at", {
+      mode: "date",
+      withTimezone: true,
+    }).defaultNow(),
+    lastModifiedBy: varchar("last_modified_by", { length: 255 }).references(
+      () => users.id,
+    ),
+  },
+  (task) => ({
+    projectIdIdx: index("task_project_id_idx").on(task.projectId),
+    projectNameIdx: index("task_project_name_idx").on(task.title),
+    projectStatusIdx: index("task_project_status_idx").on(task.status),
+  }),
+);

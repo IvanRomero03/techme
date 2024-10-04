@@ -1,10 +1,10 @@
 import { z } from "zod";
 
 import { eq } from "drizzle-orm";
-import { readableRole } from "techme/app/members/columns";
 import { createTRPCRouter, protectedProcedure } from "techme/server/api/trpc";
 import getOpenAI from "techme/server/chatgpt/openai";
 import { projects } from "techme/server/db/schema";
+import { readableRole } from "techme/util/UserRole";
 
 export const projectsRouterSummary = createTRPCRouter({
   getProjectSummary: protectedProcedure
@@ -19,16 +19,20 @@ export const projectsRouterSummary = createTRPCRouter({
       }
       const QueryKey =
         "project_summary_" + project[0]!.id + "_" + ctx.session.user.role;
-
+      console.log(QueryKey, "QueryKey");
       try {
         const cachedSummary = await ctx.cache.get(QueryKey);
+        console.log(cachedSummary, "cachedSummary");
         if (cachedSummary) {
           yield cachedSummary;
           return cachedSummary;
         }
-      } catch (error) {}
-
+      } catch (error) {
+        console.error("Error getting cache", error);
+      }
+      console.log("No cache found");
       const openai = getOpenAI();
+      console.log("openai");
       const summary = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
@@ -53,6 +57,7 @@ export const projectsRouterSummary = createTRPCRouter({
         ],
         stream: true,
       });
+      console.log("summary");
       let snapshot = "";
       for await (const response of summary) {
         if (response.choices[0]?.delta?.content) {
@@ -64,5 +69,12 @@ export const projectsRouterSummary = createTRPCRouter({
         EX: 60 * 60 * 24 * 7,
       });
       return snapshot;
+    }),
+  unsetCacheProjectSummary: protectedProcedure
+    .input(z.object({ projectId: z.number() }))
+    .mutation(async function ({ ctx, input }) {
+      const QueryKey =
+        "project_summary_" + input.projectId + "_" + ctx.session.user.role;
+      await ctx.cache.del(QueryKey);
     }),
 });
