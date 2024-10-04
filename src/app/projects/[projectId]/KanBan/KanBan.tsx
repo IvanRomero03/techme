@@ -124,7 +124,6 @@ export default function KanBan({ projectId }: { projectId: number }) {
       return;
     }
 
-    // Find the containers
     const activeContainer = findContainer(id) as keyof typeof items;
     const overContainer = findContainer(overId) as keyof typeof items;
 
@@ -147,7 +146,6 @@ export default function KanBan({ projectId }: { projectId: number }) {
       const activeItems = prev[activeContainer];
       const overItems = prev[overContainer];
 
-      // Find the indexes for the items
       const activeIndex = activeItems.findIndex(
         (item) => item.id === Number(id),
       );

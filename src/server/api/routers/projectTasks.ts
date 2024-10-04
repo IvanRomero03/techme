@@ -75,7 +75,6 @@ export const projectsRouterTasks = createTRPCRouter({
             eq(projectTasks.userId, user),
           ),
         );
-      // group by status
       const tasksGrouped = {
         todo: [] as typeof tasks,
         "in-progress": [] as typeof tasks,
@@ -103,34 +102,16 @@ export const projectsRouterTasks = createTRPCRouter({
       }),
     )
     .mutation(async function ({ ctx, input }) {
-      console.log(input, "input");
       const user = ctx.session.user.id;
-      console.log(input, "input");
       const task = await ctx.db
         .update(projectTasks)
         .set({ status: input.status, lastModifiedBy: user })
         .where(
           and(eq(projectTasks.id, input.id), eq(projectTasks.userId, user)),
         );
-      console.log(task, "task");
       try {
-        console.log("try");
-        if (
-          await ctx.cache.exists(
-            getProyectsTasksQueryKey(input.projectId, user),
-          )
-        ) {
-          console.log("exists");
-          await ctx.cache.del(getProyectsTasksQueryKey(input.projectId, user));
-          console.log("deleted");
-        }
-        // const task = await ctx.cache.del(
-        //   getProyectsTasksQueryKey(input.id, user),
-        // );=
-        console.log(task, "tasksss");
-      } catch (error) {
-        console.log("errortasks", error);
-      }
+        await ctx.cache.del(getProyectsTasksQueryKey(input.projectId, user));
+      } catch (error) {}
       return task;
     }),
   updateTask: protectedProcedure
