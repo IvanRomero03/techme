@@ -30,26 +30,39 @@ export default function TaskModal({
   proyectId,
   newTask,
   task,
+  setDragDissabled,
 }: {
   proyectId: number;
   newTask: boolean;
   task?: Task;
+  setDragDissabled?: (b: boolean) => void;
 }) {
   const [open, setOpen] = useState(false);
   const { mutateAsync: createTask } = api.prjectTasks.createTask.useMutation();
   const { mutateAsync: updateTask } = api.prjectTasks.updateTask.useMutation();
   const utils = api.useUtils();
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(open) => {
+        setOpen(open);
+        if (setDragDissabled) {
+          setDragDissabled(!open);
+        }
+      }}
+    >
       <DialogTrigger>
         {newTask ? (
           <Button variant="outline">New Task</Button>
         ) : (
           <Button
             variant="outline"
-            onClick={() => {
-              setOpen(true);
-            }}
+            // onClick={() => {
+            //   setOpen(true);
+            //   if (setDragDissabled) {
+            //     setDragDissabled(true);
+            //   }
+            // }}
           >
             Edit
           </Button>
@@ -74,6 +87,9 @@ export default function TaskModal({
               await utils.prjectTasks.getProjectTasks.refetch({
                 projectId: proyectId,
               });
+              if (setDragDissabled) {
+                setDragDissabled(false);
+              }
               setOpen(false);
               return;
             }
@@ -86,6 +102,9 @@ export default function TaskModal({
               projectId: proyectId,
             });
             setOpen(false);
+            if (setDragDissabled) {
+              setDragDissabled(false);
+            }
           }}
           validationSchema={toFormikValidationSchema(
             z.object({
