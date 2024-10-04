@@ -8,6 +8,15 @@ import { Input } from "t/components/ui/input";
 import { api } from "techme/trpc/react";
 import React, { useState } from "react";
 import { useSession } from "next-auth/react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogTrigger,
+  DialogFooter,
+} from "t/components/ui/dialog";
 
 interface Requirement {
   id?: number;
@@ -24,31 +33,23 @@ interface RequirementsProps {
 }
 
 export default function Requirements({ projectId }: RequirementsProps) {
-  const {
-    data: requirements,
-    isLoading,
-    isError,
-  } = api.requirements.getAllRequirements.useQuery({ projectId });
+  const { data: requirements, isLoading, isError } = api.requirements.getAllRequirements.useQuery({ projectId });
 
   const utils = api.useUtils();
-
   const { data: session } = useSession();
   const userId = session?.user?.id;
 
-  const { mutateAsync: addRequirement } =
-    api.requirements.createRequirement.useMutation({
-      onSuccess: () => utils.requirements.getAllRequirements.invalidate(),
-    });
+  const { mutateAsync: addRequirement } = api.requirements.createRequirement.useMutation({
+    onSuccess: () => utils.requirements.getAllRequirements.invalidate(),
+  });
 
-  const { mutateAsync: updateRequirement } =
-    api.requirements.updateRequirement.useMutation({
-      onSuccess: () => utils.requirements.getAllRequirements.invalidate(),
-    });
+  const { mutateAsync: updateRequirement } = api.requirements.updateRequirement.useMutation({
+    onSuccess: () => utils.requirements.getAllRequirements.invalidate(),
+  });
 
-  const { mutateAsync: deleteRequirement } =
-    api.requirements.deleteRequirement.useMutation({
-      onSuccess: () => utils.requirements.getAllRequirements.invalidate(),
-    });
+  const { mutateAsync: deleteRequirement } = api.requirements.deleteRequirement.useMutation({
+    onSuccess: () => utils.requirements.getAllRequirements.invalidate(),
+  });
 
   const handleAddRequirement = async (requirement: Requirement) => {
     await addRequirement({
@@ -63,7 +64,6 @@ export default function Requirements({ projectId }: RequirementsProps) {
 
   const handleUpdateRequirement = async (requirement: Requirement) => {
     if (!requirement.id) return;
-
     await updateRequirement({
       id: requirement.id,
       title: requirement.title,
@@ -80,120 +80,10 @@ export default function Requirements({ projectId }: RequirementsProps) {
   };
 
   const [editIndex, setEditIndex] = useState<number | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
     <>
-      <Formik
-        initialValues={{
-          requirements: [
-            {
-              title: "",
-              description: "",
-              status: "active",
-              priority: 0,
-              lastModifiedBy: "",
-            },
-          ] as Requirement[],
-        }}
-        onSubmit={async (values, { resetForm }) => {
-          await Promise.all(
-            values.requirements.map((requirement) =>
-              handleAddRequirement(requirement),
-            ),
-          );
-          resetForm();
-        }}
-      >
-        {({ values }) => (
-          <Form className="mb-4">
-            <FieldArray name="requirements">
-              {(arrayHelpers) => (
-                <div>
-                  {values.requirements.map((_, index) => (
-                    <div
-                      key={index}
-                      className="mb-4 flex flex-col gap-2 rounded-md border p-4"
-                    >
-                      <div className="flex flex-col gap-2">
-                        <Label htmlFor={`requirements.${index}.title`}>
-                          Title
-                        </Label>
-                        <Field
-                          name={`requirements.${index}.title`}
-                          as={Input}
-                          type="text"
-                          placeholder="Enter a title"
-                          className="w-full rounded-md border p-2"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label htmlFor={`requirements.${index}.description`}>
-                          Description
-                        </Label>
-                        <Field
-                          name={`requirements.${index}.description`}
-                          as={Textarea}
-                          placeholder="Enter a description"
-                          className="w-full rounded-md border p-2"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label htmlFor={`requirements.${index}.status`}>
-                          Status
-                        </Label>
-                        <Field
-                          name={`requirements.${index}.status`}
-                          as={Input}
-                          type="text"
-                          placeholder="Enter a status"
-                          className="w-full rounded-md border p-2"
-                        />
-                      </div>
-                      <div className="flex flex-col gap-2">
-                        <Label htmlFor={`requirements.${index}.priority`}>
-                          Priority
-                        </Label>
-                        <Field
-                          name={`requirements.${index}.priority`}
-                          as={Input}
-                          type="number"
-                          placeholder="Enter a priority"
-                          className="w-full rounded-md border p-2"
-                        />
-                      </div>
-                      <Button
-                        type="button"
-                        onClick={() => arrayHelpers.remove(index)}
-                        className="mt-2"
-                      >
-                        Remove Requirement
-                      </Button>
-                    </div>
-                  ))}
-                  <Button
-                    type="button"
-                    onClick={() =>
-                      arrayHelpers.push({
-                        title: "",
-                        description: "",
-                        status: "active",
-                        priority: 0,
-                        lastModifiedBy: userId ?? "",
-                      })
-                    }
-                    className="mt-4"
-                  >
-                    Add Another Requirement
-                  </Button>
-                </div>
-              )}
-            </FieldArray>
-            <Button type="submit" className="mt-4">
-              Submit Requirements
-            </Button>
-          </Form>
-        )}
-      </Formik>
       <h2 className="mt-8 text-xl font-bold">Existing Requirements</h2>
       {isLoading ? (
         <p>Loading requirements...</p>
@@ -202,10 +92,7 @@ export default function Requirements({ projectId }: RequirementsProps) {
       ) : (
         <div>
           {requirements?.map((requirement, index) => (
-            <div
-              key={requirement.id}
-              className="mb-4 flex flex-col gap-2 rounded-md border p-4"
-            >
+            <div key={requirement.id} className="mb-4 flex flex-col gap-2 rounded-md border p-4">
               {editIndex === index ? (
                 <>
                   <Formik
@@ -238,9 +125,7 @@ export default function Requirements({ projectId }: RequirementsProps) {
                           />
                         </div>
                         <div className="flex flex-col gap-2">
-                          <Label htmlFor={`description-${index}`}>
-                            Description
-                          </Label>
+                          <Label htmlFor={`description-${index}`}>Description</Label>
                           <Field
                             id={`description-${index}`}
                             name="description"
@@ -268,16 +153,8 @@ export default function Requirements({ projectId }: RequirementsProps) {
                             className="w-full rounded-md border p-2"
                           />
                         </div>
-                        <Button type="submit" className="mx-4 mt-4">
-                          Save Changes
-                        </Button>
-                        <Button
-                          type="button"
-                          onClick={() => setEditIndex(null)}
-                          className="mt-4"
-                        >
-                          Cancel
-                        </Button>
+                        <Button type="submit" className="mx-4 mt-4">Save Changes</Button>
+                        <Button type="button" onClick={() => setEditIndex(null)} className="mt-4">Cancel</Button>
                       </Form>
                     )}
                   </Formik>
@@ -292,18 +169,8 @@ export default function Requirements({ projectId }: RequirementsProps) {
                       <p>Priority: {requirement.priority}</p>
                     </div>
                     <div className="space-x-4">
-                      <Button
-                        variant="outline"
-                        onClick={() => setEditIndex(index)}
-                      >
-                        Edit
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        onClick={() => handleDeleteRequirement(requirement.id)}
-                      >
-                        Delete
-                      </Button>
+                      <Button variant="outline" onClick={() => setEditIndex(index)}>Edit</Button>
+                      <Button variant="destructive" onClick={() => handleDeleteRequirement(requirement.id)}>Delete</Button>
                     </div>
                   </div>
                 </>
@@ -312,6 +179,95 @@ export default function Requirements({ projectId }: RequirementsProps) {
           ))}
         </div>
       )}
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogTrigger asChild>
+          <Button className="mt-4">+ Add New Requirement</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px] md:max-w-[600px] lg:max-w-[1200px]">
+          <DialogHeader>
+            <DialogTitle>Add New Requirement</DialogTitle>
+            <DialogDescription>
+              Fill in the details below to add a new requirement to the project.
+            </DialogDescription>
+          </DialogHeader>
+          <Formik
+            initialValues={{
+              requirements: [
+                {
+                  title: "",
+                  description: "",
+                  status: "active",
+                  priority: 0,
+                  lastModifiedBy: userId ?? "",
+                },
+              ] as Requirement[],
+            }}
+            onSubmit={async (values, { resetForm }) => {
+              await Promise.all(values.requirements.map((requirement) => handleAddRequirement(requirement)));
+              resetForm();
+              setDialogOpen(false);  
+            }}
+          >
+            {({ values }) => (
+              <Form>
+                <FieldArray name="requirements">
+                  {(arrayHelpers) => (
+                    <div>
+                      {values.requirements.map((_, index) => (
+                        <div key={index} className="mb-4 flex flex-col gap-2 rounded-md border p-4">
+                          <div className="flex flex-col gap-2">
+                            <Label htmlFor={`requirements.${index}.title`}>Title</Label>
+                            <Field
+                              name={`requirements.${index}.title`}
+                              as={Input}
+                              type="text"
+                              placeholder="Enter a title"
+                              className="w-full rounded-md border p-2"
+                            />
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <Label htmlFor={`requirements.${index}.description`}>Description</Label>
+                            <Field
+                              name={`requirements.${index}.description`}
+                              as={Textarea}
+                              placeholder="Enter a description"
+                              className="w-full rounded-md border p-2"
+                            />
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <Label htmlFor={`requirements.${index}.status`}>Status</Label>
+                            <Field
+                              name={`requirements.${index}.status`}
+                              as={Input}
+                              type="text"
+                              placeholder="Enter a status"
+                              className="w-full rounded-md border p-2"
+                            />
+                          </div>
+                          <div className="flex flex-col gap-2">
+                            <Label htmlFor={`requirements.${index}.priority`}>Priority</Label>
+                            <Field
+                              name={`requirements.${index}.priority`}
+                              as={Input}
+                              type="number"
+                              placeholder="Enter a priority"
+                              className="w-full rounded-md border p-2"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </FieldArray>
+                <DialogFooter>
+                  <Button type="submit">Submit Requirements</Button>
+                </DialogFooter>
+              </Form>
+            )}
+          </Formik>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
