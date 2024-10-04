@@ -1,17 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { Task } from "./KanBan";
 import TaskModal from "../TaskModal";
 import { Badge } from "t/components/ui/badge";
 
-export function Item({ task }: { task: Task }) {
+export function Item({
+  task,
+  setDragDissabled,
+}: {
+  task: Task;
+  setDragDissabled?: (b: boolean) => void;
+}) {
   return (
     <div className="m-2 flex flex-col rounded border border-gray-200 bg-white p-4 shadow">
       <div className="flex w-full items-center justify-between">
         {task.title}
         {task.projectId && (
-          <TaskModal task={task} proyectId={task.projectId} newTask={false} />
+          <TaskModal
+            task={task}
+            proyectId={task.projectId}
+            newTask={false}
+            setDragDissabled={setDragDissabled}
+          />
         )}
       </div>
       <div className="text-sm">{task.description}</div>
@@ -40,6 +51,7 @@ export function Item({ task }: { task: Task }) {
 }
 
 export default function SortableItem({ task }: { task: Task }) {
+  const [isDraggable, setIsDraggable] = useState(true);
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id: task.id });
 
@@ -47,10 +59,10 @@ export default function SortableItem({ task }: { task: Task }) {
     transform: CSS.Transform.toString(transform),
     transition,
   };
-
+  const listenersState = isDraggable ? listeners : undefined;
   return (
-    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
-      <Item task={task} />
+    <div ref={setNodeRef} style={style} {...attributes} {...listenersState}>
+      <Item task={task} setDragDissabled={setIsDraggable} />
     </div>
   );
 }
