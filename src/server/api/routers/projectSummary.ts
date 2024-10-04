@@ -19,20 +19,16 @@ export const projectsRouterSummary = createTRPCRouter({
       }
       const QueryKey =
         "project_summary_" + project[0]!.id + "_" + ctx.session.user.role;
-      console.log(QueryKey, "QueryKey");
       try {
         const cachedSummary = await ctx.cache.get(QueryKey);
-        console.log(cachedSummary, "cachedSummary");
         if (cachedSummary) {
           yield cachedSummary;
           return cachedSummary;
         }
       } catch (error) {
-        console.error("Error getting cache", error);
+        console.error("Failed to get cache on getProjectSummary", error);
       }
-      console.log("No cache found");
       const openai = getOpenAI();
-      console.log("openai");
       const summary = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
@@ -57,7 +53,6 @@ export const projectsRouterSummary = createTRPCRouter({
         ],
         stream: true,
       });
-      console.log("summary");
       let snapshot = "";
       for await (const response of summary) {
         if (response.choices[0]?.delta?.content) {

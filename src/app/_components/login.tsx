@@ -8,8 +8,6 @@ import {
   CardHeader,
   CardTitle,
 } from "t/components/ui/card";
-import { Input } from "t/components/ui/input";
-import { Label } from "t/components/ui/label";
 
 export function LoginForm() {
   return (

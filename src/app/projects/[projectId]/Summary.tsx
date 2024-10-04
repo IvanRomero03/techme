@@ -4,7 +4,6 @@ import Markdown from "react-markdown";
 import { Button } from "t/components/ui/button";
 import { Card, CardContent, CardHeader } from "t/components/ui/card";
 import { api } from "techme/trpc/react";
-import { DndContext } from "@dnd-kit/core";
 import KanBan from "./KanBan/KanBan";
 import TaskModal from "./TaskModal";
 

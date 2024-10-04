@@ -81,7 +81,6 @@ export default function Details({ projectId }: { projectId: string }) {
             ),
           }}
           onSubmit={async (values) => {
-            console.log(values);
             if (!proyectDetails?.project.id) {
               return;
             }

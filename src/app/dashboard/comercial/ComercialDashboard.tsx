@@ -1,6 +1,16 @@
 "use client";
 // app/_components/AdminDashboard.tsx
-import * as React from "react";
+import {
+  ArcElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip,
+} from "chart.js";
+import Link from "next/link";
+import { FaChartPie, FaProjectDiagram, FaTasks, FaUsers } from "react-icons/fa"; // Import icons
 import { Button } from "t/components/ui/button";
 import {
   Card,
@@ -10,38 +20,9 @@ import {
   CardHeader,
   CardTitle,
 } from "t/components/ui/card";
-import { Input } from "t/components/ui/input";
-import { Label } from "t/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "t/components/ui/select";
 import { Progress } from "t/components/ui/progress";
-import { Doughnut } from "react-chartjs-2";
-import {
-  FaProjectDiagram,
-  FaUsers,
-  FaCalendarAlt,
-  FaTasks,
-  FaChartPie,
-} from "react-icons/fa"; // Import icons
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import { Navigate } from "react-big-calendar";
-import Link from "next/link";
 import { api } from "techme/trpc/react";
 
-// Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -52,11 +33,9 @@ ChartJS.register(
 );
 
 const ComercialDashboard = () => {
-  const { data: projects, isLoading: projectsLoading } =
-    api.projects.getMyProjectsStatus.useQuery();
+  const { data: projects } = api.projects.getMyProjectsStatus.useQuery();
   return (
     <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 lg:grid-cols-3">
-      {/* Start New Project Card */}
       <Card className="rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
         <CardHeader>
           <CardTitle>
@@ -74,7 +53,6 @@ const ComercialDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Analyze Projects Card */}
       <Card className="rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
         <CardHeader>
           <CardTitle>
@@ -88,7 +66,6 @@ const ComercialDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* View Clients Card */}
       <Card className="rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
         <CardHeader>
           <CardTitle>
@@ -109,8 +86,6 @@ const ComercialDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Current Project Status Card */}
-      {/*Modify to make dynamic*/}
       <Card className="col-span-3 rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
         <CardHeader>
           <CardTitle>

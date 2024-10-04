@@ -1,12 +1,8 @@
 import { z } from "zod";
 
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "techme/server/api/trpc";
-import { users } from "techme/server/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { createTRPCRouter, protectedProcedure } from "techme/server/api/trpc";
+import { users } from "techme/server/db/schema";
 import { UserRole } from "techme/util/UserRole";
 
 export const membersRouter = createTRPCRouter({

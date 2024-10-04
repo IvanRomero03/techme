@@ -13,7 +13,7 @@ import { ZodError } from "zod";
 
 import { getServerAuthSession } from "techme/server/auth";
 import { db } from "techme/server/db";
-import { cache, getCacheClient } from "techme/server/db/cache";
+import { cache } from "techme/server/db/cache";
 
 /**
  * 1. CONTEXT

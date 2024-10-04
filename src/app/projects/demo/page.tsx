@@ -64,8 +64,6 @@ export default function ProjectMenu() {
     (typeof schema)["__output"]["fases"]
   >([]);
 
-  const [isStreaming, setIsStreaming] = useState<boolean>(false);
-
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!(e.target.files && e.target.files.length > 0 && e.target.files[0])) {
       return;
@@ -79,7 +77,6 @@ export default function ProjectMenu() {
       const reader = new FileReader();
       reader.onload = async (e) => {
         setText(e.target?.result as string);
-        console.log("text", e.target?.result as string);
       };
       reader.readAsText(file);
     }
@@ -89,7 +86,6 @@ export default function ProjectMenu() {
   const handleGet = async () => {
     if (file && text) {
       setLoadingEsts(true);
-      setIsStreaming(true);
       setEstimaciones([]);
 
       const thread = await openai.beta.threads.create({
@@ -114,7 +110,6 @@ export default function ProjectMenu() {
           }
           try {
             const prev = parse(snapshot.value) as (typeof schema)["__output"];
-            console.log("prev", prev);
             if (prev.fases) {
               if (prev.fases.length > 0) {
                 const previewPrev = [] as (typeof schema)["__output"]["fases"];
@@ -128,22 +123,27 @@ export default function ProjectMenu() {
                     ) {
                       previewPrev.push(fase);
                     }
-                  } catch (error) {}
+                  } catch (error) {
+                    console.error(error);
+                  }
                 }
                 setLoadingEsts(previewPrev.length === 0);
                 setEstimaciones(previewPrev);
               }
             }
-          } catch (error) {}
+          } catch (error) {
+            console.error(error);
+          }
         })
-        .on("textDone", (message, snapshot) => {
+        .on("textDone", (message) => {
           const texto = message.value;
           try {
             const respuesta = schema.$parseRaw(texto);
             setLoadingEsts(false);
             setEstimaciones(respuesta.fases);
-            setIsStreaming(false);
-          } catch (error) {}
+          } catch (error) {
+            console.error(error);
+          }
         });
       setLoadingEsts(false);
       await res.done();
@@ -153,7 +153,7 @@ export default function ProjectMenu() {
   const handleGetSummary = async () => {
     if (file && text) {
       setLoadingSummary(true);
-      const res = openai.beta.chat.completions
+      openai.beta.chat.completions
         .stream({
           model: "gpt-4o",
           messages: [
@@ -172,17 +172,14 @@ export default function ProjectMenu() {
         })
         .on("content.done", (lis) => {
           setLoadingSummary(false);
-          console.log("lisRES", lis);
           setSummary(lis.content);
         });
-      console.log("res", res);
       setLoadingSummary(false);
     }
   };
 
   return (
     <div className="flex h-full w-full">
-      {/* Sidebar Menu */}
       <div className="my-4 w-1/5 rounded-2xl bg-gray-100 p-4">
         <ul className="space-y-2">
           {menuItems.map((item) => (
@@ -200,13 +197,10 @@ export default function ProjectMenu() {
         </ul>
       </div>
 
-      {/* Main Content Area */}
       <div className="mx-6 w-3/4 rounded-2xl border p-8 shadow-md">
-        {/* Estimations Section */}
         <h2 className="mb-4 text-2xl font-bold">{activeMenuItem}</h2>
 
         <div className="mb-6 grid grid-cols-2 gap-5">
-          {/* Example Phase Cards */}
           <Card className="bg-gray-50">
             <CardHeader>
               <CardTitle>Upload Context</CardTitle>
@@ -233,7 +227,6 @@ export default function ProjectMenu() {
           </Card>
         </div>
 
-        {/* Summary */}
         <Card className="p-4">
           <CardHeader>
             <CardTitle>Summary</CardTitle>

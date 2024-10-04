@@ -1,8 +1,18 @@
 "use client";
 // app/_components/AdminDashboard.tsx
-import * as React from "react";
+import {
+  ArcElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip,
+} from "chart.js";
+import Link from "next/link";
+import { Doughnut } from "react-chartjs-2";
+import { FaCalendarAlt, FaProjectDiagram, FaTasks } from "react-icons/fa"; // Import icons
 import { Button } from "t/components/ui/button";
-import { api } from "techme/trpc/react";
 import {
   Card,
   CardContent,
@@ -11,36 +21,10 @@ import {
   CardHeader,
   CardTitle,
 } from "t/components/ui/card";
-import { Input } from "t/components/ui/input";
-import { Label } from "t/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "t/components/ui/select";
 import { Progress } from "t/components/ui/progress";
-import { Doughnut } from "react-chartjs-2";
-import {
-  FaProjectDiagram,
-  FaUsers,
-  FaCalendarAlt,
-  FaTasks,
-} from "react-icons/fa"; // Import icons
-import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  ArcElement,
-  Title,
-  Tooltip,
-  Legend,
-} from "chart.js";
-import Link from "next/link";
-import { readableRole, UserRole } from "techme/util/UserRole";
+import { api } from "techme/trpc/react";
+import { readableRole, type UserRole } from "techme/util/UserRole";
 
-// Register Chart.js components
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -58,16 +42,13 @@ export interface ProjectDays {
 }
 
 export function AdminDashboard() {
-  const { data: projects, isLoading: projectsLoading } =
-    api.projects.getMyProjectsStatus.useQuery();
-  const { data: members, isLoading: membersLoading } =
-    api.members.getTopMembers.useQuery();
+  const { data: projects } = api.projects.getMyProjectsStatus.useQuery();
+  const { data: members } = api.members.getTopMembers.useQuery();
   const { data: projectsDays, isLoading } =
     api.projects.getMyProjectsDeadline.useQuery();
 
   return (
     <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2 lg:grid-cols-3">
-      {/* Pending Projects Card */}
       <Card className="rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
         <CardHeader>
           <CardTitle>
@@ -105,7 +86,6 @@ export function AdminDashboard() {
         </CardFooter>
       </Card>
 
-      {/* Co-workers Card */}
       <Card className="rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
         <CardHeader>
           <CardTitle>Co-workers</CardTitle>
@@ -138,7 +118,6 @@ export function AdminDashboard() {
         </CardContent>
       </Card>
 
-      {/* Calendar Card */}
       <Card className="rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
         <CardHeader>
           <CardTitle>
@@ -158,7 +137,6 @@ export function AdminDashboard() {
         </CardFooter>
       </Card>
 
-      {/* Current Project Status Card */}
       <Card className="col-span-2 rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
         <CardHeader>
           <CardTitle>
@@ -187,7 +165,6 @@ export function AdminDashboard() {
         </CardFooter>
       </Card>
 
-      {/* Top Categories Card */}
       <Card className="rounded-2xl shadow-lg transition-shadow hover:shadow-2xl">
         <CardHeader>
           <CardTitle>Top Categories</CardTitle>

@@ -1,12 +1,8 @@
 import { z } from "zod";
 
-import {
-  createTRPCRouter,
-  protectedProcedure,
-  publicProcedure,
-} from "techme/server/api/trpc";
-import { users, projects, peoplePerProject } from "techme/server/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { createTRPCRouter, protectedProcedure } from "techme/server/api/trpc";
+import { peoplePerProject, projects, users } from "techme/server/db/schema";
 
 export const projectsRouter = createTRPCRouter({
   createProject: protectedProcedure
