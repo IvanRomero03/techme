@@ -55,17 +55,7 @@ export default function TaskModal({
         {newTask ? (
           <Button variant="outline">New Task</Button>
         ) : (
-          <Button
-            variant="outline"
-            // onClick={() => {
-            //   setOpen(true);
-            //   if (setDragDissabled) {
-            //     setDragDissabled(true);
-            //   }
-            // }}
-          >
-            Edit
-          </Button>
+          <Button variant="outline">Edit</Button>
         )}
       </DialogTrigger>
       <DialogContent className="min-h-[550px]">
