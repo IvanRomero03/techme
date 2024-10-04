@@ -9,7 +9,7 @@ import {
   SelectTrigger,
 } from "t/components/ui/select";
 import { api } from "techme/trpc/react";
-import { UserRole } from "techme/util/UserRole";
+import { readableRole, UserRole } from "techme/util/UserRole";
 
 type Member = {
   id: string;
@@ -17,25 +17,6 @@ type Member = {
   email: string;
   role: UserRole;
 };
-
-export function readableRole(role: UserRole) {
-  switch (role) {
-    case UserRole.ProjectManager:
-      return "Project Manager";
-    case UserRole.Comercial:
-      return "Comercial";
-    case UserRole.DigitalLead:
-      return "Digital Lead";
-    case UserRole.LeadPresales:
-      return "Lead Presales";
-    case UserRole.GDM:
-      return "GDM";
-    case UserRole.Admin:
-      return "Admin";
-    case UserRole.Unauthorized:
-      return "Unauthorized";
-  }
-}
 
 function SelectableRole({ row }: { row: { original: Member } }) {
   const member = row.original;

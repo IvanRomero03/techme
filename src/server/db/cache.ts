@@ -18,7 +18,8 @@ export async function getCacheClient() {
       throw err;
     });
 }
-type RedisClient = ReturnType<typeof createClient>;
+
+export type RedisClient = ReturnType<typeof createClient>;
 
 const globalForCache = globalThis as unknown as {
   cache: Promise<RedisClient>;

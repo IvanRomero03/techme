@@ -38,8 +38,7 @@ import {
   Legend,
 } from "chart.js";
 import Link from "next/link";
-import { readableRole } from "../members/columns";
-import { UserRole } from "techme/util/UserRole";
+import { readableRole, UserRole } from "techme/util/UserRole";
 
 // Register Chart.js components
 ChartJS.register(

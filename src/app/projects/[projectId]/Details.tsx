@@ -28,14 +28,13 @@ import {
 } from "t/components/ui/select";
 import { Textarea } from "t/components/ui/textarea";
 import { DatePickerRange } from "techme/app/_components/DatePickerRange";
-import { readableRole } from "techme/app/members/columns";
 import {
   ProjectStage,
   ProjectStatus,
   readableProjectStage,
   readableProjectStatus,
 } from "techme/util/Readables";
-import type { UserRole } from "techme/util/UserRole";
+import { type UserRole, readableRole } from "techme/util/UserRole";
 import { api } from "techme/trpc/react";
 
 export default function Details({ projectId }: { projectId: string }) {
