@@ -67,6 +67,7 @@ export default function TaskModal({
             if (!newTask && task) {
               await updateTask({
                 ...values,
+                projectId: proyectId,
                 id: task.id,
                 status: values.status as "todo" | "in-progress" | "done",
               });

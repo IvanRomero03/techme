@@ -235,6 +235,7 @@ export default function KanBan({ projectId }: { projectId: number }) {
     }
     await updateTaskStatus({
       id: Number(id),
+      projectId,
       status: overContainer,
     });
     await utils.prjectTasks.getProjectTasks.refetch({ projectId });

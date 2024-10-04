@@ -6,6 +6,10 @@ import { createTRPCRouter, protectedProcedure } from "techme/server/api/trpc";
 import { projects, projectTasks } from "techme/server/db/schema";
 import { readableRole } from "techme/util/UserRole";
 
+function getProyectsTasksQueryKey(projectId: number, userId: string) {
+  return "project_tasks_" + projectId + "_" + userId;
+}
+
 export const projectsRouterTasks = createTRPCRouter({
   createTask: protectedProcedure
     .input(
@@ -29,8 +33,10 @@ export const projectsRouterTasks = createTRPCRouter({
         lastModifiedBy: user,
       });
       try {
-        await ctx.cache.del("project_tasks_" + input.projectId + "_" + user);
-      } catch (error) {}
+        await ctx.cache.del(getProyectsTasksQueryKey(input.projectId, user));
+      } catch (error) {
+        console.error(error, "error creating task");
+      }
       return task;
     }),
   getProjectTasks: protectedProcedure
@@ -38,9 +44,11 @@ export const projectsRouterTasks = createTRPCRouter({
     .query(async function ({ ctx, input }) {
       const user = ctx.session.user.id;
       try {
+        console.log("getProjectTasks");
         const tasks = await ctx.cache.get(
-          "project_tasks_" + input.projectId + "_" + user,
+          getProyectsTasksQueryKey(input.projectId, user),
         );
+        console.log(tasks, "tasks");
         if (tasks) {
           return JSON.parse(tasks) as Record<
             "todo" | "in-progress" | "done",
@@ -78,7 +86,7 @@ export const projectsRouterTasks = createTRPCRouter({
       }
       try {
         await ctx.cache.set(
-          "project_tasks_" + input.projectId + "_" + user,
+          getProyectsTasksQueryKey(input.projectId, user),
           JSON.stringify(tasksGrouped),
           { EX: 60 * 60 },
         );
@@ -90,28 +98,46 @@ export const projectsRouterTasks = createTRPCRouter({
     .input(
       z.object({
         id: z.number(),
+        projectId: z.number(),
         status: z.enum(["todo", "in-progress", "done"]),
       }),
     )
     .mutation(async function ({ ctx, input }) {
+      console.log(input, "input");
       const user = ctx.session.user.id;
+      console.log(input, "input");
       const task = await ctx.db
         .update(projectTasks)
         .set({ status: input.status, lastModifiedBy: user })
         .where(
           and(eq(projectTasks.id, input.id), eq(projectTasks.userId, user)),
         );
+      console.log(task, "task");
       try {
-        const task = await ctx.cache.del(
-          "project_tasks_" + input.id + "_" + user,
-        );
-      } catch (error) {}
+        console.log("try");
+        if (
+          await ctx.cache.exists(
+            getProyectsTasksQueryKey(input.projectId, user),
+          )
+        ) {
+          console.log("exists");
+          await ctx.cache.del(getProyectsTasksQueryKey(input.projectId, user));
+          console.log("deleted");
+        }
+        // const task = await ctx.cache.del(
+        //   getProyectsTasksQueryKey(input.id, user),
+        // );=
+        console.log(task, "tasksss");
+      } catch (error) {
+        console.log("errortasks", error);
+      }
       return task;
     }),
   updateTask: protectedProcedure
     .input(
       z.object({
         id: z.number(),
+        projectId: z.number(),
         title: z.string(),
         description: z.string(),
         status: z.enum(["todo", "in-progress", "done"]),
@@ -120,11 +146,6 @@ export const projectsRouterTasks = createTRPCRouter({
     )
     .mutation(async function ({ ctx, input }) {
       const user = ctx.session.user.id;
-      try {
-        const task = await ctx.cache.del(
-          "project_tasks_" + input.id + "_" + user,
-        );
-      } catch (error) {}
       const task = await ctx.db
         .update(projectTasks)
         .set({
@@ -137,6 +158,11 @@ export const projectsRouterTasks = createTRPCRouter({
         .where(
           and(eq(projectTasks.id, input.id), eq(projectTasks.userId, user)),
         );
+      try {
+        const task = await ctx.cache.del(
+          getProyectsTasksQueryKey(input.projectId, user),
+        );
+      } catch (error) {}
       return task;
     }),
 });
