@@ -17,12 +17,12 @@ test("has title", async ({ page }) => {
   await button?.click();
   await page.waitForTimeout(2000);
   const emailInput = await page.$("input[type=email]");
-  await emailInput?.fill("mponcezertuche@gmail.com");
+  await emailInput?.fill(process.env.CI_EMAIL ?? "");
   const nextButton = await page.$("button:has-text('Next')");
   await nextButton?.click();
   await page.waitForTimeout(2000);
   const passwordInput = await page.$("input[type=password]");
-  await passwordInput?.fill("Over12:)");
+  await passwordInput?.fill(process.env.CI_PASSWORD ?? "");
   const signInButton = await page.$("button:has-text('Next')");
   await signInButton?.click();
   await page.waitForTimeout(2000);
