@@ -28,6 +28,7 @@
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@heroicons/react": "^2.1.5",
     "@liveblocks/client": "^2.6.0",
+    "@liveblocks/node": "^2.6.0",
     "@liveblocks/react": "^2.6.0",
     "@mui/material": "^5.16.7",
     "@nextui-org/react": "^2.4.6",

@@ -27,9 +27,7 @@ const RootClientLayout: React.FC<RootClientLayoutProps> = ({
   const toggleCollapse = () => setIsCollapsed(!isCollapsed);
 
   return (
-    <LiveblocksProvider
-      publicApiKey={process.env.NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_API_KEY ?? ""}
-    >
+    <LiveblocksProvider authEndpoint={"/api/liveblocks-auth"}>
       <RoomProvider id="my-room" initialPresence={{ cursor: { x: 0, y: 0 } }}>
         <ClientSideSuspense fallback={<div>Loading…</div>}>
           <TRPCReactProvider>

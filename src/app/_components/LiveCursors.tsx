@@ -45,6 +45,9 @@ export default function LiveCursors({
 }) {
   const [{}, updateMyPresence] = useMyPresence();
   const others = useOthers();
+  if (!session) {
+    return <div>{children}</div>;
+  }
   return (
     <div
       onPointerMove={(event) => {
