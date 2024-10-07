@@ -25,7 +25,7 @@ const RootClientLayout: React.FC<RootClientLayoutProps> = ({
   const [isCollapsed, setIsCollapsed] = useState(true);
 
   const toggleCollapse = () => setIsCollapsed(!isCollapsed);
-  if (!session) {
+  if (!session?.user) {
     return (
       <ClientSideSuspense fallback={<div>Loading…</div>}>
         <TRPCReactProvider>
