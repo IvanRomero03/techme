@@ -3,7 +3,7 @@ import { createTRPCContext } from "techme/server/api/trpc";
 import { env } from "techme/env";
 
 const liveblocks = new Liveblocks({
-  secret: env.LIVEBLOCKS_SECRET_API_KEY,
+  secret: env.LIVEBLOCKS_SECRET_API_KEY ?? "sk_prod_xxxx…xxxxxx",
 });
 
 export async function POST(request: Request) {
