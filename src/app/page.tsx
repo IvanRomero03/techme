@@ -11,6 +11,7 @@ import { getServerAuthSession } from "techme/server/auth";
 import SigninAzure from "./_components/SigninAzure";
 import SigninGoogle from "./_components/SigninGoogle";
 import SignOut from "./_components/SignOut";
+import { LoginForm } from "./_components/login";
 
 export default async function Home() {
   const session = await getServerAuthSession();
@@ -24,6 +25,7 @@ export default async function Home() {
       <CardContent>
         {!session && (
           <>
+            <LoginForm />
             <SigninGoogle />
             <SigninAzure />
           </>

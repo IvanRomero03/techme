@@ -28,8 +28,15 @@ import { cache } from "techme/server/db/cache";
  * @see https://trpc.io/docs/server/context
  */
 export const createTRPCContext = async (opts: { headers: Headers }) => {
-  const session = await getServerAuthSession();
-  // const cache = await getCacheClient();
+  const session = {
+    user: {
+      id: '342e41c4-6ed3-48b4-aa74-6fae060bca5a', // Mocked user ID
+      name: 'Ivan Alberto Romero Wells',
+      email: 'a00833623@tec.mx',
+      role: 'COMERCIAL', // Mocked user role
+    },
+  };
+
   return {
     db,
     cache: await cache,

@@ -1,3 +1,4 @@
+"use client";
 import Link from "next/link";
 
 import { Button } from "t/components/ui/button";
@@ -8,33 +9,73 @@ import {
   CardHeader,
   CardTitle,
 } from "t/components/ui/card";
+import { Formik, Field, Form } from 'formik';
+import * as Yup from 'yup';
+import axios from 'axios';
+import { api } from 'techme/trpc/react';
+
+
+const LoginSchema = Yup.object().shape({
+  username: Yup.string().required('Username is required'),
+  password: Yup.string().required('Password is required'),
+});
 
 export function LoginForm() {
-  return (
-    <Card className="m:10 mx-auto max-w-sm">
-      <CardHeader>
-        <CardTitle className="text-2xl">Login</CardTitle>
-        <CardDescription>
-          Enter your email below to login to your account
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <Link href="/api/auth/callback/google" passHref>
-          <Button variant="default" className="w-full">
-            Login with Google
-          </Button>
-        </Link>
+  const mutation = api.login.verifyUser.useMutation();
 
-        <Button variant="outline" className="mt-3 w-full">
-          Login with Microsoft
-        </Button>
-        <div className="mt-4 text-center text-sm">
-          Don&apos;t have an account?{" "}
-          <Link href="#" className="underline">
-            Sign up
-          </Link>
-        </div>
-      </CardContent>
-    </Card>
+  const handleLogin = async (values: any) => {
+    try {
+      const response = await mutation.mutateAsync(values);
+      if (response) {
+        // Handle successful login, e.g., redirect to dashboard
+        window.location.href = `/dashboard/${response.role?.toLowerCase()}`;
+      }
+    } catch (error) {
+      // Handle login error
+      console.error('Login failed:', error);
+    }
+  };
+  return (
+      <Formik
+          initialValues={{ username: '', password: '' }}
+          validationSchema={LoginSchema}
+          onSubmit={handleLogin}
+        >
+          {({ errors, touched }) => (
+            <Form>
+              <div className="mb-4">
+                <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                  Username
+                </label>
+                <Field
+                  id="username"
+                  name="username"
+                  type="text"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                />
+                {errors.username && touched.username ? (
+                  <div className="text-red-600 text-sm">{errors.username}</div>
+                ) : null}
+              </div>
+              <div className="mb-4">
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  Password
+                </label>
+                <Field
+                  id="password"
+                  name="password"
+                  type="password"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                />
+                {errors.password && touched.password ? (
+                  <div className="text-red-600 text-sm">{errors.password}</div>
+                ) : null}
+              </div>
+              <Button type="submit" variant="default" className="w-full my-10">
+                Login
+              </Button>
+            </Form>
+          )}
+        </Formik>
   );
 }
