@@ -8,7 +8,6 @@ const liveblocks = new Liveblocks({
 
 export async function POST(request: Request) {
   // Get the current user from your database
-  //   const user = __getUserFromDB__(request);
   const ctx = await createTRPCContext({
     headers: request.headers,
   });
@@ -20,20 +19,14 @@ export async function POST(request: Request) {
     return new Response("Unauthorized", { status: 401 });
   }
   // Start an auth session inside your endpoint
-  const session = liveblocks.prepareSession(
-    ctx.session?.user.id,
-    {
-      userInfo: {
-        name: ctx.session?.user.name,
-      },
-    }, // Optional
-    // { userInfo: user.metadata }, // Optional
-  );
+  const session = liveblocks.prepareSession(ctx.session?.user.id, {
+    userInfo: {
+      name: ctx.session?.user.name,
+    },
+  });
 
   // Use a naming pattern to allow access to rooms with wildcards
   // Giving the user read access on their org, and write access on their group
-  //   session.allow(`${user.organization}:*`, session.READ_ACCESS);
-  //   session.allow(`${user.organization}:${user.group}:*`, session.FULL_ACCESS);
   session.allow("*", session.FULL_ACCESS);
   // Authorize the user and return the result
   const { status, body } = await session.authorize();
