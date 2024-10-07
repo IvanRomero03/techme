@@ -1,13 +1,23 @@
 import { test, expect, type Page, selectors } from "@playwright/test";
+import { env } from "techme/env";
 
-test.beforeEach(async ({ page }) => {
-  await page.goto("http://localhost:3000");
+test.beforeEach(async ({ browser, page }) => {
+  // const b = await browser.newContext();
+  // page = await b.newPage();
+  // await page.goto("http://localhost:3000");
+  // const page = await b.newPage();
+  // await page.goto("http://localhost:3000");
+  // test.extend({ page });
+  // return {};
+  // return { page };
 });
 
-test("has title", async ({ page }) => {
-  await page.waitForTimeout(2000);
+test("login", async ({ browser }) => {
+  const context = await browser.newContext();
+  const page = await context.newPage();
+  await page.goto("http://localhost:3000");
+  await page.waitForTimeout(3000);
   await expect(page).toHaveTitle("TechMe");
-  const title = await page.title();
   const text = await page.$$eval("button", (buttons) =>
     buttons.map((b) => b.textContent),
   );
@@ -16,13 +26,18 @@ test("has title", async ({ page }) => {
   const button = await page.$("button:has-text('Sign in with Google')");
   await button?.click();
   await page.waitForTimeout(2000);
+  expect(page.url()).toContain("accounts.google.com");
   const emailInput = await page.$("input[type=email]");
-  await emailInput?.fill(process.env.CI_EMAIL ?? "");
+  console.log(env.CI_EMAIL);
+  expect(emailInput).not.toBeNull();
+  await emailInput?.fill(env.CI_EMAIL);
   const nextButton = await page.$("button:has-text('Next')");
   await nextButton?.click();
   await page.waitForTimeout(2000);
   const passwordInput = await page.$("input[type=password]");
-  await passwordInput?.fill(process.env.CI_PASSWORD ?? "");
+  await page.waitForTimeout(2000);
+  expect(passwordInput).not.toBeNull();
+  await passwordInput?.fill(env.CI_PASSWORD);
   const signInButton = await page.$("button:has-text('Next')");
   await signInButton?.click();
   await page.waitForTimeout(2000);
@@ -36,5 +51,6 @@ test("has title", async ({ page }) => {
       break;
     }
   }
+
   expect(page.url()).toContain("localhost:3000/dashboard");
 });
