@@ -37,7 +37,6 @@ import {
 import { type UserRole, readableRole } from "techme/util/UserRole";
 import { api } from "techme/trpc/react";
 
-
 export default function Details({ projectId }: { projectId: string }) {
   const { data: proyectDetails, isLoading: isLoadingProyectDetails } =
     api.projects.getProyectInfo.useQuery({
