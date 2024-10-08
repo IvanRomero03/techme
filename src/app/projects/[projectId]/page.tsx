@@ -11,6 +11,7 @@ import Summary from "./Summary";
 const menuItems = [
   "Summary",
   "Details",
+  "Documentation",
   "Requirements",
   "Planning",
   "Analysis",
@@ -57,16 +58,18 @@ export default function Page({ params }: { params: { projectId: string } }) {
             ))}
           </ul>
         </div>
-        <div className="mx-6 w-3/4 rounded-2xl border p-8 shadow-md">
+        <div className="relative mx-6 w-3/4 rounded-2xl border p-8 shadow-md">
           <h2 className="mb-4 text-2xl font-bold">{activeMenuItem}</h2>
           {activeMenuItem === "Estimations" ? (
-            <Estimations />
+            <Estimations projectId={Number(params.projectId)} />
           ) : activeMenuItem === "Details" ? (
             <Details projectId={params.projectId} />
           ) : activeMenuItem === "Summary" ? (
             <Summary projectId={params.projectId} />
           ) : activeMenuItem === "Requirements" ? (
             <Requirements projectId={Number(params.projectId)} />
+          ) : activeMenuItem === "Documentation" ? (
+            <></>
           ) : (
             <></>
           )}
