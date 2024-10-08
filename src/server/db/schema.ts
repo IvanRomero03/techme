@@ -213,7 +213,9 @@ export const frameworkContracts = createTable(
       withTimezone: true,
     }).default(sql`NOW() + INTERVAL '1 year'`),
     status: varchar("status", { length: 255 }).default("active"),
-    lastModifiedBy: varchar("last_modified_by", { length: 255 }).references(() => users.id),
+    lastModifiedBy: varchar("last_modified_by", { length: 255 }).references(
+      () => users.id,
+    ),
   },
   (contract) => ({
     nameIdx: index("contract_name_idx").on(contract.name),
@@ -221,10 +223,39 @@ export const frameworkContracts = createTable(
   }),
 );
 
-export const frameworkContractPerProject = createTable("framework_contract_per_project", {
-  contractId: integer("contract_id").references(() => frameworkContracts.id, {
-    onDelete: "cascade",
-  }),
-  projectId: integer("project_id").references(() => projects.id),
-});
+export const frameworkContractPerProject = createTable(
+  "framework_contract_per_project",
+  {
+    contractId: integer("contract_id").references(() => frameworkContracts.id, {
+      onDelete: "cascade",
+    }),
+    projectId: integer("project_id").references(() => projects.id),
+  },
+);
 
+export const estimations = createTable(
+  "estimations",
+  {
+    id: serial("id").primaryKey(),
+    projectId: integer("project_id").references(() => projects.id, {
+      onDelete: "cascade",
+    }),
+    phase: varchar("phase", { length: 255 }).notNull(),
+    timeEstimation: integer("time_estimation").default(0),
+    timeUnit: varchar("time_unit", { length: 255 }).default("days"),
+    manforce: integer("manforce").default(0),
+    manforceUnit: varchar("manforce_unit", { length: 255 }),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", {
+      mode: "date",
+      withTimezone: true,
+    }).defaultNow(),
+    lastModifiedBy: varchar("last_modified_by", { length: 255 }).references(
+      () => users.id,
+    ),
+  },
+  (estimation) => ({
+    projectIdIdx: index("estimation_project_id_idx").on(estimation.projectId),
+    phaseIdx: index("estimation_phase_idx").on(estimation.phase),
+  }),
+);
