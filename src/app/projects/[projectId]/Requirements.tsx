@@ -33,23 +33,30 @@ interface RequirementsProps {
 }
 
 export default function Requirements({ projectId }: RequirementsProps) {
-  const { data: requirements, isLoading, isError } = api.requirements.getAllRequirements.useQuery({ projectId });
+  const {
+    data: requirements,
+    isLoading,
+    isError,
+  } = api.requirements.getAllRequirements.useQuery({ projectId });
 
   const utils = api.useUtils();
   const { data: session } = useSession();
   const userId = session?.user?.id;
 
-  const { mutateAsync: addRequirement } = api.requirements.createRequirement.useMutation({
-    onSuccess: () => utils.requirements.getAllRequirements.invalidate(),
-  });
+  const { mutateAsync: addRequirement } =
+    api.requirements.createRequirement.useMutation({
+      onSuccess: () => utils.requirements.getAllRequirements.invalidate(),
+    });
 
-  const { mutateAsync: updateRequirement } = api.requirements.updateRequirement.useMutation({
-    onSuccess: () => utils.requirements.getAllRequirements.invalidate(),
-  });
+  const { mutateAsync: updateRequirement } =
+    api.requirements.updateRequirement.useMutation({
+      onSuccess: () => utils.requirements.getAllRequirements.invalidate(),
+    });
 
-  const { mutateAsync: deleteRequirement } = api.requirements.deleteRequirement.useMutation({
-    onSuccess: () => utils.requirements.getAllRequirements.invalidate(),
-  });
+  const { mutateAsync: deleteRequirement } =
+    api.requirements.deleteRequirement.useMutation({
+      onSuccess: () => utils.requirements.getAllRequirements.invalidate(),
+    });
 
   const handleAddRequirement = async (requirement: Requirement) => {
     await addRequirement({
@@ -92,7 +99,10 @@ export default function Requirements({ projectId }: RequirementsProps) {
       ) : (
         <div>
           {requirements?.map((requirement, index) => (
-            <div key={requirement.id} className="mb-4 flex flex-col gap-2 rounded-md border p-4">
+            <div
+              key={requirement.id}
+              className="mb-4 flex flex-col gap-2 rounded-md border p-4"
+            >
               {editIndex === index ? (
                 <>
                   <Formik
@@ -125,7 +135,9 @@ export default function Requirements({ projectId }: RequirementsProps) {
                           />
                         </div>
                         <div className="flex flex-col gap-2">
-                          <Label htmlFor={`description-${index}`}>Description</Label>
+                          <Label htmlFor={`description-${index}`}>
+                            Description
+                          </Label>
                           <Field
                             id={`description-${index}`}
                             name="description"
@@ -153,8 +165,16 @@ export default function Requirements({ projectId }: RequirementsProps) {
                             className="w-full rounded-md border p-2"
                           />
                         </div>
-                        <Button type="submit" className="mx-4 mt-4">Save Changes</Button>
-                        <Button type="button" onClick={() => setEditIndex(null)} className="mt-4">Cancel</Button>
+                        <Button type="submit" className="mx-4 mt-4">
+                          Save Changes
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={() => setEditIndex(null)}
+                          className="mt-4"
+                        >
+                          Cancel
+                        </Button>
                       </Form>
                     )}
                   </Formik>
@@ -169,8 +189,18 @@ export default function Requirements({ projectId }: RequirementsProps) {
                       <p>Priority: {requirement.priority}</p>
                     </div>
                     <div className="space-x-4">
-                      <Button variant="outline" onClick={() => setEditIndex(index)}>Edit</Button>
-                      <Button variant="destructive" onClick={() => handleDeleteRequirement(requirement.id)}>Delete</Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setEditIndex(index)}
+                      >
+                        Edit
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        onClick={() => handleDeleteRequirement(requirement.id)}
+                      >
+                        Delete
+                      </Button>
                     </div>
                   </div>
                 </>
@@ -204,20 +234,29 @@ export default function Requirements({ projectId }: RequirementsProps) {
               ] as Requirement[],
             }}
             onSubmit={async (values, { resetForm }) => {
-              await Promise.all(values.requirements.map((requirement) => handleAddRequirement(requirement)));
+              await Promise.all(
+                values.requirements.map((requirement) =>
+                  handleAddRequirement(requirement),
+                ),
+              );
               resetForm();
-              setDialogOpen(false);  
+              setDialogOpen(false);
             }}
           >
             {({ values }) => (
               <Form>
                 <FieldArray name="requirements">
-                  {(arrayHelpers) => (
+                  {() => (
                     <div>
                       {values.requirements.map((_, index) => (
-                        <div key={index} className="mb-4 flex flex-col gap-2 rounded-md border p-4">
+                        <div
+                          key={index}
+                          className="mb-4 flex flex-col gap-2 rounded-md border p-4"
+                        >
                           <div className="flex flex-col gap-2">
-                            <Label htmlFor={`requirements.${index}.title`}>Title</Label>
+                            <Label htmlFor={`requirements.${index}.title`}>
+                              Title
+                            </Label>
                             <Field
                               name={`requirements.${index}.title`}
                               as={Input}
@@ -227,7 +266,11 @@ export default function Requirements({ projectId }: RequirementsProps) {
                             />
                           </div>
                           <div className="flex flex-col gap-2">
-                            <Label htmlFor={`requirements.${index}.description`}>Description</Label>
+                            <Label
+                              htmlFor={`requirements.${index}.description`}
+                            >
+                              Description
+                            </Label>
                             <Field
                               name={`requirements.${index}.description`}
                               as={Textarea}
@@ -236,7 +279,9 @@ export default function Requirements({ projectId }: RequirementsProps) {
                             />
                           </div>
                           <div className="flex flex-col gap-2">
-                            <Label htmlFor={`requirements.${index}.status`}>Status</Label>
+                            <Label htmlFor={`requirements.${index}.status`}>
+                              Status
+                            </Label>
                             <Field
                               name={`requirements.${index}.status`}
                               as={Input}
@@ -246,7 +291,9 @@ export default function Requirements({ projectId }: RequirementsProps) {
                             />
                           </div>
                           <div className="flex flex-col gap-2">
-                            <Label htmlFor={`requirements.${index}.priority`}>Priority</Label>
+                            <Label htmlFor={`requirements.${index}.priority`}>
+                              Priority
+                            </Label>
                             <Field
                               name={`requirements.${index}.priority`}
                               as={Input}

@@ -28,6 +28,7 @@ export default function Cursor({ color, textColor, x, y, name }: Props) {
           left: 0,
           top: 0,
           transform: `translateX(${x}px) translateY(${y}px)`,
+          zIndex: 50,
         }}
         width="24"
         height="36"
