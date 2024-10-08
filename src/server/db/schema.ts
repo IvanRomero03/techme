@@ -197,3 +197,34 @@ export const projectTasks = createTable(
     projectStatusIdx: index("task_project_status_idx").on(task.status),
   }),
 );
+
+export const frameworkContracts = createTable(
+  "framework_contracts",
+  {
+    id: serial("id").primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    description: text("description"),
+    startDate: timestamp("start_date", {
+      mode: "date",
+      withTimezone: true,
+    }).defaultNow(),
+    endDate: timestamp("end_date", {
+      mode: "date",
+      withTimezone: true,
+    }).default(sql`NOW() + INTERVAL '1 year'`),
+    status: varchar("status", { length: 255 }).default("active"),
+    lastModifiedBy: varchar("last_modified_by", { length: 255 }).references(() => users.id),
+  },
+  (contract) => ({
+    nameIdx: index("contract_name_idx").on(contract.name),
+    statusIdx: index("contract_status_idx").on(contract.status),
+  }),
+);
+
+export const frameworkContractPerProject = createTable("framework_contract_per_project", {
+  contractId: integer("contract_id").references(() => frameworkContracts.id, {
+    onDelete: "cascade",
+  }),
+  projectId: integer("project_id").references(() => projects.id),
+});
+

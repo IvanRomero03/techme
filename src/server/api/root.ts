@@ -4,6 +4,7 @@ import { projectsRouter } from "./routers/projects";
 import { projectsRouterSummary } from "./routers/projectSummary";
 import { requirementsRouter } from "./routers/requirements";
 import { projectsRouterTasks } from "./routers/projectTasks";
+import { frameworkContractsRouter } from "./routers/frameworkContractsRouter";
 
 /**
  * This is the primary router for your server.
@@ -16,10 +17,14 @@ export const appRouter = createTRPCRouter({
   projectsSummary: projectsRouterSummary,
   requirements: requirementsRouter,
   prjectTasks: projectsRouterTasks,
+  frameworkContracts: frameworkContractsRouter,
 });
 
 // export type definition of API
 export type AppRouter = typeof appRouter;
+
+
+
 
 /**
  * Create a server-side caller for the tRPC API.
