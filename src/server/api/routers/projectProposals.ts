@@ -18,7 +18,7 @@ export const projectProposalsRouter = createTRPCRouter({
         return [];
       }
 
-      const QueryKey = `project_proposal_${project[0]!.id}_${ctx.session.user.role}`;
+      const QueryKey = `project_proposal_${project[0].id}_${ctx.session.user.role}`;
 
       try {
         const cachedProposal = await ctx.cache.get(QueryKey);
@@ -47,9 +47,9 @@ export const projectProposalsRouter = createTRPCRouter({
             role: "user",
             content:
               "El proyecto se llama: " +
-              project[0]!.name +
+              project[0].name +
               " y su descripción es la siguiente: " +
-              project[0]!.description,
+              project[0].description,
           },
         ],
         stream: true,
