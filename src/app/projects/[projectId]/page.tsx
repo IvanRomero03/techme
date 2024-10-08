@@ -8,7 +8,6 @@ import Estimations from "./Estimations";
 import Requirements from "./Requirements";
 import Summary from "./Summary";
 
-
 const menuItems = [
   "Summary",
   "Details",
