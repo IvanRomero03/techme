@@ -10,14 +10,9 @@ export const frameworkContractsRouter = createTRPCRouter({
     .query(async ({ ctx, input }) => {
       
       return await ctx.db.select().from(frameworkContracts)
-        .where(eq(frameworkContractPerProject.projectId, input.projectId)) // Obtain contracts filter
+        .where(eq(frameworkContractPerProject.projectId, input.projectId)) 
         .leftJoin(frameworkContractPerProject, eq(frameworkContracts.id, frameworkContractPerProject.contractId));
     }),
-
-
-    // Should i add other mutations or functions ivan?? 
-
-  
 });
 
 

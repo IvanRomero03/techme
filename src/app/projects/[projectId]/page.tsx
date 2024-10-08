@@ -9,7 +9,7 @@ import Details from "./Details";
 import Estimations from "./Estimations";
 import Requirements from "./Requirements";
 import Summary from "./Summary";
-import React from "react";
+
 
 const menuItems = [
   "Summary",
