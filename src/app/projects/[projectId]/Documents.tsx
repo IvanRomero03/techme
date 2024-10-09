@@ -1,28 +1,28 @@
-import { Button } from "t/components/ui/button";
-import {
-  ResizableHandle,
-  ResizablePanel,
-  ResizablePanelGroup,
-} from "t/components/ui/resizable";
-import AddDocumentModal from "./AddDocumentModal";
-import { Separator } from "t/components/ui/separator";
-import { api } from "techme/trpc/react";
-import { Card, CardHeader } from "t/components/ui/card";
+import { Form, Formik } from "formik";
 import { File, X } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Button } from "t/components/ui/button";
+import { Card, CardHeader } from "t/components/ui/card";
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuTrigger,
 } from "t/components/ui/context-menu";
+import { Input } from "t/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "t/components/ui/popover";
-import { Field, Form, Formik } from "formik";
-import { Input } from "t/components/ui/input";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "t/components/ui/resizable";
+import { Separator } from "t/components/ui/separator";
+import { api } from "techme/trpc/react";
+import AddDocumentModal from "./AddDocumentModal";
 
 export function Documents({ projectId }: { projectId: number }) {
   const { data: documents } = api.documents.getDocuments.useQuery({
@@ -53,7 +53,6 @@ export function Documents({ projectId }: { projectId: number }) {
         if (findInDocuments.name !== selectedDocument.name) {
           setSelectedDocument(findInDocuments);
         }
-        // setSelectedDocument(findInDocuments);
       }
     }
   }, [documents]);

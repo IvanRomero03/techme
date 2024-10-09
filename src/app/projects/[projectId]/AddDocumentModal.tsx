@@ -141,7 +141,6 @@ export default function AddDocumentModal({
                             }
                           }
                         }}
-                        // required
                       />
                       {errors.file && (
                         <p className="text-red-500">{errors.file}</p>
@@ -161,11 +160,7 @@ export default function AddDocumentModal({
                         >
                           Cancel
                         </Button>
-                        <Button
-                          className="m-4"
-                          type="submit"
-                          // disabled={dirty || Object.keys(errors).length > 0}
-                        >
+                        <Button className="m-4" type="submit">
                           Upload
                         </Button>
                       </DialogFooter>
