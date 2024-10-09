@@ -6,6 +6,7 @@ import { requirementsRouter } from "./routers/requirements";
 import { projectsRouterTasks } from "./routers/projectTasks";
 import { frameworkContractsRouter } from "./routers/frameworkContractsRouter";
 import { projectsEstimationsRouter } from "./routers/estimations";
+import { documentsRouter } from "./routers/documents";
 import { projectProposalsRouter } from "./routers/projectProposals";
 import { projectEstimatesRouter } from "./routers/projectEstimate";
 import { projectChecklistRouter } from "./routers/projectChecklist";
@@ -26,6 +27,7 @@ export const appRouter = createTRPCRouter({
   projectEstimate: projectEstimatesRouter,
   projectChecklist: projectChecklistRouter,
   estimations: projectsEstimationsRouter,
+  documents: documentsRouter,
 });
 
 // export type definition of API

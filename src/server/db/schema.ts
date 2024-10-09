@@ -259,3 +259,29 @@ export const estimations = createTable(
     phaseIdx: index("estimation_phase_idx").on(estimation.phase),
   }),
 );
+
+export const projectDocuments = createTable(
+  "documents",
+  {
+    id: varchar("id", { length: 255 })
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    projectId: integer("project_id").references(() => projects.id, {
+      onDelete: "cascade",
+    }),
+    name: varchar("name", { length: 255 }).notNull(),
+    url: varchar("url", { length: 255 }).notNull(),
+    uploadedBy: varchar("uploaded_by", { length: 255 }).references(
+      () => users.id,
+    ),
+    uploadedAt: timestamp("uploaded_at", {
+      mode: "date",
+      withTimezone: true,
+    }).defaultNow(),
+  },
+  (document) => ({
+    projectIdIdx: index("document_project_id_idx").on(document.projectId),
+    nameIdx: index("document_name_idx").on(document.name),
+  }),
+);

@@ -7,6 +7,7 @@ import Details from "./Details";
 import Estimations from "./Estimations";
 import Requirements from "./Requirements";
 import Summary from "./Summary";
+import { Documents } from "./Documents";
 import Proposals from "./Proposals";
 
 const menuItems = [
@@ -37,7 +38,7 @@ export default function Page({ params }: { params: { projectId: string } }) {
   }
 
   return (
-    <>
+    <div className="flex h-full flex-col">
       <h1 className="mb-4 text-2xl font-bold">
         Project: {projectDetails?.project.name}
       </h1>
@@ -72,12 +73,12 @@ export default function Page({ params }: { params: { projectId: string } }) {
           ) : activeMenuItem === "Proposals" ? (
             <Proposals projectId={params.projectId} />
           ) : activeMenuItem === "Documentation" ? (
-            <></>
+            <Documents projectId={Number(params.projectId)} />
           ) : (
             <></>
           )}
         </div>
       </div>
-    </>
+    </div>
   );
 }
