@@ -8,6 +8,7 @@ import Estimations from "./Estimations";
 import Requirements from "./Requirements";
 import Summary from "./Summary";
 import { Documents } from "./Documents";
+import Proposals from "./Proposals";
 
 const menuItems = [
   "Summary",
@@ -23,7 +24,7 @@ const menuItems = [
 
 export default function Page({ params }: { params: { projectId: string } }) {
   const [activeMenuItem, setActiveMenuItem] = useState(menuItems[0]);
-  const { data: proyectDetails, isLoading: isLoadingProyectDetails } =
+  const { data: projectDetails, isLoading: isLoadingProjectDetails } =
     api.projects.getProyectInfo.useQuery({
       projectId: Number(params.projectId),
     });
@@ -32,14 +33,14 @@ export default function Page({ params }: { params: { projectId: string } }) {
     setActiveMenuItem(item);
   };
 
-  if (isLoadingProyectDetails) {
+  if (isLoadingProjectDetails) {
     return <p>Loading...</p>;
   }
 
   return (
     <div className="flex h-full flex-col">
       <h1 className="mb-4 text-2xl font-bold">
-        Project: {proyectDetails?.project.name}
+        Project: {projectDetails?.project.name}
       </h1>
       <div className="flex h-full w-full">
         <div className="my-4 w-1/5 rounded-2xl bg-gray-100 p-4">
@@ -69,6 +70,8 @@ export default function Page({ params }: { params: { projectId: string } }) {
             <Summary projectId={params.projectId} />
           ) : activeMenuItem === "Requirements" ? (
             <Requirements projectId={Number(params.projectId)} />
+          ) : activeMenuItem === "Proposals" ? (
+            <Proposals projectId={params.projectId} />
           ) : activeMenuItem === "Documentation" ? (
             <Documents projectId={Number(params.projectId)} />
           ) : (

@@ -7,6 +7,9 @@ import { projectsRouterTasks } from "./routers/projectTasks";
 import { frameworkContractsRouter } from "./routers/frameworkContractsRouter";
 import { projectsEstimationsRouter } from "./routers/estimations";
 import { documentsRouter } from "./routers/documents";
+import { projectProposalsRouter } from "./routers/projectProposals";
+import { projectEstimatesRouter } from "./routers/projectEstimate";
+import { projectChecklistRouter } from "./routers/projectChecklist";
 
 /**
  * This is the primary router for your server.
@@ -20,6 +23,9 @@ export const appRouter = createTRPCRouter({
   requirements: requirementsRouter,
   prjectTasks: projectsRouterTasks,
   frameworkContracts: frameworkContractsRouter,
+  projectProposals: projectProposalsRouter,
+  projectEstimate: projectEstimatesRouter,
+  projectChecklist: projectChecklistRouter,
   estimations: projectsEstimationsRouter,
   documents: documentsRouter,
 });
