@@ -30,6 +30,9 @@ export const env = createEnv({
     GOOGLE_CLIENT_ID: z.string(),
     REDIS_URL: z.string().url(),
     LIVEBLOCKS_SECRET_API_KEY: z.string(),
+    SUPABASE_BASE_URL: z.string().url(),
+    SUPABASE_ANON_KEY: z.string(),
+    SUPABASE_SECRET_KEY: z.string(),
   },
 
   /**
@@ -58,6 +61,9 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
     REDIS_URL: process.env.REDIS_URL,
     LIVEBLOCKS_SECRET_API_KEY: process.env.LIVEBLOCKS_SECRET_API_KEY,
+    SUPABASE_BASE_URL: process.env.SUPABASE_BASE_URL,
+    SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
+    SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
