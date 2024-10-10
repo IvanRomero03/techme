@@ -10,6 +10,13 @@ import {reviewSubmissionRouter} from "./routers/reviews";
 
 //se crea los enlaces de conexión de la base de datos y la vista
 //las rutas de la api
+import { frameworkContractsRouter } from "./routers/frameworkContractsRouter";
+import { projectsEstimationsRouter } from "./routers/estimations";
+import { documentsRouter } from "./routers/documents";
+import { projectProposalsRouter } from "./routers/projectProposals";
+import { projectEstimatesRouter } from "./routers/projectEstimate";
+import { projectChecklistRouter } from "./routers/projectChecklist";
+import { meetingsRouter, peoplePerMeetingRouter } from "./routers/meetings";
 
 /**
  * This is the primary router for your server.
@@ -24,7 +31,15 @@ export const appRouter = createTRPCRouter({
   prjectTasks: projectsRouterTasks,
   validation: validationRouter,
   documentNotes: documentNotesRouter,
-  reviews: reviewSubmissionRouter
+  reviews: reviewSubmissionRouter,
+  frameworkContracts: frameworkContractsRouter,
+  projectProposals: projectProposalsRouter,
+  projectEstimate: projectEstimatesRouter,
+  projectChecklist: projectChecklistRouter,
+  estimations: projectsEstimationsRouter,
+  documents: documentsRouter,
+  meetings: meetingsRouter,
+  peoplePerMeeting: peoplePerMeetingRouter,
 });
 
 // export type definition of API

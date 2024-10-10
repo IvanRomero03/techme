@@ -7,7 +7,9 @@ import RootClientLayout from "./_components/RootClientLayout";
 export const metadata: Metadata = {
   title: "TechMe",
   description: "Neoris & TechMe",
-  icons: [{ rel: "icon", url: "/public/favicon.ico" }],
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default async function RootLayout({
