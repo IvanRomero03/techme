@@ -10,6 +10,7 @@ import { documentsRouter } from "./routers/documents";
 import { projectProposalsRouter } from "./routers/projectProposals";
 import { projectEstimatesRouter } from "./routers/projectEstimate";
 import { projectChecklistRouter } from "./routers/projectChecklist";
+import { meetingsRouter, peoplePerMeetingRouter } from "./routers/meetings";
 
 /**
  * This is the primary router for your server.
@@ -28,6 +29,8 @@ export const appRouter = createTRPCRouter({
   projectChecklist: projectChecklistRouter,
   estimations: projectsEstimationsRouter,
   documents: documentsRouter,
+  meetings: meetingsRouter,
+  peoplePerMeeting: peoplePerMeetingRouter,
 });
 
 // export type definition of API
