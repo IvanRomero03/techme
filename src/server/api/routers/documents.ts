@@ -55,4 +55,27 @@ export const documentsRouter = createTRPCRouter({
         .set({ name: input.name })
         .where(and(eq(projectDocuments.id, input.documentId)));
     }),
+  pdfToMarkdown: protectedProcedure
+    .input(z.object({ url: z.string().nullable() }))
+    .query(async ({ input }) => {
+      if (!input.url) {
+        return "";
+      }
+      const response = await fetch(
+        "https://281b-172-174-209-112.ngrok-free.app/convert",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            file_url: input.url,
+          }),
+        },
+      );
+      const data = (await response.json()) as {
+        chunks: string[];
+      };
+      console.log(data);
+    }),
 });
