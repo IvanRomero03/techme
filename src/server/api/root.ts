@@ -4,6 +4,12 @@ import { projectsRouter } from "./routers/projects";
 import { projectsRouterSummary } from "./routers/projectSummary";
 import { requirementsRouter } from "./routers/requirements";
 import { projectsRouterTasks } from "./routers/projectTasks";
+import { validationRouter } from "./routers/validation";
+import {documentNotesRouter} from "./routers/documentNotes";
+import {reviewSubmissionRouter} from "./routers/reviews";
+
+//se crea los enlaces de conexión de la base de datos y la vista
+//las rutas de la api
 
 /**
  * This is the primary router for your server.
@@ -16,6 +22,9 @@ export const appRouter = createTRPCRouter({
   projectsSummary: projectsRouterSummary,
   requirements: requirementsRouter,
   prjectTasks: projectsRouterTasks,
+  validation: validationRouter,
+  documentNotes: documentNotesRouter,
+  reviews: reviewSubmissionRouter
 });
 
 // export type definition of API

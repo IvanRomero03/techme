@@ -8,6 +8,7 @@ import {
   text,
   timestamp,
   varchar,
+  boolean
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
 
@@ -197,3 +198,73 @@ export const projectTasks = createTable(
     projectStatusIdx: index("task_project_status_idx").on(task.status),
   }),
 );
+
+//TABLA VALIDATION
+export const validation = createTable(
+  "validation",
+  {
+    id: serial("id").primaryKey(),
+    reviewId: serial("review_id"),
+    projectId: integer("project_id").references(() => projects.id, {
+      onDelete: "cascade",
+    }),
+    createdAt: timestamp("created_at", {
+      mode: "date"
+    }).defaultNow(),
+    documentUrl: varchar("document_url", { length: 255 }),
+    completed: boolean("completed").default(false),
+    reviewCompletedAt: timestamp("review_completed_at", {
+      mode: "date",
+      withTimezone: true
+    }),
+    lastModifiedBy: varchar("last_modified_by", { length: 255 }).references(
+      () => users.id,
+    ),
+  },
+  (validation) => ({
+    projectIdIdx: index("validation_project_id_idx").on(validation.projectId),
+    reviewIdIdx: index("validation_review_id_idx").on(validation.reviewId),
+  })
+);
+
+
+export const documentNotes = createTable(
+  "document_notes",
+  {
+    id: serial("id").primaryKey(),
+    validationId: integer("validation_id").references(() => validation.id, {
+      onDelete: "cascade",
+    }),
+    documentUrl: varchar("document_url", { length: 255 }),
+    note: text("note").notNull(),
+    createdAt: timestamp("created_at", {
+      mode: "date",
+      withTimezone: true,
+    }).defaultNow(),
+    createdBy: varchar("created_by", { length: 255 }).references(() => users.id),
+  }
+);
+
+export const reviewSubmission = createTable(
+  "review_submission",
+  {
+    id: serial("id").primaryKey(),
+    validationId: integer("validation_id").references(() => validation.id, {
+      onDelete: "cascade",
+    }),
+    reviewCount: integer("review_count"),
+    finalReview: boolean("final_review").default(false),
+    submissionConfirmedAt: timestamp("submission_confirmed_at", {
+      mode: "date",
+      withTimezone: true,
+    }),
+    submittedBy: varchar("submitted_by", { length: 255 }).references(
+      () => users.id,
+    ),
+    submittedAt: timestamp("submitted_at", {
+      mode: "date",
+      withTimezone: true,
+    }).defaultNow(),
+  }
+);
+

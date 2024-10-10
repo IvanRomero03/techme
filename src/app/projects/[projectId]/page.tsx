@@ -7,6 +7,7 @@ import Details from "./Details";
 import Estimations from "./Estimations";
 import Requirements from "./Requirements";
 import Summary from "./Summary";
+import Validation from "./Validation";
 
 const menuItems = [
   "Summary",
@@ -67,9 +68,9 @@ export default function Page({ params }: { params: { projectId: string } }) {
             <Summary projectId={params.projectId} />
           ) : activeMenuItem === "Requirements" ? (
             <Requirements projectId={Number(params.projectId)} />
-          ) : (
-            <></>
-          )}
+          ) : activeMenuItem === "Validation" ? (
+            <Validation projectId={Number(params.projectId)} /> 
+          ):null }
         </div>
       </div>
     </>
