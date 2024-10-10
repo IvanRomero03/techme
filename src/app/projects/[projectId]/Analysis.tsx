@@ -5,7 +5,7 @@ import { Button } from "t/components/ui/button";
 import { Label } from "t/components/ui/label";
 import { Textarea } from "t/components/ui/textarea";
 import { Input } from "t/components/ui/input";
-import { api } from "techme/trpc/react"; // TRPC API importado para manejar los requests
+import { api } from "techme/trpc/react"; 
 import { useSession } from "next-auth/react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogTrigger, DialogFooter } from "t/components/ui/dialog";
 import { Field, Form, Formik } from "formik";
@@ -163,7 +163,7 @@ const Analysis: React.FC<AnalysisProps> = ({ projectId }) => {
         </Dialog>
       </div>
 
-      {/* Mostrar contratos filtrados */}
+      
       <div className="space-y-2">
         {isLoading ? (
           <p>Loading contracts...</p>
