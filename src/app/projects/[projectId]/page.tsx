@@ -9,7 +9,8 @@ import Requirements from "./Requirements";
 import Summary from "./Summary";
 import { Documents } from "./Documents";
 import Proposals from "./Proposals";
-import Analysis from "./Analysis"
+import Analysis from "./Analysis";
+import Planning from "./Planning";
 
 const menuItems = [
   "Summary",
@@ -77,8 +78,9 @@ export default function Page({ params }: { params: { projectId: string } }) {
             <Documents projectId={Number(params.projectId)} />
           ) : activeMenuItem == "Analysis" ? (
             <Analysis projectId={params.projectId} />
+          ) : activeMenuItem === "Planning" ? (
+            <Planning projectId={Number(params.projectId)} />
           ) : (
-              
             <></>
           )}
         </div>
