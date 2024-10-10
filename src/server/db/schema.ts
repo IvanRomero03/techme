@@ -285,3 +285,35 @@ export const projectDocuments = createTable(
     nameIdx: index("document_name_idx").on(document.name),
   }),
 );
+
+export const meetings = createTable("meetings", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projects.id).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  date: timestamp("date", { mode: "date", withTimezone: true }).notNull(),
+  description: text("description"), // Adding description field
+  createdBy: varchar("created_by", { length: 255 }).references(() => users.id).notNull(),
+  modifiedBy: varchar("modified_by", { length: 255 }).references(() => users.id),
+});
+
+export const meetingsRelations = relations(meetings, ({ many }) => ({
+  attendees: many(peoplePerMeeting),
+}));
+
+export const peoplePerMeeting = createTable("people_per_meeting", {
+  meetingId: integer("meeting_id").references(() => meetings.id, { onDelete: "cascade" }), // Foreign key for meetings
+  userId: varchar("user_id", { length: 255 }).references(() => users.id), // Foreign key for users
+  createdBy: varchar("created_by", { length: 255 }).references(() => users.id).notNull(), // User who invited
+  modifiedBy: varchar("modified_by", { length: 255 }).references(() => users.id), // User who last modified the invitation
+}, (peoplePerMeeting) => ({
+  meetingIdUserIdx: primaryKey({
+    columns: [peoplePerMeeting.meetingId, peoplePerMeeting.userId],
+  }),
+  meetingIdIdx: index("people_per_meeting_meeting_id_idx").on(peoplePerMeeting.meetingId),
+  userIdIdx: index("people_per_meeting_user_id_idx").on(peoplePerMeeting.userId),
+}));
+
+export const peoplePerMeetingRelations = relations(peoplePerMeeting, ({ one }) => ({
+  meeting: one(meetings, { fields: [peoplePerMeeting.meetingId], references: [meetings.id] }),
+  user: one(users, { fields: [peoplePerMeeting.userId], references: [users.id] }),
+}));
