@@ -9,6 +9,7 @@ import Requirements from "./Requirements";
 import Summary from "./Summary";
 import { Documents } from "./Documents";
 import Proposals from "./Proposals";
+import Analysis from "./Analysis";
 import Planning from "./Planning";
 
 const menuItems = [
@@ -63,23 +64,25 @@ export default function Page({ params }: { params: { projectId: string } }) {
         </div>
         <div className="relative mx-6 w-3/4 rounded-2xl border p-8 shadow-md">
           <h2 className="mb-4 text-2xl font-bold">{activeMenuItem}</h2>
-            {activeMenuItem === "Estimations" ? (
+          {activeMenuItem === "Estimations" ? (
             <Estimations projectId={Number(params.projectId)} />
-            ) : activeMenuItem === "Details" ? (
+          ) : activeMenuItem === "Details" ? (
             <Details projectId={params.projectId} />
-            ) : activeMenuItem === "Summary" ? (
+          ) : activeMenuItem === "Summary" ? (
             <Summary projectId={params.projectId} />
-            ) : activeMenuItem === "Requirements" ? (
+          ) : activeMenuItem === "Requirements" ? (
             <Requirements projectId={Number(params.projectId)} />
-            ) : activeMenuItem === "Proposals" ? (
+          ) : activeMenuItem === "Proposals" ? (
             <Proposals projectId={params.projectId} />
-            ) : activeMenuItem === "Documentation" ? (
+          ) : activeMenuItem === "Documentation" ? (
             <Documents projectId={Number(params.projectId)} />
-            ) : activeMenuItem === "Planning" ? (
-            <Planning projectId={Number(params.projectId)}/>
-            ) : (
+          ) : activeMenuItem == "Analysis" ? (
+            <Analysis projectId={params.projectId} />
+          ) : activeMenuItem === "Planning" ? (
+            <Planning projectId={Number(params.projectId)} />
+          ) : (
             <></>
-            )}
+          )}
         </div>
       </div>
     </div>
