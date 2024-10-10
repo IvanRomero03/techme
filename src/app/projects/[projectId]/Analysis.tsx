@@ -24,43 +24,50 @@ interface AnalysisProps {
   projectId: string;
 }
 
+interface ContractValues {
+  name: string;
+  description?: string | null;
+  startDate: string;
+  endDate: string;
+  status: string;
+}
+
 const Analysis: React.FC<AnalysisProps> = ({ projectId }) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const { data: session } = useSession();
   const userId = session?.user?.id;
 
-  
   const { data: contracts = [], isLoading } = api.frameworkContracts.getAllContracts.useQuery({
-    projectId: parseInt(projectId),
+    projectId: Number(projectId),
   });
 
-  
   const utils = api.useUtils();
 
-  
   const { mutateAsync: addContract } = api.frameworkContracts.addContract.useMutation({
-    onSuccess: () => {
-      utils.frameworkContracts.getAllContracts.invalidate(); 
+    onSuccess: async () => {
+      await utils.frameworkContracts.getAllContracts.invalidate(); 
     },
   });
 
-  
-  const handleAddContract = async (values: any) => {
-    await addContract({
-      projectId: parseInt(projectId),
-      name: values.name,
-      description: values.description || null,
-      startDate: values.startDate,
-      endDate: values.endDate,
-      status: values.status || "active",
-    });
+  const handleAddContract = async (values: ContractValues) => {
+    try {
+      await addContract({
+        projectId: Number(projectId),
+        name: values.name,
+        description: values.description ?? undefined,
+        startDate: values.startDate,
+        endDate: values.endDate,
+        status: values.status ?? "active",
+      });
+    } catch (error) {
+      console.error("Error adding contract:", error);
+    }
   };
 
-  
   const filteredContracts = contracts.filter(
     (contract: { framework_contracts: FrameworkContract }) =>
-      contract.framework_contracts.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contract.framework_contracts.name.toLowerCase().includes(searchTerm.toLowerCase()) ??
       contract.framework_contracts.description?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -68,7 +75,6 @@ const Analysis: React.FC<AnalysisProps> = ({ projectId }) => {
     <div className="space-y-4">
       <h1 className="text-2xl font-bold">Framework Contracts Analysis for Project {projectId}</h1>
 
-      
       <div className="flex justify-between items-center mb-4">
         <div>
           <Label htmlFor="search">Search Contracts</Label>
@@ -81,7 +87,6 @@ const Analysis: React.FC<AnalysisProps> = ({ projectId }) => {
           />
         </div>
 
-        
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button className="ml-4">+ Add Contract</Button>
@@ -102,7 +107,7 @@ const Analysis: React.FC<AnalysisProps> = ({ projectId }) => {
                 status: "active",
               }}
               onSubmit={async (values, { resetForm }) => {
-                await handleAddContract(values); 
+                await handleAddContract(values);
                 resetForm(); 
                 setDialogOpen(false); 
               }}
@@ -163,7 +168,6 @@ const Analysis: React.FC<AnalysisProps> = ({ projectId }) => {
         </Dialog>
       </div>
 
-      
       <div className="space-y-2">
         {isLoading ? (
           <p>Loading contracts...</p>
