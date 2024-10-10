@@ -310,10 +310,14 @@ export const meetingsRelations = relations(meetings, ({ many }) => ({
 export const peoplePerMeeting = createTable(
   "people_per_meeting",
   {
-    meetingId: integer("meeting_id").references(() => meetings.id, {
-      onDelete: "cascade",
-    }), // Foreign key for meetings
-    userId: varchar("user_id", { length: 255 }).references(() => users.id), // Foreign key for users
+    meetingId: integer("meeting_id")
+      .references(() => meetings.id, {
+        onDelete: "cascade",
+      })
+      .notNull(), // Foreign key for meetings
+    userId: varchar("user_id", { length: 255 })
+      .references(() => users.id)
+      .notNull(), // Foreign key for users
     createdBy: varchar("created_by", { length: 255 })
       .references(() => users.id)
       .notNull(), // User who invited
@@ -351,11 +355,12 @@ export const peoplePerMeetingRelations = relations(
 export const documentEmbeddings = createTable(
   "document_embeddings",
   {
+    id: serial("id").primaryKey(),
     documentId: varchar("document_id", { length: 255 }).references(
       () => projectDocuments.id,
     ),
     text: text("text").notNull(),
-    embedding: vector("embedding", { dimensions: 3072 }).notNull(), // text-embedding-3-large
+    embedding: vector("embedding", { dimensions: 1536 }).notNull(), // text-embedding-3-large
   },
   (embedding) => ({
     documentIdIdx: index("embedding_document_id_idx").on(embedding.documentId),
