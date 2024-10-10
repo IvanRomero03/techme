@@ -1,5 +1,7 @@
+import { eq } from "drizzle-orm";
 import { type NextRequest, type NextResponse } from "next/server";
 import { env } from "techme/env";
+import { appRouter, createCaller } from "techme/server/api/root";
 import { createTRPCContext } from "techme/server/api/trpc";
 import { projectDocuments } from "techme/server/db/schema";
 import { getStorage } from "techme/server/db/storage";
@@ -57,6 +59,18 @@ export async function POST(req: NextRequest) {
     uploadedBy: ctx.session.user.id,
   });
 
+  const docId = await ctx.db
+    .select()
+    .from(projectDocuments)
+    .where(eq(projectDocuments.url, url));
+
+  if (!docId[0]) {
+    return new Response("Failed to get document", {
+      status: 500,
+    });
+  }
+  const caller = createCaller(ctx);
+  await caller.documents.postProcessDocument({ documentId: docId[0].id });
   return new Response("Document uploaded", {
     status: 200,
   });
