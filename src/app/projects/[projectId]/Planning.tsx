@@ -13,6 +13,13 @@ import { Command, CommandGroup, CommandInput, CommandList, CommandItem, CommandE
 import { Avatar, AvatarFallback, AvatarImage } from "t/components/ui/avatar";
 import { XCircle } from "lucide-react";
 
+type Member = {
+    id: string;
+    name?: string | null;
+    email?: string;
+    image?: string | null;
+};
+
 export default function Planning({ projectId }: { projectId: number }) {
     const { data: session } = useSession();
     const currentUserId = session?.user?.id; // Get the current user ID from session
@@ -20,14 +27,14 @@ export default function Planning({ projectId }: { projectId: number }) {
     const [meetingTitle, setMeetingTitle] = useState("");
     const [meetingDate, setMeetingDate] = useState("");
     const [meetingDescription, setMeetingDescription] = useState("");
-    const [selectedMembers, setSelectedMembers] = useState(new Map<string, any>());
-    const [openMembers, setOpenMembers] = useState(false);
+    const [selectedMembers, setSelectedMembers] = useState<Map<string, Member>>(new Map());
+    const [openMembers, setOpenMembers] = useState<boolean>(false);
 
     const { data: meetings, isLoading, error } = api.meetings.getProjectMeetings.useQuery({
         projectId,
     });
 
-    const { data: members, isLoading: membersLoading } = api.members.getAuthorizedMembers.useQuery();
+    const { data: members} = api.members.getAuthorizedMembers.useQuery();
     const { mutate: addMeeting, status: addMeetingStatus } = api.meetings.addMeeting.useMutation();
     const isAdding = addMeetingStatus === 'pending';
 
@@ -43,12 +50,12 @@ export default function Planning({ projectId }: { projectId: number }) {
         }
 
         try {
-            await addMeeting({
+            addMeeting({
                 projectId,
                 title: meetingTitle,
                 date: meetingDate,
                 description: meetingDescription,
-                createdBy: currentUserId || "Unknown",
+                createdBy: currentUserId ?? "Unknown",
                 attendees: Array.from(selectedMembers.keys())
             });
             setMeetingTitle("");
@@ -56,13 +63,17 @@ export default function Planning({ projectId }: { projectId: number }) {
             setMeetingDescription(""); 
             setSelectedMembers(new Map());
             console.log("Meeting scheduled successfully!");
-        } catch (err) {
+        } catch {
             console.log("Failed to schedule the meeting. Try again.");
         }
     };
 
     const handleDialogClose = async () => {
-        await utils.meetings.getProjectMeetings.refetch({ projectId });
+        try {
+            await utils.meetings.getProjectMeetings.refetch({ projectId });
+        } catch (error) {
+            console.error("Failed to refetch meetings:", error);
+        }
     };
 
     return (
@@ -171,7 +182,7 @@ export default function Planning({ projectId }: { projectId: number }) {
                             {Array.from(selectedMembers.values()).map((member) => (
                                 <div key={member.id} className="flex items-center gap-2">
                                     <Avatar>
-                                        <AvatarImage src={member.image} />
+                                        <AvatarImage src={member.image ?? undefined} />
                                         <AvatarFallback>{member.name?.[0]}</AvatarFallback>
                                     </Avatar>
                                     <div>
@@ -224,7 +235,7 @@ export default function Planning({ projectId }: { projectId: number }) {
                                                 <Button
                                                     variant="outline"
                                                     onClick={async () => {
-                                                        await deleteMeeting({ id: meeting.id });
+                                                        deleteMeeting({ id: meeting.id });
                                                         await utils.meetings.getProjectMeetings.refetch({
                                                             projectId,
                                                         });
@@ -251,3 +262,4 @@ export default function Planning({ projectId }: { projectId: number }) {
         </div>
     );
 }
+
