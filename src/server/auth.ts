@@ -7,6 +7,7 @@ import {
 import { type Adapter } from "next-auth/adapters";
 import AzureADProvider from "next-auth/providers/azure-ad";
 import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 import { db } from "techme/server/db";
 import {
   accounts,
@@ -15,6 +16,8 @@ import {
   verificationTokens,
 } from "techme/server/db/schema";
 import type { UserRole } from "techme/util/UserRole";
+import { env } from "techme/env";
+import { eq } from "drizzle-orm";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -71,6 +74,43 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
       allowDangerousEmailAccountLinking: true,
     }),
+    ...(process.env.CI
+      ? []
+      : [
+          CredentialsProvider({
+            credentials: {
+              email: {
+                label: "Email",
+                type: "text",
+              },
+              password: {
+                label: "Password",
+                type: "password",
+              },
+            },
+            async authorize(credentials) {
+              if (!!process.env.CI) {
+                throw new Error("Credentials provider unallowed");
+              }
+              const email = credentials?.email;
+              const password = credentials?.password;
+              if (!email || !password) {
+                throw new Error("Email and password are required");
+              }
+              if (email !== env.CI_EMAIL || password !== env.CI_PASSWORD) {
+                throw new Error("Invalid email or password");
+              }
+              const user = await db
+                .select()
+                .from(users)
+                .where(eq(users.email, email));
+              if (!user[0]) {
+                throw new Error("User not found");
+              }
+              return { ...user[0], role: user[0].role as UserRole };
+            },
+          }),
+        ]),
     /**
      * ...add more providers here.
      *
