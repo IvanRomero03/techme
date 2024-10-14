@@ -29,8 +29,9 @@ jobs:
           # echo "$VARS_CONTEXT" | to_envs >> $GITHUB_ENV
           echo "$SECRETS_CONTEXT" | to_envs >> $GITHUB_ENV
       - name: Run Playwright tests
-        # env:
-        #   SKIP_ENV_VALIDATION: true
+        env:
+          CI: true
+          NODE_ENV: "test"
         run: yarn playwright test
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
