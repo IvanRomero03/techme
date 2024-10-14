@@ -74,7 +74,7 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
       allowDangerousEmailAccountLinking: true,
     }),
-    ...(process.env.CI
+    ...(process.env.CI || process.env.NODE_ENV === "test"
       ? []
       : [
           CredentialsProvider({
@@ -89,7 +89,7 @@ export const authOptions: NextAuthOptions = {
               },
             },
             async authorize(credentials) {
-              if (!!process.env.CI) {
+              if (!!process.env.CI || process.env.NODE_ENV === "test") {
                 throw new Error("Credentials provider unallowed");
               }
               const email = credentials?.email;
