@@ -9,6 +9,7 @@ import {
   timestamp,
   varchar,
   vector,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
 
@@ -366,3 +367,89 @@ export const documentEmbeddings = createTable(
     documentIdIdx: index("embedding_document_id_idx").on(embedding.documentId),
   }),
 );
+
+//TABLA VALIDATION
+export const validation = createTable (
+  "validation",
+  {
+    id: serial("id").primaryKey(), 
+    name: varchar("name", {length: 255 }).notNull(),
+    userId: varchar("user_id", {length: 255}).references(() => users.id),
+    isFinal: boolean("is_final").default(false),
+    createdAt: timestamp("created_at", {
+      mode: "date",
+      withTimezone: true,
+    }).defaultNow(),
+    completedAt: timestamp("completed_at" , {
+      mode: "date",
+      withTimezone: true,
+    }),
+  },
+  (validation) => ({
+    userIdIdx: index("validation_user_id_idx").on(validation.userId),
+  }),
+);
+
+export const validationDocuments = createTable(
+  "validation_documents",
+  {
+    id: varchar("id", {length: 255})
+    .notNull()
+    .primaryKey()
+    .$defaultFn(()=> crypto.randomUUID()),
+    validationId: integer("validation_id").references(() => validation.id, {
+      onDelete: "cascade",
+    }).notNull(),
+    name: varchar("name", { length: 255}).notNull(),
+    url: varchar("url", {length: 255}).notNull(),
+    uploadedBy: varchar("uploaded_by", {length: 255}).references(() => users.id).notNull(),
+    uploadedAt: timestamp("uploaded_at", {
+      mode: "date",
+      withTimezone: true,
+    }).defaultNow(),
+  },
+  (document) => ({
+    validationIdIdx: index("Validation_document_validation_id_idx").on(document.validationId),
+    nameIdx: index("validation_documet_name_idx").on(document.name),
+  }),
+);
+
+export const validationDocumentNotes = createTable (
+  "validation_document_notes",
+  {
+    id: serial("id").primaryKey(),
+    documentId: varchar("document_id", {length: 255}).references(() => validationDocuments.id,{
+      onDelete: "cascade",
+    }).notNull(),
+    note: text("note").notNull(),
+    createdBy: varchar("created_by", {length: 255}).references(() => users.id),
+    createdAt: timestamp("created_at", {
+      mode: "date",
+      withTimezone: true,
+  }).defaultNow(),
+  },
+  (note) => ({
+    documentIdIdx: index("validation_note_document_id_idx").on(note.documentId),
+  }),
+);
+
+export const validationDocumentLikes = createTable(
+  "validation_document_likes",
+  {
+    id: serial("id").primaryKey(), 
+    documentId: varchar("document_id", { length: 255 }).references(() => validationDocuments.id, {
+      onDelete: "cascade",
+    }).notNull(), 
+    userId: varchar("user_id", { length: 255 }).references(() => users.id).notNull(), 
+    likedAt: timestamp("liked_at", {
+      mode: "date",
+      withTimezone: true,
+    }).defaultNow(), 
+  },
+  (like) => ({
+    documentUserIdIdx: primaryKey({ columns: [like.documentId, like.userId] }), 
+    documentIdIdx: index("validation_like_document_id_idx").on(like.documentId), 
+    userIdIdx: index("validation_like_user_id_idx").on(like.userId), 
+  }),
+);
+
