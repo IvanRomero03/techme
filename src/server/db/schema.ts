@@ -436,7 +436,7 @@ export const validationDocumentNotes = createTable (
 export const validationDocumentLikes = createTable(
   "validation_document_likes",
   {
-    id: serial("id").primaryKey(), 
+    // Eliminamos la columna "id" con serial y primaryKey
     documentId: varchar("document_id", { length: 255 }).references(() => validationDocuments.id, {
       onDelete: "cascade",
     }).notNull(), 
@@ -447,7 +447,7 @@ export const validationDocumentLikes = createTable(
     }).defaultNow(), 
   },
   (like) => ({
-    documentUserIdIdx: primaryKey({ columns: [like.documentId, like.userId] }), 
+    documentUserIdIdx: primaryKey({ columns: [like.documentId, like.userId] }), // Clave primaria compuesta
     documentIdIdx: index("validation_like_document_id_idx").on(like.documentId), 
     userIdIdx: index("validation_like_user_id_idx").on(like.userId), 
   }),
