@@ -52,9 +52,10 @@ export default function Validation({ validationId }: ValidationProps) {
     onSuccess: () => utils.validation.getAllReviews.invalidate(),
   });
 
-  const { mutateAsync: finalizeReview } = api.validation.finalizeReview.useMutation({
-    onSuccess: () => utils.validation.getAllReviews.invalidate(),
-  });
+  const { mutateAsync: finalizeReview } =
+    api.validation.finalizeReview.useMutation({
+      onSuccess: () => utils.validation.getAllReviews.invalidate(),
+    });
 
   const [reviews, setReviews] = useState<Review[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -64,7 +65,7 @@ export default function Validation({ validationId }: ValidationProps) {
     const response = await fetch(url);
     const blob = await response.blob();
     const downloadUrl = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = downloadUrl;
     a.download = fileName;
     document.body.appendChild(a);
@@ -78,15 +79,15 @@ export default function Validation({ validationId }: ValidationProps) {
     return "URL_DEL_ARCHIVO_SUBIDO"; // Simulando una URL
   };
 
-  const handleAddReview = async (review: Omit<Review, 'id'>) => {
+  const handleAddReview = async (review: Omit<Review, "id">) => {
     const documentsWithUrls = await Promise.all(
       review.documents.map(async (doc) => {
         if (doc.file) {
           const url = await uploadFile(doc.file);
           return { ...doc, url };
         }
-        return { ...doc, url: doc.url || "" };
-      })
+        return { ...doc, url: doc.url ?? "" };
+      }),
     );
 
     const newReviewData = await addReview({
@@ -112,8 +113,8 @@ export default function Validation({ validationId }: ValidationProps) {
     await finalizeReview({ reviewId: id, userId: userId ?? "" });
     setReviews((prevReviews) =>
       prevReviews.map((review) =>
-        review.id === id ? { ...review, isFinal: true } : review
-      )
+        review.id === id ? { ...review, isFinal: true } : review,
+      ),
     );
   };
 
@@ -138,7 +139,9 @@ export default function Validation({ validationId }: ValidationProps) {
             <Formik
               initialValues={{
                 name: "",
-                documents: [{ name: "", file: null, notes: "", uploadedBy: userId ?? "" }],
+                documents: [
+                  { name: "", file: null, notes: "", uploadedBy: userId ?? "" },
+                ],
               }}
               onSubmit={async (values, { resetForm }) => {
                 await handleAddReview({
@@ -166,11 +169,13 @@ export default function Validation({ validationId }: ValidationProps) {
                     />
                   </div>
                   <FieldArray name="documents">
-                    {({ remove, push }) => (
+                    {(arrayHelpers) => (
                       <div className="flex flex-col gap-2">
                         {values.documents.map((_, index: number) => (
                           <div key={index}>
-                            <Label htmlFor={`documents.${index}.name`}>Document Name</Label>
+                            <Label htmlFor={`documents.${index}.name`}>
+                              Document Name
+                            </Label>
                             <Field
                               id={`documents.${index}.name`}
                               name={`documents.${index}.name`}
@@ -179,18 +184,26 @@ export default function Validation({ validationId }: ValidationProps) {
                               placeholder="Enter document name"
                               className="w-full rounded-md border p-2"
                             />
-                            <Label htmlFor={`documents.${index}.file`}>Upload Document</Label>
+                            <Label htmlFor={`documents.${index}.file`}>
+                              Upload Document
+                            </Label>
                             <input
                               id={`documents.${index}.file`}
                               name={`documents.${index}.file`}
                               type="file"
                               onChange={(event) => {
-                                const file = event.currentTarget.files?.[0] || null;
-                                setFieldValue(`documents.${index}.file`, file);
+                                const file =
+                                  event.currentTarget.files?.[0] ?? null;
+                                void setFieldValue(
+                                  `documents.${index}.file`,
+                                  file,
+                                );
                               }}
                               className="w-full rounded-md border p-2"
                             />
-                            <Label htmlFor={`documents.${index}.notes`}>Notes</Label>
+                            <Label htmlFor={`documents.${index}.notes`}>
+                              Notes
+                            </Label>
                             <Field
                               id={`documents.${index}.notes`}
                               name={`documents.${index}.notes`}
@@ -201,14 +214,21 @@ export default function Validation({ validationId }: ValidationProps) {
                             <div className="mt-4 flex gap-6">
                               <Button
                                 type="button"
-                                onClick={() => remove(index)}
+                                onClick={() => arrayHelpers.remove(index)}
                                 className="text-red-500"
                               >
                                 Delete Document
                               </Button>
                               <Button
                                 type="button"
-                                onClick={() => push({ name: '', file: null, notes: '', uploadedBy: userId ?? '' })}
+                                onClick={() =>
+                                  arrayHelpers.push({
+                                    name: "",
+                                    file: null,
+                                    notes: "",
+                                    uploadedBy: userId ?? "",
+                                  })
+                                }
                                 className="text-blue-500"
                               >
                                 Add Document
@@ -231,7 +251,10 @@ export default function Validation({ validationId }: ValidationProps) {
         {/* Mostrar los reviews creados */}
         <div className="mt-4">
           {reviews.map((review) => (
-            <div key={review.id} className="border p-4 rounded-md shadow-md mt-4">
+            <div
+              key={review.id}
+              className="mt-4 rounded-md border p-4 shadow-md"
+            >
               <h3>{review.name}</h3>
               {review.documents.map((doc) => (
                 <div key={doc.id}>
