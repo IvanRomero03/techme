@@ -52,81 +52,74 @@ export default function Validation({ validationId }: ValidationProps) {
     onSuccess: () => utils.validation.getAllReviews.invalidate(),
   });
 
-  const { mutateAsync: updateReview } = api.validation.updateReview.useMutation({
-    onSuccess: () => utils.validation.getAllReviews.invalidate(),
-  });
-
   const { mutateAsync: finalizeReview } = api.validation.finalizeReview.useMutation({
     onSuccess: () => utils.validation.getAllReviews.invalidate(),
   });
 
-  const { mutateAsync: deleteDocument } = api.validation.deleteDocument.useMutation({
-    onSuccess: () => utils.validation.getAllReviews.invalidate(),
-  });
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  // Función para descargar el archivo directamente
+  const downloadFile = async (url: string, fileName: string) => {
+    const response = await fetch(url);
+    const blob = await response.blob();
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = downloadUrl;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(downloadUrl);
+  };
 
   // Función para manejar la subida de archivos a un servicio (como Supabase, Firebase, etc.)
   const uploadFile = async (file: File): Promise<string> => {
-    // Aquí puedes implementar la subida de archivos
-    // Esta función debe devolver la URL del archivo subido
-    // Ejemplo (Supabase):
-    // const { data, error } = await supabase.storage.from('your-bucket').upload(`documents/${file.name}`, file);
-    // if (error) throw new Error(error.message);
-    // return data.publicUrl; 
     return "URL_DEL_ARCHIVO_SUBIDO"; // Simulando una URL
   };
 
   const handleAddReview = async (review: Omit<Review, 'id'>) => {
-    // Asegúrate de que todos los documentos tengan una URL válida
     const documentsWithUrls = await Promise.all(
       review.documents.map(async (doc) => {
         if (doc.file) {
-          const url = await uploadFile(doc.file); // Subir archivo y obtener URL
-          return { ...doc, url };  // Reemplazar `file` por `url` después de la subida
+          const url = await uploadFile(doc.file);
+          return { ...doc, url };
         }
-        return { ...doc, url: doc.url || "" };  // Si no hay archivo, asegura que 'url' no sea undefined
+        return { ...doc, url: doc.url || "" };
       })
     );
-  
-    await addReview({
+
+    const newReviewData = await addReview({
       name: review.name,
       userId: userId ?? "",
       documents: documentsWithUrls,
     });
-  };
-  
-  const handleUpdateReview = async (review: Review) => {
-    if (!review.id) return;
-  
-    // Asegúrate de que todos los documentos tengan una URL válida
-    const documentsWithUrls = await Promise.all(
-      review.documents.map(async (doc) => {
-        if (doc.file) {
-          const url = await uploadFile(doc.file); // Subir archivo y obtener URL
-          return { ...doc, url };  // Reemplazar `file` por `url` después de la subida
-        }
-        return { ...doc, url: doc.url || "" };  // Si no hay archivo, asegura que 'url' no sea undefined
-      })
-    );
-  
-    await updateReview({
-      id: review.id,
+
+    const newReview: Review = {
+      id: newReviewData.id,
       name: review.name,
       userId: userId ?? "",
       documents: documentsWithUrls,
-    });
+      createdAt: new Date(),
+      isFinal: false,
+      completedAt: null,
+    };
+
+    setReviews((prevReviews) => [...prevReviews, newReview]);
   };
-  
 
   const handleFinalizeReview = async (id: number) => {
     await finalizeReview({ reviewId: id, userId: userId ?? "" });
+    setReviews((prevReviews) =>
+      prevReviews.map((review) =>
+        review.id === id ? { ...review, isFinal: true } : review
+      )
+    );
   };
 
-  const handleDeleteDocument = async (docId: number) => {
-    await deleteDocument({ documentId: docId.toString() });
-  };
-
-  const [editIndex, setEditIndex] = useState<number | null>(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  function handleDeleteDocument(arg0: number): void {
+    throw new Error("Function not implemented.");
+  }
 
   return (
     <>
@@ -177,9 +170,7 @@ export default function Validation({ validationId }: ValidationProps) {
                       <div className="flex flex-col gap-2">
                         {values.documents.map((_, index: number) => (
                           <div key={index}>
-                            <Label htmlFor={`documents.${index}.name`}>
-                              Document Name
-                            </Label>
+                            <Label htmlFor={`documents.${index}.name`}>Document Name</Label>
                             <Field
                               id={`documents.${index}.name`}
                               name={`documents.${index}.name`}
@@ -188,9 +179,7 @@ export default function Validation({ validationId }: ValidationProps) {
                               placeholder="Enter document name"
                               className="w-full rounded-md border p-2"
                             />
-                            <Label htmlFor={`documents.${index}.file`}>
-                              Upload Document
-                            </Label>
+                            <Label htmlFor={`documents.${index}.file`}>Upload Document</Label>
                             <input
                               id={`documents.${index}.file`}
                               name={`documents.${index}.file`}
@@ -201,9 +190,7 @@ export default function Validation({ validationId }: ValidationProps) {
                               }}
                               className="w-full rounded-md border p-2"
                             />
-                            <Label htmlFor={`documents.${index}.notes`}>
-                              Notes
-                            </Label>
+                            <Label htmlFor={`documents.${index}.notes`}>Notes</Label>
                             <Field
                               id={`documents.${index}.notes`}
                               name={`documents.${index}.notes`}
@@ -240,6 +227,42 @@ export default function Validation({ validationId }: ValidationProps) {
             </Formik>
           </DialogContent>
         </Dialog>
+
+        {/* Mostrar los reviews creados */}
+        <div className="mt-4">
+          {reviews.map((review) => (
+            <div key={review.id} className="border p-4 rounded-md shadow-md mt-4">
+              <h3>{review.name}</h3>
+              {review.documents.map((doc) => (
+                <div key={doc.id}>
+                  <Button onClick={() => downloadFile(doc.url!, doc.name)}>
+                    Download {doc.name}
+                  </Button>
+                  {!review.isFinal && (
+                    <Button
+                      type="button"
+                      onClick={() => handleDeleteDocument(doc.id!)}
+                      className="ml-4 text-red-500"
+                    >
+                      Delete
+                    </Button>
+                  )}
+                </div>
+              ))}
+              {!review.isFinal && (
+                <div className="mt-4">
+                  <Button
+                    type="button"
+                    onClick={() => handleFinalizeReview(review.id)}
+                    className="text-green-500"
+                  >
+                    Final Review
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
     </>
   );

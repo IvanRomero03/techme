@@ -74,7 +74,7 @@ export const validationRouter = createTRPCRouter({
         }
       }
 
-      return review; // Devuelve el review creado
+      return { id: reviewId };  // Devuelve solo el ID del review creado
     }),
 
   getAllReviews: publicProcedure
@@ -121,7 +121,7 @@ export const validationRouter = createTRPCRouter({
         throw new Error("Error finalizing review, reviewId is undefined.");
       }
 
-      return finalizedReview[0]; // Retorna el review finalizado
+      return { id: finalizedReview[0].id };  // Devuelve solo el ID del review finalizado
     }),
 
   // Mutación para actualizar un review
@@ -149,6 +149,11 @@ export const validationRouter = createTRPCRouter({
         .where(eq(validation.id, input.id))
         .returning({ id: validation.id });
 
+      // Verificar si updatedReview[0] existe
+      if (!updatedReview[0]) {
+        throw new Error("Error updating review, no review found.");
+      }
+
       // Actualizar los documentos si están presentes
       if (input.documents) {
         const documentPromises = input.documents.map(async (doc) => {
@@ -163,7 +168,7 @@ export const validationRouter = createTRPCRouter({
         await Promise.all(documentPromises);  // Asegura que todos los documentos se actualicen
       }
 
-      return updatedReview;
+      return { id: updatedReview[0].id };  // Devuelve solo el ID del review actualizado
     }),
 
   // Mutación para eliminar un documento
