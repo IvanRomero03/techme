@@ -31,7 +31,7 @@ export default async function Home() {
           </>
         )}
 
-        {session && (
+        {session && session.user && session.user.role && (
           <>
             <Link href={`/dashboard/${session.user.role.toLowerCase()}`}>
               <Button variant="default" className="mt-4 w-full">

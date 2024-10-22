@@ -4,6 +4,13 @@ import { projectsRouter } from "./routers/projects";
 import { projectsRouterSummary } from "./routers/projectSummary";
 import { requirementsRouter } from "./routers/requirements";
 import { projectsRouterTasks } from "./routers/projectTasks";
+import { frameworkContractsRouter } from "./routers/frameworkContractsRouter";
+import { projectsEstimationsRouter } from "./routers/estimations";
+import { documentsRouter } from "./routers/documents";
+import { projectProposalsRouter } from "./routers/projectProposals";
+import { projectEstimatesRouter } from "./routers/projectEstimate";
+import { projectChecklistRouter } from "./routers/projectChecklist";
+import { meetingsRouter, peoplePerMeetingRouter } from "./routers/meetings";
 import { loginVerification } from "./routers/login";
 
 /**
@@ -17,6 +24,14 @@ export const appRouter = createTRPCRouter({
   projectsSummary: projectsRouterSummary,
   requirements: requirementsRouter,
   prjectTasks: projectsRouterTasks,
+  frameworkContracts: frameworkContractsRouter,
+  projectProposals: projectProposalsRouter,
+  projectEstimate: projectEstimatesRouter,
+  projectChecklist: projectChecklistRouter,
+  estimations: projectsEstimationsRouter,
+  documents: documentsRouter,
+  meetings: meetingsRouter,
+  peoplePerMeeting: peoplePerMeetingRouter,
   login: loginVerification,
 });
 

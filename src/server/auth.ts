@@ -1,3 +1,4 @@
+// auth.ts or similar file
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import {
   getServerSession,
@@ -17,41 +18,59 @@ import {
 import type { UserRole } from "techme/util/UserRole";
 
 /**
- * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
- * object and keep type safety.
- *
- * @see https://next-auth.js.org/getting-started/typescript#module-augmentation
+ * Module augmentation for `next-auth` types
  */
 declare module "next-auth" {
   interface Session extends DefaultSession {
     user: {
       id: string;
-      // ...other properties
       role: UserRole;
     } & DefaultSession["user"];
   }
 
   interface User {
-    // ...other properties
     role: UserRole;
   }
 }
 
-/**
- * Options for NextAuth.js used to configure adapters, providers, callbacks, etc.
- *
- * @see https://next-auth.js.org/configuration/options
- */
+// Create a constant for the hardcoded user data
+const HARDCODED_USER = {
+  id: "342e41c4-6ed3-48b4-aa74-6fae060bca5a",
+  name: "Ivan Alberto Romero Wells",
+  email: "a00833623@tec.mx",
+  role: "ADMIN" as UserRole,
+  image: null, 
+};
+
 export const authOptions: NextAuthOptions = {
   callbacks: {
-    session: ({ session, user }) => ({
-      ...session,
-      user: {
-        ...session.user,
-        id: user.id,
-        role: user.role,
-      },
-    }),
+    session: async ({ session }) => {
+      
+      if (process.env.NEXT_PUBLIC_USE_HARDCODED_SESSION === "true") {
+        return {
+          ...session,
+          user: HARDCODED_USER,
+          expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), 
+        };
+      }
+      
+      return session;
+    },
+    jwt: async ({ token, user }) => {
+      // If using hardcoded session, modify the JWT token
+      if (process.env.NEXT_PUBLIC_USE_HARDCODED_SESSION === "true") {
+        return {
+          ...token,
+          ...HARDCODED_USER,
+        };
+      }
+
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
+      }
+      return token;
+    },
   },
   adapter: DrizzleAdapter(db, {
     usersTable: users,
@@ -71,21 +90,12 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
       allowDangerousEmailAccountLinking: true,
     }),
-    /**
-     * ...add more providers here.
-     *
-     * Most other providers require a bit more work than the Discord provider. For example, the
-     * GitHub provider requires you to add the `refresh_token_expires_in` field to the Account
-     * model. Refer to the NextAuth.js docs for the provider you want to use. Example:
-     *
-     * @see https://next-auth.js.org/providers/github
-     */
   ],
 };
 
-/**
- * Wrapper for `getServerSession` so that you don't need to import the `authOptions` in every file.
- *
- * @see https://next-auth.js.org/configuration/nextjs
- */
+// Wrapper for getServerSession
 export const getServerAuthSession = () => getServerSession(authOptions);
+
+// Add a helper function to check if using hardcoded session
+export const isUsingHardcodedSession = () => 
+  process.env.NEXT_PUBLIC_USE_HARDCODED_SESSION === "true";

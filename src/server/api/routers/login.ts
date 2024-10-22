@@ -18,7 +18,8 @@ export const loginVerification = createTRPCRouter({
                     id: user.id,
                     name: user.name,
                     email: user.email, 
-                    role: user.role
+                    role: user.role,
+                    emailVerified: user.emailVerified,
                 };
         } else {
             throw new Error("Invalid credentials");

@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { createTRPCRouter, protectedProcedure } from "techme/server/api/trpc";
 import getOpenAI from "techme/server/chatgpt/openai";
 import { projects } from "techme/server/db/schema";
-import { readableRole } from "techme/util/UserRole";
+import { readableRole, UserRole } from "techme/util/UserRole";
 
 export const projectsRouterSummary = createTRPCRouter({
   getProjectSummary: protectedProcedure
@@ -36,7 +36,7 @@ export const projectsRouterSummary = createTRPCRouter({
             role: "system",
             content:
               "Eres un robot que ayuda a un " +
-              readableRole(ctx.session.user.role) +
+              readableRole(ctx.session.user.role as UserRole) +
               " para resumir su proyecto, tu tarea es dar la información más relevante y concisa sobre el proyecto." +
               " Ayudalo a cumplir con sus objetivos para poder desarrollar una preventa del proyecto." +
               " Por favor intenta hacer el resumen lo más corto posible y usa bullet points (-) para hacerlo más legible." +

@@ -25,6 +25,7 @@ interface TopNavBarProps {
 }
 
 const TopNavBar: React.FC<TopNavBarProps> = ({ session }) => {
+  console.log(session?.user);
   return (
     <div
       className={`flex items-center justify-between bg-white px-6 py-3 shadow-lg transition-all duration-300`}

@@ -66,3 +66,39 @@ test('view calendar', async ({ page }) => {
     await page.goto(`/calendar`);
     await page.waitForTimeout(5000);
 });
+
+test ('view documents', async ({ page }) => {
+    await login(page);
+
+    await page.goto(`/projects`);
+    await page.waitForTimeout(10000);
+    await page.getByText('Compra venta automoviles 2').click();
+    await page.waitForTimeout(3000);
+
+    await page.getByText('Documentation').click();
+    await page.waitForTimeout(5000);
+    await page.getByText('Documento general').click();
+
+});
+
+test ('add meeting', async ({ page }) => {
+    await login(page);
+
+    await page.goto(`/projects`);
+    await page.waitForTimeout(10000);
+    await page.getByText('Compra venta automoviles 2').click();
+    await page.waitForTimeout(3000);
+
+    await page.getByText('Planning').click();
+    await page.waitForTimeout(5000);
+    await page.getByText('Add Meeting').click();
+    await page.fill('input[placeholder="Enter meeting title"]', 'Test Meeting');
+    await page.fill('input[type="date"]', '2024-11-10');
+    await page.fill('input[placeholder="Enter meeting description"]', 'Test meeting description');
+    await page.getByText('Add Members').click();
+    await page.getByText('Elvia Itzamná Rosas Herrera').click();
+    await page.getByText('Ivan Alberto Romero Wells').click();
+    await page.getByText('Fill in the details to schedule a new meeting and invite members.').click();
+    await page.getByText('Schedule Meeting').click();
+
+});

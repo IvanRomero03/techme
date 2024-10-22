@@ -8,6 +8,7 @@ import {
   text,
   timestamp,
   varchar,
+  vector,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
 
@@ -195,5 +196,173 @@ export const projectTasks = createTable(
     projectIdIdx: index("task_project_id_idx").on(task.projectId),
     projectNameIdx: index("task_project_name_idx").on(task.title),
     projectStatusIdx: index("task_project_status_idx").on(task.status),
+  }),
+);
+
+export const frameworkContracts = createTable(
+  "framework_contracts",
+  {
+    id: serial("id").primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    description: text("description"),
+    startDate: timestamp("start_date", {
+      mode: "date",
+      withTimezone: true,
+    }).defaultNow(),
+    endDate: timestamp("end_date", {
+      mode: "date",
+      withTimezone: true,
+    }).default(sql`NOW() + INTERVAL '1 year'`),
+    status: varchar("status", { length: 255 }).default("active"),
+    lastModifiedBy: varchar("last_modified_by", { length: 255 }).references(
+      () => users.id,
+    ),
+  },
+  (contract) => ({
+    nameIdx: index("contract_name_idx").on(contract.name),
+    statusIdx: index("contract_status_idx").on(contract.status),
+  }),
+);
+
+export const frameworkContractPerProject = createTable(
+  "framework_contract_per_project",
+  {
+    contractId: integer("contract_id").references(() => frameworkContracts.id, {
+      onDelete: "cascade",
+    }),
+    projectId: integer("project_id").references(() => projects.id),
+  },
+);
+
+export const estimations = createTable(
+  "estimations",
+  {
+    id: serial("id").primaryKey(),
+    projectId: integer("project_id").references(() => projects.id, {
+      onDelete: "cascade",
+    }),
+    phase: varchar("phase", { length: 255 }).notNull(),
+    timeEstimation: integer("time_estimation").default(0),
+    timeUnit: varchar("time_unit", { length: 255 }).default("days"),
+    manforce: integer("manforce").default(0),
+    manforceUnit: varchar("manforce_unit", { length: 255 }),
+    notes: text("notes"),
+    createdAt: timestamp("created_at", {
+      mode: "date",
+      withTimezone: true,
+    }).defaultNow(),
+    lastModifiedBy: varchar("last_modified_by", { length: 255 }).references(
+      () => users.id,
+    ),
+  },
+  (estimation) => ({
+    projectIdIdx: index("estimation_project_id_idx").on(estimation.projectId),
+    phaseIdx: index("estimation_phase_idx").on(estimation.phase),
+  }),
+);
+
+export const projectDocuments = createTable(
+  "documents",
+  {
+    id: varchar("id", { length: 255 })
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    projectId: integer("project_id").references(() => projects.id, {
+      onDelete: "cascade",
+    }),
+    name: varchar("name", { length: 255 }).notNull(),
+    url: varchar("url", { length: 255 }).notNull(),
+    uploadedBy: varchar("uploaded_by", { length: 255 }).references(
+      () => users.id,
+    ),
+    uploadedAt: timestamp("uploaded_at", {
+      mode: "date",
+      withTimezone: true,
+    }).defaultNow(),
+  },
+  (document) => ({
+    projectIdIdx: index("document_project_id_idx").on(document.projectId),
+    nameIdx: index("document_name_idx").on(document.name),
+  }),
+);
+
+export const meetings = createTable("meetings", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id")
+    .references(() => projects.id)
+    .notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  date: timestamp("date", { mode: "date", withTimezone: true }).notNull(),
+  description: text("description"), // Adding description field
+  createdBy: varchar("created_by", { length: 255 })
+    .references(() => users.id)
+    .notNull(),
+  modifiedBy: varchar("modified_by", { length: 255 }).references(
+    () => users.id,
+  ),
+});
+
+export const meetingsRelations = relations(meetings, ({ many }) => ({
+  attendees: many(peoplePerMeeting),
+}));
+
+export const peoplePerMeeting = createTable(
+  "people_per_meeting",
+  {
+    meetingId: integer("meeting_id")
+      .references(() => meetings.id, {
+        onDelete: "cascade",
+      })
+      .notNull(), // Foreign key for meetings
+    userId: varchar("user_id", { length: 255 })
+      .references(() => users.id)
+      .notNull(), // Foreign key for users
+    createdBy: varchar("created_by", { length: 255 })
+      .references(() => users.id)
+      .notNull(), // User who invited
+    modifiedBy: varchar("modified_by", { length: 255 }).references(
+      () => users.id,
+    ), // User who last modified the invitation
+  },
+  (peoplePerMeeting) => ({
+    meetingIdUserIdx: primaryKey({
+      columns: [peoplePerMeeting.meetingId, peoplePerMeeting.userId],
+    }),
+    meetingIdIdx: index("people_per_meeting_meeting_id_idx").on(
+      peoplePerMeeting.meetingId,
+    ),
+    userIdIdx: index("people_per_meeting_user_id_idx").on(
+      peoplePerMeeting.userId,
+    ),
+  }),
+);
+
+export const peoplePerMeetingRelations = relations(
+  peoplePerMeeting,
+  ({ one }) => ({
+    meeting: one(meetings, {
+      fields: [peoplePerMeeting.meetingId],
+      references: [meetings.id],
+    }),
+    user: one(users, {
+      fields: [peoplePerMeeting.userId],
+      references: [users.id],
+    }),
+  }),
+);
+
+export const documentEmbeddings = createTable(
+  "document_embeddings",
+  {
+    id: serial("id").primaryKey(),
+    documentId: varchar("document_id", { length: 255 }).references(
+      () => projectDocuments.id,
+    ),
+    text: text("text").notNull(),
+    embedding: vector("embedding", { dimensions: 1536 }).notNull(), // text-embedding-3-large
+  },
+  (embedding) => ({
+    documentIdIdx: index("embedding_document_id_idx").on(embedding.documentId),
   }),
 );
