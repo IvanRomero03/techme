@@ -50,7 +50,7 @@ export default function Planning({ projectId }: { projectId: number }) {
         }
       
         try {
-          await addMeeting({
+        addMeeting({
             projectId,
             title: meetingTitle,
             date: meetingDate,
@@ -76,7 +76,7 @@ export default function Planning({ projectId }: { projectId: number }) {
 
     const handleDialogClose = async () => {
         try {
-            utils.meetings.getProjectMeetings.refetch({ projectId });
+            void utils.meetings.getProjectMeetings.refetch({ projectId });
         } catch (error) {
             console.error("Failed to refetch meetings:", error);
         }
