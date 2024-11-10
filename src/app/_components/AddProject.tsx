@@ -37,6 +37,7 @@ export function AddProject() {
     api.members.getAuthorizedMembers.useQuery();
   const { mutateAsync: createProject } =
     api.projects.createProject.useMutation();
+  const { mutateAsync: createNotifications } = api.notifications.createMany.useMutation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const session = useSession();
   const utils = api.useUtils();
@@ -89,14 +90,40 @@ export function AddProject() {
             _openMembers: false,
           }}
           onSubmit={async (values) => {
-            await createProject({
-              project_name: values.project_name,
-              project_description: values.project_description,
-              project_category: values.project_category,
-              project_members: Array.from(values._selectedMembers.keys()),
-            });
-            await utils.projects.getMyProjects.invalidate();
-            setDialogOpen(false);
+            try {
+
+              const newProject = await createProject({
+                project_name: values.project_name,
+                project_description: values.project_description,
+                project_category: values.project_category,
+                project_members: Array.from(values._selectedMembers.keys()),
+              });
+
+             
+              const notifications = Array.from(values._selectedMembers.keys()).map(memberId => ({
+                userId: memberId,
+                title: "New Project Added",
+                message: `You've been added to project: ${values.project_name}`,
+                type: "PROJECT_ADDED",
+                relatedId: newProject[0]!.id,
+              })) as {
+                userId: string;
+                title: string;
+                message: string;
+                type: "PROJECT_ADDED";
+                relatedId: number;
+              }[];
+
+              await createNotifications(notifications);
+
+             
+              await utils.projects.getMyProjects.invalidate();
+              await utils.notifications.getAll.invalidate();
+
+              setDialogOpen(false);
+            } catch (error) {
+              console.error("Failed to create project:", error);
+            }
           }}
         >
           {({ values, setFieldValue }) => (

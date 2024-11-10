@@ -10,6 +10,7 @@ import {
   varchar,
   vector,
   boolean,
+  pgTable,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
 
@@ -452,4 +453,19 @@ export const validationDocumentLikes = createTable(
     userIdIdx: index("validation_like_user_id_idx").on(like.userId), 
   }),
 );
+
+
+
+export const notifications = pgTable("notifications", {
+
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  type: varchar("type", { length: 50 }).notNull(), 
+  isRead: boolean("is_read").default(false),
+  relatedId: integer("related_id"), // meetingId
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 

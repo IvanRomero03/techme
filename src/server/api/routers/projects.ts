@@ -24,7 +24,10 @@ export const projectsRouter = createTRPCRouter({
           stage: "PLANNING",
           status: "ACTIVE",
         })
-        .returning();
+        .returning({
+          id: projects.id,
+          name: projects.name,
+        });
       await ctx.db.insert(peoplePerProject).values(
         input.project_members.map((userId) => ({
           projectId: project[0]?.id,

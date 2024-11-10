@@ -22,7 +22,7 @@ type Member = {
 
 export default function Planning({ projectId }: { projectId: number }) {
     const { data: session } = useSession();
-    const currentUserId = session?.user?.id; // Get the current user ID from session
+    const currentUserId = session?.user?.id; 
 
     const [meetingTitle, setMeetingTitle] = useState("");
     const [meetingDate, setMeetingDate] = useState("");
@@ -45,28 +45,34 @@ export default function Planning({ projectId }: { projectId: number }) {
 
     const handleAddMeeting = async () => {
         if (!meetingTitle || !meetingDate || !meetingDescription) {
-            console.log("Please provide meeting title, date, and description.");
-            return;
+          console.log("Please provide meeting title, date, and description.");
+          return;
         }
-
+      
         try {
-            addMeeting({
-                projectId,
-                title: meetingTitle,
-                date: meetingDate,
-                description: meetingDescription,
-                createdBy: currentUserId ?? "Unknown",
-                attendees: Array.from(selectedMembers.keys())
-            });
-            setMeetingTitle("");
-            setMeetingDate("");
-            setMeetingDescription(""); 
-            setSelectedMembers(new Map());
-            console.log("Meeting scheduled successfully!");
-        } catch {
-            console.log("Failed to schedule the meeting. Try again.");
+          await addMeeting({
+            projectId,
+            title: meetingTitle,
+            date: meetingDate,
+            description: meetingDescription,
+            createdBy: currentUserId ?? "Unknown",
+            attendees: Array.from(selectedMembers.keys())
+          });
+      
+          setMeetingTitle("");
+          setMeetingDate("");
+          setMeetingDescription(""); 
+          setSelectedMembers(new Map());
+          
+          
+          await utils.meetings.getProjectMeetings.invalidate();
+          await utils.notifications.getAll.invalidate();
+          
+          console.log("Meeting scheduled successfully!");
+        } catch (error) {
+          console.log("Failed to schedule the meeting. Try again.");
         }
-    };
+      };
 
     const handleDialogClose = async () => {
         try {
@@ -81,7 +87,6 @@ export default function Planning({ projectId }: { projectId: number }) {
             <div className="mb-6">
                 <h2 className="text-2xl font-bold mb-4">Meetings</h2>
 
-                {/* Button to open dialog */}
                 <Dialog onOpenChange={handleDialogClose}>
                     <DialogTrigger asChild>
                         <Button className="mt-4">Add Meeting</Button>

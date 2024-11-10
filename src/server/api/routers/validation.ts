@@ -4,8 +4,8 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "techme/server/api/trpc";
-import { validation, validationDocuments, validationDocumentNotes, validationDocumentLikes } from "techme/server/db/schema";
-import { eq, sql } from "drizzle-orm";  // Asegúrate de importar sql
+import { validation, validationDocuments, validationDocumentNotes, validationDocumentLikes, notifications, peoplePerProject } from "techme/server/db/schema";
+import { eq, sql } from "drizzle-orm"; 
 
 export const validationRouter = createTRPCRouter({
   createReview: protectedProcedure
@@ -13,6 +13,7 @@ export const validationRouter = createTRPCRouter({
       z.object({
         name: z.string(),
         userId: z.string(),
+        projectId: z.number(),
         documents: z.array(z.object({
           name: z.string(),
           url: z.string(),
@@ -22,7 +23,6 @@ export const validationRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Crear el review en la tabla validation
       const review = await ctx.db
         .insert(validation)
         .values({
@@ -30,7 +30,7 @@ export const validationRouter = createTRPCRouter({
           userId: input.userId,
           isFinal: false,
         })
-        .returning({ id: validation.id }); // Retorna solo el ID del review
+        .returning({ id: validation.id });
 
       const reviewId = review[0]?.id;
 
@@ -38,7 +38,6 @@ export const validationRouter = createTRPCRouter({
         throw new Error("Error creating review, reviewId is undefined.");
       }
 
-      // Insertar los documentos asociados al review
       const documentPromises = input.documents.map(async (doc) => {
         const insertedDoc = await ctx.db.insert(validationDocuments).values({
           validationId: reviewId,
@@ -53,7 +52,6 @@ export const validationRouter = createTRPCRouter({
           throw new Error("Error inserting document, documentId is undefined.");
         }
 
-        // Insertar notas para los documentos si están presentes
         if (doc.notes) {
           await ctx.db.insert(validationDocumentNotes).values({
             documentId: documentId,
@@ -66,7 +64,6 @@ export const validationRouter = createTRPCRouter({
       try {
         await Promise.all(documentPromises);
       } catch (error) {
-        // Verificación de tipo para asegurar que 'error' es una instancia de 'Error'
         if (error instanceof Error) {
           throw new Error("Error inserting documents: " + error.message);
         } else {
@@ -74,8 +71,33 @@ export const validationRouter = createTRPCRouter({
         }
       }
 
-      return { id: reviewId };  // Devuelve solo el ID del review creado
+      const projectMembers = await ctx.db
+        .select({
+          userId: peoplePerProject.userId,
+        })
+        .from(peoplePerProject)
+        .where(eq(peoplePerProject.projectId, input.projectId));
+
+      const validMembers = projectMembers.filter((member): member is { userId: string } => 
+        member.userId != null
+      );
+
+      if (validMembers.length > 0) {
+        await ctx.db.insert(notifications).values(
+          validMembers.map((member) => ({
+            userId: member.userId,
+            title: "New Validation Review",
+            message: `A new validation review "${input.name}" has been created`,
+            type: "VALIDATION_ADDED",
+            relatedId: review[0]?.id,
+          }))
+        );
+      }
+
+      return { id: review[0]?.id };
     }),
+
+  
 
   getAllReviews: publicProcedure
     .input(z.object({ userId: z.string() }))
@@ -98,16 +120,16 @@ export const validationRouter = createTRPCRouter({
       return allReviews;
     }),
 
-  // Mutación para finalizar un review
   finalizeReview: protectedProcedure
     .input(
       z.object({
         reviewId: z.number(),
         userId: z.string(),
+        projectId: z.number(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      // Actualizar el review para marcarlo como finalizado
+
       const finalizedReview = await ctx.db
         .update(validation)
         .set({
@@ -115,22 +137,49 @@ export const validationRouter = createTRPCRouter({
           completedAt: new Date(),
         })
         .where(eq(validation.id, input.reviewId))
-        .returning({ id: validation.id }); // Retorna solo el ID del review finalizado
+        .returning({ 
+          id: validation.id,
+          name: validation.name 
+        });
 
       if (!finalizedReview[0]?.id) {
         throw new Error("Error finalizing review, reviewId is undefined.");
       }
 
-      return { id: finalizedReview[0].id };  // Devuelve solo el ID del review finalizado
+      const projectMembers = await ctx.db
+        .select({
+          userId: peoplePerProject.userId,
+        })
+        .from(peoplePerProject)
+        .where(eq(peoplePerProject.projectId, input.projectId));
+
+      const validMembers = projectMembers.filter((member): member is { userId: string } => 
+        member.userId != null
+      );
+
+      if (validMembers.length > 0) {
+        await ctx.db.insert(notifications).values(
+          validMembers.map((member) => ({
+            userId: member.userId,
+            title: "Validation Review Finalized",
+            message: `The validation review "${finalizedReview[0]?.name}" has been finalized`,
+            type: "VALIDATION_ADDED", 
+            relatedId: finalizedReview[0]?.id,
+          }))
+        );
+      }
+  
+      return { id: finalizedReview[0]?.id };
     }),
 
-  // Mutación para actualizar un review
+
   updateReview: protectedProcedure
     .input(
       z.object({
-        id: z.number(),  // ID del review que quieres actualizar
-        name: z.string().optional(),  // El nombre puede ser opcional si no se quiere actualizar
-        userId: z.string(),  // ID del usuario que está realizando la actualización
+        id: z.number(),  
+        name: z.string().optional(), 
+        userId: z.string(), 
+        projectId: z.number(),
         documents: z.array(z.object({
           name: z.string(),
           url: z.string(),
@@ -140,21 +189,23 @@ export const validationRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Actualizar el nombre del review si es necesario
+
       const updatedReview = await ctx.db
         .update(validation)
         .set({
-          name: input.name ?? undefined,  // Actualiza el nombre solo si se ha proporcionado
+          name: input.name ?? undefined,  
         })
         .where(eq(validation.id, input.id))
-        .returning({ id: validation.id });
+        .returning({ 
+          id: validation.id,
+          name: validation.name 
+        });
 
-      // Verificar si updatedReview[0] existe
       if (!updatedReview[0]) {
         throw new Error("Error updating review, no review found.");
       }
 
-      // Actualizar los documentos si están presentes
+
       if (input.documents) {
         const documentPromises = input.documents.map(async (doc) => {
           await ctx.db.insert(validationDocuments).values({
@@ -165,17 +216,41 @@ export const validationRouter = createTRPCRouter({
           });
         });
 
-        await Promise.all(documentPromises);  // Asegura que todos los documentos se actualicen
+        await Promise.all(documentPromises);  
       }
 
-      return { id: updatedReview[0].id };  // Devuelve solo el ID del review actualizado
-    }),
+      const projectMembers = await ctx.db
+        .select({
+          userId: peoplePerProject.userId,
+        })
+        .from(peoplePerProject)
+        .where(eq(peoplePerProject.projectId, input.projectId));
 
-  // Mutación para eliminar un documento
+
+      const validMembers = projectMembers.filter((member): member is { userId: string } => 
+        member.userId != null
+      );
+
+      if (validMembers.length > 0) {
+        await ctx.db.insert(notifications).values(
+          validMembers.map((member) => ({
+            userId: member.userId,
+            title: "New Validation Review",
+            message: `A new validation review "${input.name}" has been created`,
+            type: "VALIDATION_ADDED",
+            relatedId: updatedReview[0]!.id,
+          }))
+        );
+      }
+
+      return { id: updatedReview[0]?.id };
+    }),
+    
+
   deleteDocument: protectedProcedure
     .input(z.object({ documentId: z.string() }))
     .mutation(async ({ ctx, input }) => {
-      // Eliminar un documento específico
+
       await ctx.db.delete(validationDocuments).where(eq(validationDocuments.id, input.documentId));
     }),
 });

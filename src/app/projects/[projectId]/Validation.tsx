@@ -18,12 +18,11 @@ import {
   DialogFooter,
 } from "t/components/ui/dialog";
 
-// Definición de los tipos para Review y Document
 interface Document {
   id?: number;
   name: string;
-  file: File | null; // Aquí almacenamos el archivo
-  url?: string; // Ahora usamos la URL después de subir el archivo
+  file: File | null; 
+  url?: string; 
   uploadedBy: string;
   notes?: string;
 }
@@ -49,7 +48,9 @@ export default function Validation({ validationId }: ValidationProps) {
   const utils = api.useUtils();
 
   const { mutateAsync: addReview } = api.validation.createReview.useMutation({
-    onSuccess: () => utils.validation.getAllReviews.invalidate(),
+    onSuccess: async () => {await utils.validation.getAllReviews.invalidate();
+      await utils.notifications.getAll.invalidate();
+    },
   });
 
   const { mutateAsync: finalizeReview } =
@@ -74,9 +75,8 @@ export default function Validation({ validationId }: ValidationProps) {
     window.URL.revokeObjectURL(downloadUrl);
   };
 
-  // Función para manejar la subida de archivos a un servicio (como Supabase, Firebase, etc.)
   const uploadFile = async (file: File): Promise<string> => {
-    return "URL_DEL_ARCHIVO_SUBIDO"; // Simulando una URL
+    return "URL_DEL_ARCHIVO_SUBIDO"; 
   };
 
   const handleAddReview = async (review: Omit<Review, "id">) => {
@@ -94,10 +94,10 @@ export default function Validation({ validationId }: ValidationProps) {
       name: review.name,
       userId: userId ?? "",
       documents: documentsWithUrls,
+      projectId: 0
     });
-
     const newReview: Review = {
-      id: newReviewData.id,
+      id: newReviewData.id!,
       name: review.name,
       userId: userId ?? "",
       documents: documentsWithUrls,
@@ -108,9 +108,8 @@ export default function Validation({ validationId }: ValidationProps) {
 
     setReviews((prevReviews) => [...prevReviews, newReview]);
   };
-
   const handleFinalizeReview = async (id: number) => {
-    await finalizeReview({ reviewId: id, userId: userId ?? "" });
+    await finalizeReview({ reviewId: id, userId: userId ?? "", projectId: 0 });
     setReviews((prevReviews) =>
       prevReviews.map((review) =>
         review.id === id ? { ...review, isFinal: true } : review,
@@ -248,7 +247,6 @@ export default function Validation({ validationId }: ValidationProps) {
           </DialogContent>
         </Dialog>
 
-        {/* Mostrar los reviews creados */}
         <div className="mt-4">
           {reviews.map((review) => (
             <div
