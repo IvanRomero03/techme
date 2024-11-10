@@ -30,8 +30,8 @@ export function NotificationBell() {
   const unreadCount = notifications?.filter(n => !n.isRead).length ?? 0;
 
   const handleMarkAsRead = async (id: number) => {
-    await markAsRead({ id });
-    await utils.notifications.getAll.invalidate();
+    markAsRead({ id });
+    utils.notifications.getAll.invalidate();
   };
 
   return (
