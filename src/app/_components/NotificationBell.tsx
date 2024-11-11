@@ -59,7 +59,7 @@ export function NotificationBell() {
         onClick={() => handleMarkAsRead(notification.id)}
       >
         <div className="flex items-start gap-3">
-          {getNotificationIcon(notification.type as NotificationType)}
+          {getNotificationIcon(notification.type)}
           <div className="flex-1">
             <h4 className="font-semibold">{notification.title}</h4>
             <p className="text-sm text-gray-600">{notification.message}</p>

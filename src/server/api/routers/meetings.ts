@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { eq, sql } from "drizzle-orm";
 import { createTRPCRouter, protectedProcedure } from "techme/server/api/trpc";
-import { meetings, notifications, peoplePerMeeting, users } from "techme/server/db/schema";
+import { meetings, notifications, NotificationType, peoplePerMeeting, users } from "techme/server/db/schema";
 
 
 export const meetingsRouter = createTRPCRouter({
@@ -60,7 +60,7 @@ export const meetingsRouter = createTRPCRouter({
             userId,
             title: "New Meeting Scheduled",
             message: `You've been invited to: ${input.title} on ${new Date(input.date).toLocaleString()}`,
-            type: "MEETING_CREATED",
+            type: NotificationType.MEETING_SCHEDULED,
             relatedId: newMeeting.id,
           }))
         );

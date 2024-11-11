@@ -4,7 +4,7 @@ import {
   protectedProcedure,
   publicProcedure,
 } from "techme/server/api/trpc";
-import { validation, validationDocuments, validationDocumentNotes, validationDocumentLikes, notifications, peoplePerProject } from "techme/server/db/schema";
+import { validation, validationDocuments, validationDocumentNotes, validationDocumentLikes, notifications, peoplePerProject, NotificationType } from "techme/server/db/schema";
 import { eq, sql } from "drizzle-orm"; 
 
 export const validationRouter = createTRPCRouter({
@@ -88,7 +88,7 @@ export const validationRouter = createTRPCRouter({
             userId: member.userId,
             title: "New Validation Review",
             message: `A new validation review "${input.name}" has been created`,
-            type: "VALIDATION_ADDED",
+            type: NotificationType.VALIDATION_ADDED,
             relatedId: review[0]?.id,
           }))
         );
@@ -163,7 +163,7 @@ export const validationRouter = createTRPCRouter({
             userId: member.userId,
             title: "Validation Review Finalized",
             message: `The validation review "${finalizedReview[0]?.name}" has been finalized`,
-            type: "VALIDATION_ADDED", 
+            type: NotificationType.DOCUMENT_VALIDATED, 
             relatedId: finalizedReview[0]?.id,
           }))
         );
@@ -237,7 +237,7 @@ export const validationRouter = createTRPCRouter({
             userId: member.userId,
             title: "New Validation Review",
             message: `A new validation review "${input.name}" has been created`,
-            type: "VALIDATION_ADDED",
+            type: NotificationType.VALIDATION_ADDED,
             relatedId: updatedReview[0]!.id,
           }))
         );

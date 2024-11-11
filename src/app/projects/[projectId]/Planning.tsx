@@ -76,7 +76,7 @@ export default function Planning({ projectId }: { projectId: number }) {
 
     const handleDialogClose = async () => {
         try {
-            void utils.meetings.getProjectMeetings.refetch({ projectId });
+            await utils.meetings.getProjectMeetings.refetch({ projectId });
         } catch (error) {
             console.error("Failed to refetch meetings:", error);
         }
