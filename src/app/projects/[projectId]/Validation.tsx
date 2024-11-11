@@ -117,7 +117,7 @@ export default function Validation({ validationId }: ValidationProps) {
     setReviews((prevReviews) => [...prevReviews, newReview]);
   };
   const handleFinalizeReview = async (id: number) => {
-    await finalizeReview({ reviewId: id, userId: userId ?? "", projectId: 0 });
+    await finalizeReview({ reviewId: id, userId: userId ?? "", projectId: validationId });
     setReviews((prevReviews) =>
       prevReviews.map((review) =>
         review.id === id ? { ...review, isFinal: true } : review,
@@ -132,7 +132,7 @@ export default function Validation({ validationId }: ValidationProps) {
         projectId: validationId 
       });
       
-      // Update local state
+
       setReviews((prevReviews) =>
         prevReviews.map((review) => ({
           ...review,
