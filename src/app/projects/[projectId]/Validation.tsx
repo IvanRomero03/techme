@@ -58,8 +58,16 @@ export default function Validation({ validationId }: ValidationProps) {
       onSuccess: () => utils.validation.getAllReviews.invalidate(),
     });
 
+  const { mutateAsync: deleteDocument } = api.validation.deleteDocument.useMutation({
+    onSuccess: async () => {
+      await utils.validation.getAllReviews.invalidate();
+      await utils.notifications.getAll.invalidate();
+    },
+  });
+
   const [reviews, setReviews] = useState<Review[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Función para descargar el archivo directamente
   const downloadFile = async (url: string, fileName: string) => {
@@ -94,7 +102,7 @@ export default function Validation({ validationId }: ValidationProps) {
       name: review.name,
       userId: userId ?? "",
       documents: documentsWithUrls,
-      projectId: 0
+      projectId: validationId
     });
     const newReview: Review = {
       id: newReviewData.id!,
@@ -117,9 +125,30 @@ export default function Validation({ validationId }: ValidationProps) {
     );
   };
 
-  function handleDeleteDocument(arg0: number): void {
-    throw new Error("Function not implemented.");
-  }
+  const handleDeleteDocument = async (documentId: number) => {
+    try {
+      await deleteDocument({ 
+        documentId: documentId.toString(), 
+        projectId: validationId 
+      });
+      
+      // Update local state
+      setReviews((prevReviews) =>
+        prevReviews.map((review) => ({
+          ...review,
+          documents: review.documents.filter((doc) => doc.id !== documentId),
+        }))
+      );
+    } catch (error) {
+      console.error("Error deleting document:", error);
+      // Optionally add error handling UI
+      if (error instanceof Error) {
+        setError(error.message);
+      } else {
+        setError("Failed to delete document");
+      }
+    }
+  };
 
   return (
     <>

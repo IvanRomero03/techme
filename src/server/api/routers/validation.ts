@@ -7,6 +7,30 @@ import {
 import { validation, validationDocuments, validationDocumentNotes, validationDocumentLikes, notifications, peoplePerProject, NotificationType } from "techme/server/db/schema";
 import { eq, sql } from "drizzle-orm"; 
 
+// Add these interfaces for type safety
+interface ValidationDocument {
+  id: string;
+  name: string;
+  url: string;
+  uploadedBy: string;
+  notes?: string;
+  status: "pending" | "approved" | "rejected";
+  statusUpdatedAt?: Date;
+  statusUpdatedBy?: string;
+  validationId: number;
+}
+
+interface ValidationReview {
+  id: number;
+  name: string;
+  userId: string;
+  projectId: number;
+  documents: ValidationDocument[];
+  createdAt: Date;
+  isFinal: boolean;
+  completedAt: Date | null;
+}
+
 export const validationRouter = createTRPCRouter({
   createReview: protectedProcedure
     .input(
@@ -28,6 +52,7 @@ export const validationRouter = createTRPCRouter({
         .values({
           name: input.name,
           userId: input.userId,
+          projectId: input.projectId,
           isFinal: false,
         })
         .returning({ id: validation.id });
@@ -44,6 +69,7 @@ export const validationRouter = createTRPCRouter({
           name: doc.name,
           url: doc.url,
           uploadedBy: doc.uploadedBy,
+          status: "pending",
         }).returning({ id: validationDocuments.id });
 
         const documentId = insertedDoc[0]?.id;
@@ -57,6 +83,7 @@ export const validationRouter = createTRPCRouter({
             documentId: documentId,
             note: doc.notes,
             createdBy: input.userId,
+            type: "comment",
           });
         }
       });
@@ -99,25 +126,58 @@ export const validationRouter = createTRPCRouter({
 
   
 
-  getAllReviews: publicProcedure
-    .input(z.object({ userId: z.string() }))
-    .query(async ({ ctx, input }) => {
-      const allReviews = await ctx.db
+  getAllReviews: protectedProcedure
+    .input(z.object({ 
+      userId: z.string(),
+      projectId: z.number()
+    }))
+    .query(async ({ ctx, input }): Promise<ValidationReview[]> => {
+      const reviews = await ctx.db
         .select({
           id: validation.id,
           name: validation.name,
           userId: validation.userId,
+          projectId: validation.projectId,
           createdAt: validation.createdAt,
           isFinal: validation.isFinal,
           completedAt: validation.completedAt,
-          documents: sql`COALESCE(json_agg(d.*) FILTER (WHERE d.id IS NOT NULL), '[]')`.as("documents"),
+          documents: sql<ValidationDocument[]>`
+            COALESCE(
+              json_agg(
+                json_build_object(
+                  'id', ${validationDocuments.id},
+                  'name', ${validationDocuments.name},
+                  'url', ${validationDocuments.url},
+                  'uploadedBy', ${validationDocuments.uploadedBy},
+                  'notes', ${validationDocumentNotes.note},
+                  'status', ${validationDocuments.status},
+                  'statusUpdatedAt', ${validationDocuments.statusUpdatedAt},
+                  'statusUpdatedBy', ${validationDocuments.statusUpdatedBy},
+                  'validationId', ${validationDocuments.validationId}
+                )
+              ) FILTER (WHERE ${validationDocuments.id} IS NOT NULL),
+              '[]'
+            )
+          `.as('documents')
         })
         .from(validation)
-        .leftJoin(validationDocuments, eq(validationDocuments.validationId, validation.id))
-        .where(eq(validation.userId, input.userId))
+        .leftJoin(
+          validationDocuments,
+          eq(validationDocuments.validationId, validation.id)
+        )
+        .where(eq(validation.projectId, input.projectId))
         .groupBy(validation.id);
-    
-      return allReviews;
+
+      return reviews.map((review): ValidationReview => ({
+        id: review.id,
+        name: review.name,
+        userId: review.userId ?? '',
+        projectId: review.projectId,
+        documents: review.documents ?? [],
+        createdAt: review.createdAt ?? new Date(),
+        isFinal: review.isFinal ?? false,
+        completedAt: review.completedAt
+      }));
     }),
 
   finalizeReview: protectedProcedure
@@ -248,9 +308,104 @@ export const validationRouter = createTRPCRouter({
     
 
   deleteDocument: protectedProcedure
-    .input(z.object({ documentId: z.string() }))
+    .input(z.object({ 
+      documentId: z.string(),
+      projectId: z.number()
+    }))
     .mutation(async ({ ctx, input }) => {
+      const document = await ctx.db
+        .select({
+          id: validationDocuments.id,
+          name: validationDocuments.name,
+          validationId: validationDocuments.validationId
+        })
+        .from(validationDocuments)
+        .where(eq(validationDocuments.id, input.documentId))
+        .limit(1);
 
-      await ctx.db.delete(validationDocuments).where(eq(validationDocuments.id, input.documentId));
+      if (!document[0]) {
+        throw new Error("Document not found");
+      }
+
+      await ctx.db
+        .delete(validationDocuments)
+        .where(eq(validationDocuments.id, input.documentId));
+
+      const projectMembers = await ctx.db
+        .select({
+          userId: peoplePerProject.userId,
+        })
+        .from(peoplePerProject)
+        .where(eq(peoplePerProject.projectId, input.projectId));
+
+      const validMembers = projectMembers.filter((member): member is { userId: string } => 
+        member.userId != null
+      );
+
+      if (validMembers.length > 0) {
+        await ctx.db.insert(notifications).values(
+          validMembers.map((member) => ({
+            userId: member.userId,
+            title: "Document Deleted", 
+            message: `Document "${document[0]?.name ?? ''}" has been deleted`,
+            type: NotificationType.DOCUMENT_DELETED,
+            relatedId: document[0]?.validationId ?? 0
+          }))
+        );
+      }
+
+      return document[0];
+    }),
+
+  updateDocumentStatus: protectedProcedure
+    .input(z.object({
+      documentId: z.string(),
+      status: z.enum(["pending", "approved", "rejected"]),
+      userId: z.string(),
+      projectId: z.number(),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const updatedDoc = await ctx.db
+        .update(validationDocuments)
+        .set({
+          status: input.status,
+          statusUpdatedAt: new Date(),
+          statusUpdatedBy: input.userId,
+        })
+        .where(eq(validationDocuments.id, input.documentId))
+        .returning({
+          id: validationDocuments.id,
+          name: validationDocuments.name,
+          validationId: validationDocuments.validationId,
+        });
+
+      if (!updatedDoc[0]) {
+        throw new Error("Document not found");
+      }
+
+      const projectMembers = await ctx.db
+        .select({
+          userId: peoplePerProject.userId,
+        })
+        .from(peoplePerProject)
+        .where(eq(peoplePerProject.projectId, input.projectId));
+
+      const validMembers = projectMembers.filter((member): member is { userId: string } => 
+        member.userId != null
+      );
+
+      if (validMembers.length > 0) {
+        await ctx.db.insert(notifications).values(
+          validMembers.map((member) => ({
+            userId: member.userId,
+            title: "Document Status Updated",
+            message: `Document "${updatedDoc[0]?.name ?? ''}" has been ${input.status}`,
+            type: NotificationType.DOCUMENT_UPDATED,
+            relatedId: updatedDoc[0]?.validationId ?? 0,
+          }))
+        );
+      }
+
+      return updatedDoc[0];
     }),
 });
