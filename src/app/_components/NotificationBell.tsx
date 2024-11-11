@@ -7,14 +7,16 @@ import {
   PopoverTrigger,
 } from "t/components/ui/popover";
 import { Button } from "t/components/ui/button";
+import { NotificationType } from "techme/server/db/schema";
 
-function getNotificationIcon(type: string) {
+
+function getNotificationIcon(type: NotificationType) {
   switch (type) {
-    case 'MEETING_SCHEDULED':
+    case NotificationType.MEETING_SCHEDULED:
       return <Calendar className="h-4 w-4" />;
-    case 'VALIDATION_ADDED':
+    case NotificationType.DOCUMENT_VALIDATED:
       return <CheckCircle className="h-4 w-4" />;
-    case 'PROJECT_ADDED':
+    case NotificationType.PROJECT_ADDED:
       return <PlusCircle className="h-4 w-4" />;
     default:
       return <Bell className="h-4 w-4" />;
@@ -57,7 +59,7 @@ export function NotificationBell() {
         onClick={() => handleMarkAsRead(notification.id)}
       >
         <div className="flex items-start gap-3">
-          {getNotificationIcon(notification.type)}
+          {getNotificationIcon(notification.type as NotificationType)}
           <div className="flex-1">
             <h4 className="font-semibold">{notification.title}</h4>
             <p className="text-sm text-gray-600">{notification.message}</p>

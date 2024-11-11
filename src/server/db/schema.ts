@@ -454,7 +454,12 @@ export const validationDocumentLikes = createTable(
   }),
 );
 
-
+export enum NotificationType {
+  PROJECT_CREATED = 'PROJECT_CREATED',
+  MEETING_SCHEDULED = 'MEETING_SCHEDULED',
+  DOCUMENT_VALIDATED = 'DOCUMENT_VALIDATED',
+  PROJECT_ADDED = 'PROJECT_ADDED'
+}
 
 export const notifications = pgTable("notifications", {
 
@@ -462,7 +467,7 @@ export const notifications = pgTable("notifications", {
   userId: varchar("user_id").notNull().references(() => users.id),
   title: varchar("title", { length: 255 }).notNull(),
   message: text("message").notNull(),
-  type: varchar("type", { length: 50 }).notNull(), 
+  type: varchar("type", { length: 50 }).$type<NotificationType>().notNull(), 
   isRead: boolean("is_read").default(false),
   relatedId: integer("related_id"), // meetingId
   createdAt: timestamp("created_at").defaultNow(),

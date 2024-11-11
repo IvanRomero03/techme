@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "../trpc";
-import { notifications } from "../../db/schema";
+import { notifications, NotificationType } from "../../db/schema";
 import { eq } from "drizzle-orm";
+
+
 
 export const notificationsRouter = createTRPCRouter({
   getAll: protectedProcedure.query(async ({ ctx }) => {
@@ -25,7 +27,7 @@ export const notificationsRouter = createTRPCRouter({
       userId: z.string(),
       title: z.string(),
       message: z.string(),
-      type: z.enum(['PROJECT_CREATED', 'MEETING_SCHEDULED', 'DOCUMENT_VALIDATED', 'PROJECT_ADDED']),
+      type: z.nativeEnum(NotificationType),
       relatedId: z.number().optional(),
     })))
     .mutation(async ({ ctx, input }) => {

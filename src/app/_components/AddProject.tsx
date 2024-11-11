@@ -31,6 +31,8 @@ import { Textarea } from "t/components/ui/textarea";
 import { api } from "techme/trpc/react";
 import { readableRole, type UserRole } from "techme/util/UserRole";
 import { useSession } from "next-auth/react";
+import { NotificationType } from "techme/server/db/schema";
+
 
 export function AddProject() {
   const { data: members, isLoading: membersLoading } =
@@ -104,15 +106,9 @@ export function AddProject() {
                 userId: memberId,
                 title: "New Project Added",
                 message: `You've been added to project: ${values.project_name}`,
-                type: "PROJECT_ADDED",
+                type: NotificationType.PROJECT_ADDED,
                 relatedId: newProject[0]!.id,
-              })) as {
-                userId: string;
-                title: string;
-                message: string;
-                type: "PROJECT_ADDED";
-                relatedId: number;
-              }[];
+              }));
 
               await createNotifications(notifications);
 
