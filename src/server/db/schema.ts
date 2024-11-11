@@ -10,6 +10,7 @@ import {
   varchar,
   vector,
   boolean,
+  pgTable,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
 
@@ -369,24 +370,28 @@ export const documentEmbeddings = createTable(
 );
 
 //TABLA VALIDATION
-export const validation = createTable (
+export const validation = createTable(
   "validation",
   {
-    id: serial("id").primaryKey(), 
-    name: varchar("name", {length: 255 }).notNull(),
-    userId: varchar("user_id", {length: 255}).references(() => users.id),
+    id: serial("id").primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    userId: varchar("user_id", { length: 255 }).references(() => users.id),
+    projectId: integer("project_id").references(() => projects.id, {
+      onDelete: "cascade",
+    }).notNull(),
     isFinal: boolean("is_final").default(false),
     createdAt: timestamp("created_at", {
       mode: "date",
       withTimezone: true,
     }).defaultNow(),
-    completedAt: timestamp("completed_at" , {
+    completedAt: timestamp("completed_at", {
       mode: "date",
       withTimezone: true,
     }),
   },
   (validation) => ({
     userIdIdx: index("validation_user_id_idx").on(validation.userId),
+    projectIdIdx: index("validation_project_id_idx").on(validation.projectId),
   }),
 );
 
@@ -407,6 +412,15 @@ export const validationDocuments = createTable(
       mode: "date",
       withTimezone: true,
     }).defaultNow(),
+    status: varchar("status", { length: 50 })
+      .default("pending")
+      .$type<"pending" | "approved" | "rejected">(),
+    statusUpdatedAt: timestamp("status_updated_at", {
+      mode: "date",
+      withTimezone: true,
+    }),
+    statusUpdatedBy: varchar("status_updated_by", { length: 255 })
+      .references(() => users.id),
   },
   (document) => ({
     validationIdIdx: index("Validation_document_validation_id_idx").on(document.validationId),
@@ -427,6 +441,16 @@ export const validationDocumentNotes = createTable (
       mode: "date",
       withTimezone: true,
   }).defaultNow(),
+    type: varchar("type", { length: 50 })
+      .default("comment")
+      .$type<"comment" | "feedback" | "approval">(),
+    isResolved: boolean("is_resolved").default(false),
+    resolvedBy: varchar("resolved_by", { length: 255 })
+      .references(() => users.id),
+    resolvedAt: timestamp("resolved_at", {
+      mode: "date",
+      withTimezone: true,
+    }),
   },
   (note) => ({
     documentIdIdx: index("validation_note_document_id_idx").on(note.documentId),
@@ -452,4 +476,47 @@ export const validationDocumentLikes = createTable(
     userIdIdx: index("validation_like_user_id_idx").on(like.userId), 
   }),
 );
+
+export const validationRelations = relations(validation, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [validation.projectId],
+    references: [projects.id],
+  }),
+  documents: many(validationDocuments),
+}));
+
+export const validationDocumentsRelations = relations(validationDocuments, ({ one, many }) => ({
+  validation: one(validation, {
+    fields: [validationDocuments.validationId],
+    references: [validation.id],
+  }),
+  notes: many(validationDocumentNotes),
+  likes: many(validationDocumentLikes),
+}));
+
+export enum NotificationType {
+  PROJECT_CREATED = 'PROJECT_CREATED',
+  MEETING_SCHEDULED = 'MEETING_SCHEDULED',
+  DOCUMENT_VALIDATED = 'DOCUMENT_VALIDATED',
+  PROJECT_ADDED = 'PROJECT_ADDED',
+  VALIDATION_ADDED = 'VALIDATION_ADDED',
+  DOCUMENT_DELETED = 'DOCUMENT_DELETED',
+  VALIDATION_COMPLETED = 'VALIDATION_COMPLETED',
+  DOCUMENT_UPDATED = 'DOCUMENT_UPDATED'
+}
+
+export const notifications = pgTable("notifications", {
+
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  type: varchar("type", { length: 50 }).$type<NotificationType>().notNull(), 
+  isRead: boolean("is_read").default(false),
+  relatedId: integer("related_id"), // meetingId
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+
+
 
