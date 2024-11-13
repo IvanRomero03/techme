@@ -3,7 +3,7 @@ import { z } from "zod";
 import { and, eq, sql } from "drizzle-orm";
 import { createTRPCRouter, protectedProcedure } from "techme/server/api/trpc";
 import { invitations, users } from "techme/server/db/schema";
-import { UserRole } from "techme/util/UserRole";
+import { readableRole, UserRole } from "techme/util/UserRole";
 import { sendEmailInvitation } from "techme/server/smtp/protocol";
 
 export const membersRouter = createTRPCRouter({
@@ -40,7 +40,7 @@ export const membersRouter = createTRPCRouter({
         role: z.nativeEnum(UserRole),
       }),
     )
-    .query(async ({ ctx, input }) => {
+    .mutation(async ({ ctx, input }) => {
       const res = await ctx.db.insert(invitations).values({
         email: input.email,
         role: input.role,
@@ -50,7 +50,7 @@ export const membersRouter = createTRPCRouter({
         const invitation = await sendEmailInvitation(
           input.email,
           input.name,
-          input.role,
+          readableRole(input.role),
         );
         return { success: true };
       } catch (error) {

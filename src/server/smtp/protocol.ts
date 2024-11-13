@@ -18,7 +18,8 @@ export function getTransporter() {
 
 export async function sendMail(mail: Mail.Options) {
   const transporter = getTransporter();
-  await transporter.sendMail(mail);
+  const res = await transporter.sendMail(mail);
+  console.log("EMAIL: ", res);
 }
 
 // sample
