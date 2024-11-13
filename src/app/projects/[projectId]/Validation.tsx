@@ -177,8 +177,8 @@ export default function Validation({ validationId }: ValidationProps) {
             </DialogHeader>
             <Formik
               initialValues={{
-                name: editingReview?.name || "",
-                documents: editingReview?.documents || [
+                name: editingReview?.name ?? "",
+                documents: editingReview?.documents ?? [
                   { name: "", file: null, notes: "", uploadedBy: userId ?? "" },
                 ],
               }}
@@ -330,7 +330,7 @@ export default function Validation({ validationId }: ValidationProps) {
                     <Button
                       onClick={(e) => {
                         e.preventDefault();
-                        downloadFile(doc.url ?? "", doc.name ?? "Unnamed Document");
+                        void downloadFile(doc.url ?? "", doc.name ?? "Unnamed Document");
                       }}
                       className="bg-black text-blue-500 rounded-md p-2"
                     >
