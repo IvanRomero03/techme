@@ -33,6 +33,9 @@ export const env = createEnv({
     SUPABASE_BASE_URL: z.string().url(),
     SUPABASE_ANON_KEY: z.string(),
     SUPABASE_SECRET_KEY: z.string(),
+    SMTP_EMAIL: z.string(),
+    SMTP_PASSWORD: z.string(),
+    SMTP_NAME: z.string(),
   },
 
   /**
@@ -64,6 +67,9 @@ export const env = createEnv({
     SUPABASE_BASE_URL: process.env.SUPABASE_BASE_URL,
     SUPABASE_ANON_KEY: process.env.SUPABASE_ANON_KEY,
     SUPABASE_SECRET_KEY: process.env.SUPABASE_SECRET_KEY,
+    SMTP_EMAIL: process.env.SMTP_EMAIL,
+    SMTP_PASSWORD: process.env.SMTP_PASSWORD,
+    SMTP_NAME: process.env.SMTP_NAME,
   },
   /**
    * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
