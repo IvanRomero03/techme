@@ -1,22 +1,16 @@
-// app/_components/CalendarComponent.tsx
-
 "use client";
 
 import * as React from "react";
 import { Calendar, dateFnsLocalizer } from "react-big-calendar";
-import { format } from "date-fns";
-import { parse } from "date-fns";
-import { startOfWeek } from "date-fns";
-import { getDay } from "date-fns";
+import { format, parse, startOfWeek, getDay } from "date-fns";
 import { enUS } from "date-fns/locale";
+import { api } from "techme/trpc/react"; 
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
-// Define the locales for date-fns
 const locales = {
   "en-US": enUS,
 };
 
-// Configure the localizer for react-big-calendar
 const localizer = dateFnsLocalizer({
   format,
   parse,
@@ -25,37 +19,101 @@ const localizer = dateFnsLocalizer({
   locales,
 });
 
-// Example events
-const events = [
-  {
-    title: "Stage 1: Project A",
-    start: new Date(2024, 8, 10, 10, 0), // September 10, 2024, 10:00 AM
-    end: new Date(2024, 8, 10, 11, 0), // September 10, 2024, 11:00 AM
-  },
-  {
-    title: "Stage 5: Project C",
-    start: new Date(2024, 8, 12, 12, 30), // September 12, 2024, 12:30 PM
-    end: new Date(2024, 8, 12, 13, 30), // September 12, 2024, 1:30 PM
-  },
-  {
-    title: "Final Stage: Project B",
-    start: new Date(2024, 8, 15), // September 15, 2024
-    end: new Date(2024, 8, 15), // September 15, 2024
-  },
-];
+type ProjectEvent = {
+  id: number;
+  title: string;
+  start: Date;
+  end: Date;
+};
+
+type MeetingEvent = {
+  id: number;
+  title: string;
+  start: Date;
+  end: Date;
+};
 
 const CalendarComponent = () => {
+  const [events, setEvents] = React.useState<(ProjectEvent | MeetingEvent)[]>([]);
+
+  const { data: projectDates, isLoading: isLoadingProjects, error: errorProjects } = api.calendaryDates.getProjectDates.useQuery();
+  const { data: meetingDates, isLoading: isLoadingMeetings, error: errorMeetings } = api.calendaryMeetings.getMeetings.useQuery();
+
+  React.useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        if (projectDates && meetingDates) {
+          const formattedProjectEvents = projectDates
+            .map((project: { id: number; name: string; startDate: Date | null; endDate: Date | null }) => {
+              const start = project.startDate ? new Date(project.startDate) : null;
+              const end = project.endDate ? new Date(project.endDate) : null;
+
+              if (start && end) {
+                return {
+                  title: project.name,
+                  start,
+                  end,
+                  id: project.id,
+                };
+              }
+              return null;
+            })
+            .filter((event) => event !== null) as ProjectEvent[]; 
+
+          const formattedMeetingEvents = meetingDates
+            .map((meeting: { id: number; title: string; date: Date | null }) => {
+              const start = meeting.date ? new Date(meeting.date) : null;
+
+              if (start) {
+                return {
+                  title: meeting.title,
+                  start,
+                  end: start,
+                  id: meeting.id,
+                };
+              }
+              return null;
+            })
+            .filter((event) => event !== null) as MeetingEvent[]; 
+
+          setEvents([...formattedProjectEvents, ...formattedMeetingEvents]);
+        }
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      }
+    };
+
+    
+    void fetchEvents();
+  }, [projectDates, meetingDates]);
+
+  const eventStyleGetter = () => {
+    return {
+      style: {
+        backgroundColor: "black",
+        color: "white",
+      },
+    };
+  };
+
   return (
     <div className="p-6">
-      <h2 className="mb-4 text-2xl font-bold">Calendar</h2>
-      <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        style={{ height: 500, width: "100%" }}
-        className="rounded-md bg-white p-4 shadow-lg"
-      />
+      <h2 className="mb-4 text-2xl font-bold">Project and Meeting Calendar</h2>
+      {isLoadingProjects || isLoadingMeetings ? (
+        <p>Loading events...</p>
+      ) : errorProjects || errorMeetings ? (
+        <p>Error loading events: {errorProjects?.message ?? errorMeetings?.message}</p>
+      ) : (
+        <Calendar
+          localizer={localizer}
+          events={events}
+          startAccessor="start"
+          endAccessor="end"
+          style={{ height: 500, width: "100%" }}
+          eventPropGetter={eventStyleGetter}
+          className="rounded-md bg-white p-4 shadow-lg"
+        />
+      )}
     </div>
   );
 };
