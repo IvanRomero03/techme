@@ -1,9 +1,10 @@
 import { z } from "zod";
 
-import { eq, sql } from "drizzle-orm";
+import { and, eq, sql } from "drizzle-orm";
 import { createTRPCRouter, protectedProcedure } from "techme/server/api/trpc";
-import { users } from "techme/server/db/schema";
+import { invitations, users } from "techme/server/db/schema";
 import { UserRole } from "techme/util/UserRole";
+import { sendEmailInvitation } from "techme/server/smtp/protocol";
 
 export const membersRouter = createTRPCRouter({
   getMembers: protectedProcedure.query(async ({ ctx }) => {
@@ -31,4 +32,37 @@ export const membersRouter = createTRPCRouter({
     });
     return members;
   }),
+  inviteMembers: protectedProcedure
+    .input(
+      z.object({
+        name: z.string(),
+        email: z.string().email(),
+        role: z.nativeEnum(UserRole),
+      }),
+    )
+    .query(async ({ ctx, input }) => {
+      const res = await ctx.db.insert(invitations).values({
+        email: input.email,
+        role: input.role,
+        used: false,
+      });
+      try {
+        const invitation = await sendEmailInvitation(
+          input.email,
+          input.name,
+          input.role,
+        );
+        return { success: true };
+      } catch (error) {
+        const deleted = await ctx.db
+          .delete(invitations)
+          .where(
+            and(
+              eq(invitations.email, input.email),
+              eq(invitations.role, input.role),
+            ),
+          );
+        return { success: false };
+      }
+    }),
 });

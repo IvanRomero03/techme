@@ -1,5 +1,7 @@
+import { id } from "date-fns/locale";
 import { relations, sql } from "drizzle-orm";
 import {
+  boolean,
   index,
   integer,
   pgTableCreator,
@@ -366,3 +368,10 @@ export const documentEmbeddings = createTable(
     documentIdIdx: index("embedding_document_id_idx").on(embedding.documentId),
   }),
 );
+
+export const invitations = createTable("invitations", {
+  id: serial("id").primaryKey(),
+  email: varchar("email", { length: 255 }).notNull(),
+  role: varchar("role", { length: 255 }).notNull(),
+  used: boolean("used").default(false),
+});
