@@ -31,12 +31,15 @@ import { Textarea } from "t/components/ui/textarea";
 import { api } from "techme/trpc/react";
 import { readableRole, type UserRole } from "techme/util/UserRole";
 import { useSession } from "next-auth/react";
+import { NotificationType } from "techme/server/db/schema";
+
 
 export function AddProject() {
   const { data: members, isLoading: membersLoading } =
     api.members.getAuthorizedMembers.useQuery();
   const { mutateAsync: createProject } =
     api.projects.createProject.useMutation();
+  const { mutateAsync: createNotifications } = api.notifications.createMany.useMutation();
   const [dialogOpen, setDialogOpen] = useState(false);
   const session = useSession();
   const utils = api.useUtils();
@@ -89,14 +92,34 @@ export function AddProject() {
             _openMembers: false,
           }}
           onSubmit={async (values) => {
-            await createProject({
-              project_name: values.project_name,
-              project_description: values.project_description,
-              project_category: values.project_category,
-              project_members: Array.from(values._selectedMembers.keys()),
-            });
-            await utils.projects.getMyProjects.invalidate();
-            setDialogOpen(false);
+            try {
+
+              const newProject = await createProject({
+                project_name: values.project_name,
+                project_description: values.project_description,
+                project_category: values.project_category,
+                project_members: Array.from(values._selectedMembers.keys()),
+              });
+
+             
+              const notifications = Array.from(values._selectedMembers.keys()).map(memberId => ({
+                userId: memberId,
+                title: "New Project Added",
+                message: `You've been added to project: ${values.project_name}`,
+                type: NotificationType.PROJECT_ADDED,
+                relatedId: newProject[0]!.id,
+              }));
+
+              await createNotifications(notifications);
+
+             
+              await utils.projects.getMyProjects.invalidate();
+              await utils.notifications.getAll.invalidate();
+
+              setDialogOpen(false);
+            } catch (error) {
+              console.error("Failed to create project:", error);
+            }
           }}
         >
           {({ values, setFieldValue }) => (

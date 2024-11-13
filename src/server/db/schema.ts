@@ -1,7 +1,5 @@
-import { id } from "date-fns/locale";
 import { relations, sql } from "drizzle-orm";
 import {
-  boolean,
   index,
   integer,
   pgTableCreator,
@@ -11,6 +9,8 @@ import {
   timestamp,
   varchar,
   vector,
+  boolean,
+  pgTable,
 } from "drizzle-orm/pg-core";
 import { type AdapterAccount } from "next-auth/adapters";
 
@@ -374,4 +374,173 @@ export const invitations = createTable("invitations", {
   email: varchar("email", { length: 255 }).notNull(),
   role: varchar("role", { length: 255 }).notNull(),
   used: boolean("used").default(false),
+});
+//TABLA VALIDATION
+export const validation = createTable(
+  "validation",
+  {
+    id: serial("id").primaryKey(),
+    name: varchar("name", { length: 255 }).notNull(),
+    userId: varchar("user_id", { length: 255 }).references(() => users.id),
+    projectId: integer("project_id")
+      .references(() => projects.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    isFinal: boolean("is_final").default(false),
+    createdAt: timestamp("created_at", {
+      mode: "date",
+      withTimezone: true,
+    }).defaultNow(),
+    completedAt: timestamp("completed_at", {
+      mode: "date",
+      withTimezone: true,
+    }),
+  },
+  (validation) => ({
+    userIdIdx: index("validation_user_id_idx").on(validation.userId),
+    projectIdIdx: index("validation_project_id_idx").on(validation.projectId),
+  }),
+);
+
+export const validationDocuments = createTable(
+  "validation_documents",
+  {
+    id: varchar("id", { length: 255 })
+      .notNull()
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    validationId: integer("validation_id")
+      .references(() => validation.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    name: varchar("name", { length: 255 }).notNull(),
+    url: varchar("url", { length: 255 }).notNull(),
+    uploadedBy: varchar("uploaded_by", { length: 255 })
+      .references(() => users.id)
+      .notNull(),
+    uploadedAt: timestamp("uploaded_at", {
+      mode: "date",
+      withTimezone: true,
+    }).defaultNow(),
+    status: varchar("status", { length: 50 })
+      .default("pending")
+      .$type<"pending" | "approved" | "rejected">(),
+    statusUpdatedAt: timestamp("status_updated_at", {
+      mode: "date",
+      withTimezone: true,
+    }),
+    statusUpdatedBy: varchar("status_updated_by", { length: 255 }).references(
+      () => users.id,
+    ),
+  },
+  (document) => ({
+    validationIdIdx: index("Validation_document_validation_id_idx").on(
+      document.validationId,
+    ),
+    nameIdx: index("validation_documet_name_idx").on(document.name),
+  }),
+);
+
+export const validationDocumentNotes = createTable(
+  "validation_document_notes",
+  {
+    id: serial("id").primaryKey(),
+    documentId: varchar("document_id", { length: 255 })
+      .references(() => validationDocuments.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    note: text("note").notNull(),
+    createdBy: varchar("created_by", { length: 255 }).references(
+      () => users.id,
+    ),
+    createdAt: timestamp("created_at", {
+      mode: "date",
+      withTimezone: true,
+    }).defaultNow(),
+    type: varchar("type", { length: 50 })
+      .default("comment")
+      .$type<"comment" | "feedback" | "approval">(),
+    isResolved: boolean("is_resolved").default(false),
+    resolvedBy: varchar("resolved_by", { length: 255 }).references(
+      () => users.id,
+    ),
+    resolvedAt: timestamp("resolved_at", {
+      mode: "date",
+      withTimezone: true,
+    }),
+  },
+  (note) => ({
+    documentIdIdx: index("validation_note_document_id_idx").on(note.documentId),
+  }),
+);
+
+export const validationDocumentLikes = createTable(
+  "validation_document_likes",
+  {
+    // Eliminamos la columna "id" con serial y primaryKey
+    documentId: varchar("document_id", { length: 255 })
+      .references(() => validationDocuments.id, {
+        onDelete: "cascade",
+      })
+      .notNull(),
+    userId: varchar("user_id", { length: 255 })
+      .references(() => users.id)
+      .notNull(),
+    likedAt: timestamp("liked_at", {
+      mode: "date",
+      withTimezone: true,
+    }).defaultNow(),
+  },
+  (like) => ({
+    documentUserIdIdx: primaryKey({ columns: [like.documentId, like.userId] }), // Clave primaria compuesta
+    documentIdIdx: index("validation_like_document_id_idx").on(like.documentId),
+    userIdIdx: index("validation_like_user_id_idx").on(like.userId),
+  }),
+);
+
+export const validationRelations = relations(validation, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [validation.projectId],
+    references: [projects.id],
+  }),
+  documents: many(validationDocuments),
+}));
+
+export const validationDocumentsRelations = relations(
+  validationDocuments,
+  ({ one, many }) => ({
+    validation: one(validation, {
+      fields: [validationDocuments.validationId],
+      references: [validation.id],
+    }),
+    notes: many(validationDocumentNotes),
+    likes: many(validationDocumentLikes),
+  }),
+);
+
+export enum NotificationType {
+  PROJECT_CREATED = "PROJECT_CREATED",
+  MEETING_SCHEDULED = "MEETING_SCHEDULED",
+  DOCUMENT_VALIDATED = "DOCUMENT_VALIDATED",
+  PROJECT_ADDED = "PROJECT_ADDED",
+  VALIDATION_ADDED = "VALIDATION_ADDED",
+  DOCUMENT_DELETED = "DOCUMENT_DELETED",
+  VALIDATION_COMPLETED = "VALIDATION_COMPLETED",
+  DOCUMENT_UPDATED = "DOCUMENT_UPDATED",
+}
+
+export const notifications = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => users.id),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  type: varchar("type", { length: 50 }).$type<NotificationType>().notNull(),
+  isRead: boolean("is_read").default(false),
+  relatedId: integer("related_id"), // meetingId
+  createdAt: timestamp("created_at").defaultNow(),
 });

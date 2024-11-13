@@ -11,6 +11,7 @@ import { Documents } from "./Documents";
 import Proposals from "./Proposals";
 import Analysis from "./Analysis";
 import Planning from "./Planning";
+import Validation from "./Validation"
 
 const menuItems = [
   "Summary",
@@ -76,13 +77,13 @@ export default function Page({ params }: { params: { projectId: string } }) {
             <Proposals projectId={params.projectId} />
           ) : activeMenuItem === "Documentation" ? (
             <Documents projectId={Number(params.projectId)} />
-          ) : activeMenuItem == "Analysis" ? (
+          ) : activeMenuItem === "Analysis" ? (
             <Analysis projectId={params.projectId} />
           ) : activeMenuItem === "Planning" ? (
             <Planning projectId={Number(params.projectId)} />
-          ) : (
-            <></>
-          )}
+          ) : activeMenuItem === "Validation" ? (
+            <Validation validationId={Number(params.projectId)} />
+          ) : null}
         </div>
       </div>
     </div>

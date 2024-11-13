@@ -18,6 +18,7 @@ import {
 } from "t/components/ui/dropdown-menu";
 import { signOut } from "next-auth/react";
 import { UserRole, readableRole } from "techme/util/UserRole";
+import { NotificationBell } from "./NotificationBell";
 
 interface TopNavBarProps {
   session?: Session;
@@ -52,12 +53,7 @@ const TopNavBar: React.FC<TopNavBarProps> = ({ session }) => {
           />
         </div>
 
-        <button className="relative p-2">
-          <FontAwesomeIcon icon={faBell} className="h-5 w-5 text-gray-600" />
-          <span className="absolute right-0 top-0 inline-flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-xs font-semibold text-white">
-            4
-          </span>
-        </button>
+        <NotificationBell />
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
