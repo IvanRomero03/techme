@@ -10,7 +10,6 @@ export default async function Members() {
 
   return (
     <div className="flex w-full flex-col justify-center">
-      <Button className="m-4 flex w-2/4 self-center">Invite new member</Button>
       <InviteMember />
       <DataTable
         columns={columns}
