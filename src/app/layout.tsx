@@ -3,6 +3,7 @@ import { type Metadata } from "next";
 import { getServerAuthSession } from "techme/server/auth";
 import "techme/styles/globals.css";
 import RootClientLayout from "./_components/RootClientLayout";
+import { Toaster } from "t/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "TechMe",
@@ -23,6 +24,7 @@ export default async function RootLayout({
         <RootClientLayout session={session ?? undefined}>
           {children}
         </RootClientLayout>
+        <Toaster />
       </body>
     </html>
   );
