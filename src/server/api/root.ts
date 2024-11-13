@@ -13,6 +13,8 @@ import { projectChecklistRouter } from "./routers/projectChecklist";
 import { meetingsRouter, peoplePerMeetingRouter } from "./routers/meetings";
 import { validationRouter } from "./routers/validation";
 import { notificationsRouter } from "./routers/notifications";
+import { calendaryDatesRouter } from "./routers/CalendaryDates";
+import { CalendaryMeetingsRouter } from "./routers/CalendaryMeetings";
 
 /**
  * This is the primary router for your server.
@@ -35,6 +37,8 @@ export const appRouter = createTRPCRouter({
   peoplePerMeeting: peoplePerMeetingRouter,
   validation:  validationRouter,
   notifications: notificationsRouter,
+  calendaryDates: calendaryDatesRouter,
+  calendaryMeetings: CalendaryMeetingsRouter,
 });
 
 // export type definition of API
