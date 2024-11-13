@@ -58,7 +58,7 @@ const CalendarComponent = () => {
               }
               return null;
             })
-            .filter((event) => event !== null) as ProjectEvent[]; // Aseguramos que el filtro sea tipado correctamente
+            .filter((event) => event !== null) as ProjectEvent[]; 
 
           const formattedMeetingEvents = meetingDates
             .map((meeting: { id: number; title: string; date: Date | null }) => {
@@ -74,7 +74,7 @@ const CalendarComponent = () => {
               }
               return null;
             })
-            .filter((event) => event !== null) as MeetingEvent[]; // Aseguramos que el filtro sea tipado correctamente
+            .filter((event) => event !== null) as MeetingEvent[]; 
 
           setEvents([...formattedProjectEvents, ...formattedMeetingEvents]);
         }
@@ -83,7 +83,7 @@ const CalendarComponent = () => {
       }
     };
 
-    // Usamos void para ignorar la promesa, pero capturando errores en el try-catch
+    
     void fetchEvents();
   }, [projectDates, meetingDates]);
 
