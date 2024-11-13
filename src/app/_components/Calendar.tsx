@@ -36,7 +36,6 @@ type MeetingEvent = {
 const CalendarComponent = () => {
   const [events, setEvents] = React.useState<(ProjectEvent | MeetingEvent)[]>([]);
 
-  
   const { data: projectDates, isLoading: isLoadingProjects, error: errorProjects } = api.calendaryDates.getProjectDates.useQuery();
   const { data: meetingDates, isLoading: isLoadingMeetings, error: errorMeetings } = api.calendaryMeetings.getMeetings.useQuery();
 
@@ -44,7 +43,6 @@ const CalendarComponent = () => {
     const fetchEvents = async () => {
       try {
         if (projectDates && meetingDates) {
-          
           const formattedProjectEvents = projectDates
             .map((project: { id: number; name: string; startDate: Date | null; endDate: Date | null }) => {
               const start = project.startDate ? new Date(project.startDate) : null;
@@ -60,9 +58,8 @@ const CalendarComponent = () => {
               }
               return null;
             })
-            .filter((event) => event !== null);
+            .filter((event) => event !== null) as ProjectEvent[]; // Aseguramos que el filtro sea tipado correctamente
 
-          
           const formattedMeetingEvents = meetingDates
             .map((meeting: { id: number; title: string; date: Date | null }) => {
               const start = meeting.date ? new Date(meeting.date) : null;
@@ -71,15 +68,14 @@ const CalendarComponent = () => {
                 return {
                   title: meeting.title,
                   start,
-                  end: start, 
+                  end: start,
                   id: meeting.id,
                 };
               }
               return null;
             })
-            .filter((event) => event !== null);
+            .filter((event) => event !== null) as MeetingEvent[]; // Aseguramos que el filtro sea tipado correctamente
 
-          
           setEvents([...formattedProjectEvents, ...formattedMeetingEvents]);
         }
       } catch (error) {
@@ -87,11 +83,11 @@ const CalendarComponent = () => {
       }
     };
 
-    fetchEvents();
+    // Usamos void para ignorar la promesa, pero capturando errores en el try-catch
+    void fetchEvents();
   }, [projectDates, meetingDates]);
 
-  
-  const eventStyleGetter = (event: { title: string; start: Date; end: Date; id: number }) => {
+  const eventStyleGetter = () => {
     return {
       style: {
         backgroundColor: "black",
@@ -106,7 +102,7 @@ const CalendarComponent = () => {
       {isLoadingProjects || isLoadingMeetings ? (
         <p>Loading events...</p>
       ) : errorProjects || errorMeetings ? (
-        <p>Error loading events: {errorProjects?.message || errorMeetings?.message}</p>
+        <p>Error loading events: {errorProjects?.message ?? errorMeetings?.message}</p>
       ) : (
         <Calendar
           localizer={localizer}
@@ -123,4 +119,3 @@ const CalendarComponent = () => {
 };
 
 export default CalendarComponent;
-
