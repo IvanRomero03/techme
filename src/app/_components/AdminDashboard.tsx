@@ -70,7 +70,7 @@ export function AdminDashboard() {
                   <p
                     className={`text-lg ${typeof projectDays.days_left === "number" && projectDays.days_left <= 1 ? "text-red-500" : "text-yellow-500"}`}
                   >
-                    {String(projectDays.days_left ?? "Undefined")}{" "}
+                    {String(projectDays.days_left)}{" "}
                     {projectDays.days_left === 1 ? "Day" : "Days"} Left
                   </p>
                 </div>

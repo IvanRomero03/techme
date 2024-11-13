@@ -24,7 +24,7 @@ export const appRouter = createTRPCRouter({
   projects: projectsRouter,
   projectsSummary: projectsRouterSummary,
   requirements: requirementsRouter,
-  prjectTasks: projectsRouterTasks,
+  projectTasks: projectsRouterTasks,
   frameworkContracts: frameworkContractsRouter,
   projectProposals: projectProposalsRouter,
   projectEstimate: projectEstimatesRouter,

@@ -75,7 +75,7 @@ export const projectsRouter = createTRPCRouter({
         id: projects.id,
         name: projects.name,
         completion_percentage: projects.completionPercentage,
-        days_left: sql`EXTRACT(DAY FROM AGE(end_date, NOW()))`.as("days_left"),
+        days_left: sql<number>`EXTRACT(DAY FROM AGE(end_date, NOW()))`.as("days_left"),
       })
       .from(projects)
       .leftJoin(peoplePerProject, eq(projects.id, peoplePerProject.projectId))

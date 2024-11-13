@@ -38,8 +38,8 @@ export default function TaskModal({
   setDragDissabled?: (b: boolean) => void;
 }) {
   const [open, setOpen] = useState(false);
-  const { mutateAsync: createTask } = api.prjectTasks.createTask.useMutation();
-  const { mutateAsync: updateTask } = api.prjectTasks.updateTask.useMutation();
+  const { mutateAsync: createTask } = api.projectTasks.createTask.useMutation();
+  const { mutateAsync: updateTask } = api.projectTasks.updateTask.useMutation();
   const utils = api.useUtils();
   return (
     <Dialog
@@ -74,7 +74,7 @@ export default function TaskModal({
                 id: task.id,
                 status: values.status as "todo" | "in-progress" | "done",
               });
-              await utils.prjectTasks.getProjectTasks.refetch({
+              await utils.projectTasks.getProjectTasks.refetch({
                 projectId: proyectId,
               });
               if (setDragDissabled) {
@@ -88,7 +88,7 @@ export default function TaskModal({
               projectId: proyectId,
               status: values.status as "todo" | "in-progress" | "done",
             });
-            await utils.prjectTasks.getProjectTasks.refetch({
+            await utils.projectTasks.getProjectTasks.refetch({
               projectId: proyectId,
             });
             setOpen(false);

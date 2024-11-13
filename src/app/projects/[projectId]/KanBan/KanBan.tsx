@@ -31,11 +31,11 @@ export interface Task {
 }
 
 export default function KanBan({ projectId }: { projectId: number }) {
-  const { data: tasks } = api.prjectTasks.getProjectTasks.useQuery({
+  const { data: tasks } = api.projectTasks.getProjectTasks.useQuery({
     projectId,
   });
   const { mutateAsync: updateTaskStatus } =
-    api.prjectTasks.updateTaskStatus.useMutation();
+    api.projectTasks.updateTaskStatus.useMutation();
   const utils = api.useUtils();
   const [activeId, setActiveId] = useState<string | null>(null);
   const [items, setItems] = useState(tasks);
@@ -235,7 +235,7 @@ export default function KanBan({ projectId }: { projectId: number }) {
       projectId,
       status: overContainer,
     });
-    await utils.prjectTasks.getProjectTasks.refetch({ projectId });
+    await utils.projectTasks.getProjectTasks.refetch({ projectId });
     setActiveId(null);
   }
 }
