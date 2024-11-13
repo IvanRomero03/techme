@@ -44,7 +44,7 @@ const CalendarComponent = () => {
     const fetchEvents = async () => {
       try {
         if (projectDates && meetingDates) {
-          // Formateo de eventos de proyectos
+          
           const formattedProjectEvents = projectDates
             .map((project: { id: number; name: string; startDate: Date | null; endDate: Date | null }) => {
               const start = project.startDate ? new Date(project.startDate) : null;
