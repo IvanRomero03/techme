@@ -1,4 +1,5 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { and, eq } from "drizzle-orm";
 import {
   getServerSession,
   type DefaultSession,
@@ -10,11 +11,12 @@ import GoogleProvider from "next-auth/providers/google";
 import { db } from "techme/server/db";
 import {
   accounts,
+  invitations,
   sessions,
   users,
   verificationTokens,
 } from "techme/server/db/schema";
-import type { UserRole } from "techme/util/UserRole";
+import { UserRole } from "techme/util/UserRole";
 
 /**
  * Module augmentation for `next-auth` types. Allows us to add custom properties to the `session`
@@ -44,6 +46,41 @@ declare module "next-auth" {
  */
 export const authOptions: NextAuthOptions = {
   callbacks: {
+    signIn: async ({ user, account, profile }) => {
+      if (!user.email) {
+        return false;
+      }
+      console.log("signIn", user, account, profile);
+      if (user.role !== UserRole.Unauthorized) {
+        return true;
+      }
+      const inv = await db
+        .select()
+        .from(invitations)
+        .where(
+          and(eq(invitations.email, user.email), eq(invitations.used, false)),
+        );
+      if (inv.length === 0) {
+        return false;
+      }
+      await Promise.all([
+        db
+          .update(users)
+          .set({ role: inv[0]!.role as UserRole })
+          .where(eq(users.email, user.email)),
+
+        db
+          .update(invitations)
+          .set({ used: true })
+          .where(
+            and(
+              eq(invitations.email, user.email),
+              eq(invitations.role, inv[0]!.role),
+            ),
+          ),
+      ]);
+      return true;
+    },
     session: ({ session, user }) => ({
       ...session,
       user: {
