@@ -76,4 +76,48 @@ export const projectProposalsRouter = createTRPCRouter({
       const QueryKey = `project_proposal_${input.projectId}_${ctx.session.user.role}`;
       await ctx.cache.del(QueryKey);
     }),
+
+  // Nuevo procedimiento para enviar mensajes a la IA
+  sendMessageToAI: protectedProcedure
+    .input(z.object({ projectId: z.number(), message: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const project = await ctx.db
+        .select()
+        .from(projects)
+        .where(eq(projects.id, input.projectId));
+
+      if (!(project.length > 0) || project[0] === undefined) {
+        return "No se encontró el proyecto.";
+      }
+
+      const openai = getOpenAI();
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content:
+              "Eres un robot que ayuda a un " +
+              readableRole(ctx.session.user.role) +
+              " para desarrollar y ajustar propuestas." +
+              " Proporciona respuestas basadas en la información del proyecto y los comentarios del usuario.",
+          },
+          {
+            role: "user",
+            content:
+              "El proyecto se llama: " +
+              project[0].name +
+              ". Descripción: " +
+              project[0].description,
+          },
+          {
+            role: "user",
+            content: input.message,
+          },
+        ],
+      });
+
+      return response.choices[0]?.message?.content ?? "No se pudo obtener una respuesta de la IA.";
+    }),
 });
+

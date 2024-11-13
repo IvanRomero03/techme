@@ -1,20 +1,34 @@
 import { z } from "zod";
-import { eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { createTRPCRouter, protectedProcedure } from "techme/server/api/trpc";
 import getOpenAI from "techme/server/chatgpt/openai";
-import {
-  estimations,
-  projects,
-  documentEmbeddings,
-} from "techme/server/db/schema";
+import { estimations, projects } from "techme/server/db/schema";
 import { readableRole } from "techme/util/UserRole";
 import { zodResponseFormat } from "openai/helpers/zod.mjs";
 import { getSupabaseClient } from "techme/server/db/storage";
+
+// Response format schema for OpenAI completion
+export const responseFormat = zodResponseFormat(
+  z.object({
+    estimations: z.array(
+      z.object({
+        phase: z.string(),
+        notes: z.string(),
+        manforceNumber: z.number(),
+        manforceType: z.string(),
+        timeEstimation: z.number(),
+        timeUnit: z.string(),
+      }),
+    ),
+  }),
+  "estimations",
+);
 
 export const projectEstimatesRouter = createTRPCRouter({
   getProjectEstimate: protectedProcedure
     .input(z.object({ projectId: z.number() }))
     .query(async function* ({ ctx, input }) {
+      // Retrieve project details from the database
       const project = await ctx.db
         .select()
         .from(projects)
@@ -24,6 +38,7 @@ export const projectEstimatesRouter = createTRPCRouter({
         return [];
       }
 
+      // Define cache key
       const QueryKey = `project_estimate_${project[0].id}_${ctx.session.user.role}`;
 
       try {
@@ -36,6 +51,7 @@ export const projectEstimatesRouter = createTRPCRouter({
         console.error("Failed to get cache on getProjectEstimate", error);
       }
 
+      // Initialize OpenAI and send a completion request
       const openai = getOpenAI();
       const estimate = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -65,8 +81,9 @@ export const projectEstimatesRouter = createTRPCRouter({
         }
       }
 
+      // Store the result in the cache
       await ctx.cache.set(QueryKey, snapshot, {
-        EX: 60 * 60 * 24 * 7, // Caché por una semana
+        EX: 60 * 60 * 24 * 7, // Cache for one week
       });
 
       return snapshot;
@@ -79,9 +96,10 @@ export const projectEstimatesRouter = createTRPCRouter({
       await ctx.cache.del(QueryKey);
     }),
 
-  getRecomendations: protectedProcedure
+  getRecommendations: protectedProcedure
     .input(z.object({ projectId: z.number() }))
     .query(async function* ({ ctx, input }) {
+      // Retrieve project and estimation details
       const project = await ctx.db
         .select()
         .from(projects)
@@ -96,6 +114,7 @@ export const projectEstimatesRouter = createTRPCRouter({
         return [];
       }
 
+      // Prepare context with role, description, and estimations
       const context = {
         role: readableRole(ctx.session.user.role),
         projectDescription: project[0].description,
@@ -110,8 +129,9 @@ export const projectEstimatesRouter = createTRPCRouter({
           };
         }),
       };
-      // join context into a single string
-      const chat_query =
+
+      // Convert context to query string for OpenAI embedding
+      const chatQuery =
         "Recomendaciones de fases y sus estimaciones para el proyecto: " +
         context.projectDescription +
         " para un " +
@@ -134,22 +154,21 @@ export const projectEstimatesRouter = createTRPCRouter({
           })
           .join(" ");
 
+      // Create embedding with OpenAI for similarity search
       const openai = getOpenAI();
       const embedding = await openai.embeddings.create({
         model: "text-embedding-3-small",
-        input: chat_query,
+        input: chatQuery,
       });
 
       if (!embedding.data[0]?.embedding) {
         throw new Error("Failed to get embedding");
       }
-      console.log(embedding.data[0]?.embedding);
+
+      // Retrieve similar documents from Supabase
       const client = await getSupabaseClient();
       let closestContext;
       try {
-        //<
-        //  (typeof documentEmbeddings)[]
-        //>
         const contx = (await client.rpc("similarity_search_documents", {
           embeddingin: embedding.data[0].embedding,
           match_count: 3,
@@ -165,13 +184,13 @@ export const projectEstimatesRouter = createTRPCRouter({
         console.error("Failed to get closest context", error);
       }
 
-      console.log(closestContext);
       if (!closestContext) {
         return [];
       }
-      const chunks = closestContext.map((context) => context.texto);
-      console.log(chunks);
 
+      const chunks = closestContext.map((context) => context.texto);
+
+      // Generate recommendations based on the project context
       const estimate = await openai.chat.completions.create({
         model: "gpt-4o-2024-08-06",
         messages: [
@@ -182,7 +201,7 @@ export const projectEstimatesRouter = createTRPCRouter({
           },
           {
             role: "user",
-            content: chat_query,
+            content: chatQuery,
           },
         ],
         response_format: responseFormat,
@@ -198,19 +217,3 @@ export const projectEstimatesRouter = createTRPCRouter({
       }
     }),
 });
-
-export const responseFormat = zodResponseFormat(
-  z.object({
-    estimations: z.array(
-      z.object({
-        phase: z.string(),
-        notes: z.string(),
-        manforceNumber: z.number(),
-        manforceType: z.string(),
-        timeEstimation: z.number(),
-        timeUnit: z.string(),
-      }),
-    ),
-  }),
-  "estimations",
-);

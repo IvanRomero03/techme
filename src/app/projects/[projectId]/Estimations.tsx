@@ -12,21 +12,15 @@ import { Separator } from "t/components/ui/separator";
 import { Skeleton } from "t/components/ui/skeleton";
 
 export default function Estimations({ projectId }: { projectId: number }) {
-  const { data: estimations, isLoading } =
-    api.estimations.getProjectEstimations.useQuery({
-      projectId,
-    });
-  const { mutateAsync: deleteEstimation } =
-    api.estimations.deleteEstimation.useMutation();
+  // Consultas para obtener estimaciones y recomendaciones
+  const { data: estimations, isLoading } = api.estimations.getProjectEstimations.useQuery({ projectId });
+  const { data: recomendations } = api.projectEstimate.getRecommendations.useQuery({ projectId });
 
-  const { mutateAsync: createEstimation } =
-    api.estimations.createEstimation.useMutation();
+  // Mutaciones para manejar creación y eliminación de estimaciones
+  const { mutateAsync: deleteEstimation } = api.estimations.deleteEstimation.useMutation();
+  const { mutateAsync: createEstimation } = api.estimations.createEstimation.useMutation();
 
-  const { data: recomendations } =
-    api.projectEstimate.getRecomendations.useQuery({
-      projectId,
-    });
-
+  // Análisis y validación de recomendaciones
   let partialResponse: (typeof responseFormat)["__output"];
   try {
     const parsedRecomendations = parse(
@@ -36,8 +30,7 @@ export default function Estimations({ projectId }: { projectId: number }) {
 
     if (parsedRecomendations.estimations) {
       if (parsedRecomendations.estimations.length > 0) {
-        const validEstimations =
-          [] as (typeof responseFormat)["__output"]["estimations"];
+        const validEstimations = [] as (typeof responseFormat)["__output"]["estimations"];
         for (const estimation of parsedRecomendations.estimations) {
           try {
             if (
@@ -66,8 +59,10 @@ export default function Estimations({ projectId }: { projectId: number }) {
   }
 
   const [currentRecomendationIndex, setCurrentRecomendationIndex] = useState(0);
+  const [isAccepting, setIsAccepting] = useState(false);
 
   const utils = api.useUtils();
+
   return (
     <div>
       <EstimationModal proyectId={projectId} newEstimation />
@@ -84,14 +79,8 @@ export default function Estimations({ projectId }: { projectId: number }) {
                     estimation={{
                       ...estimation,
                       proyectId: projectId,
-                      timeEstimation: {
-                        value: estimation.timeEstimation!,
-                        unit: estimation.timeUnit!,
-                      },
-                      manforce: {
-                        value: estimation.manforce!,
-                        unit: estimation.manforceUnit!,
-                      },
+                      timeEstimation: { value: estimation.timeEstimation!, unit: estimation.timeUnit! },
+                      manforce: { value: estimation.manforce!, unit: estimation.manforceUnit! },
                       notes: estimation.notes ?? "",
                     }}
                     newEstimation={false}
@@ -100,9 +89,7 @@ export default function Estimations({ projectId }: { projectId: number }) {
                     variant="outline"
                     onClick={async () => {
                       await deleteEstimation({ id: estimation.id });
-                      await utils.estimations.getProjectEstimations.refetch({
-                        projectId,
-                      });
+                      await utils.estimations.getProjectEstimations.refetch({ projectId });
                     }}
                   >
                     Delete
@@ -113,29 +100,25 @@ export default function Estimations({ projectId }: { projectId: number }) {
             <CardContent key={estimation.id} className="flex space-x-4">
               <Card className="px-4 py-2">
                 <Label>Time Estimation</Label>
-                <p>
-                  {estimation.timeEstimation} {estimation.timeUnit}
-                </p>
+                <p>{estimation.timeEstimation} {estimation.timeUnit}</p>
               </Card>
               <Card className="px-4 py-2">
                 <Label>Manforce</Label>
-                <p>
-                  {estimation.manforce} {estimation.manforceUnit}
-                </p>
+                <p>{estimation.manforce} {estimation.manforceUnit}</p>
               </Card>
             </CardContent>
             <CardContent>
               <Card className="px-4 py-2">
                 <Label>Notes</Label>
-                <p className="h-12 overflow-y-auto text-sm">
-                  {estimation.notes}
-                </p>
+                <p className="h-12 overflow-y-auto text-sm">{estimation.notes}</p>
               </Card>
             </CardContent>
           </Card>
         ))}
       </div>
+
       <Separator className="my-4" />
+
       {partialResponse?.estimations.length === 0 ? (
         <Skeleton className="h-16 w-1/2" />
       ) : (
@@ -147,42 +130,27 @@ export default function Estimations({ projectId }: { projectId: number }) {
                 {partialResponse?.estimations[currentRecomendationIndex]?.phase}
                 <div className="gap-4">
                   <Button
+                    disabled={isAccepting}
                     onClick={async () => {
-                      setCurrentRecomendationIndex(
-                        (prev) =>
-                          (prev + 1) %
-                          (partialResponse?.estimations.length ?? 1),
-                      );
-                      const estimation =
-                        partialResponse?.estimations[currentRecomendationIndex];
+                      setIsAccepting(true);
+                      const estimation = partialResponse?.estimations[currentRecomendationIndex];
                       await createEstimation({
                         ...estimation,
                         phase: estimation?.phase ?? "",
                         notes: estimation?.notes ?? "",
                         projectId,
-                        manforce: {
-                          value: estimation?.manforceNumber ?? 0,
-                          unit: estimation?.manforceType ?? "",
-                        },
-                        timeEstimation: {
-                          value: estimation?.timeEstimation ?? 0,
-                          unit: estimation?.timeUnit ?? "",
-                        },
+                        manforce: { value: estimation?.manforceNumber ?? 0, unit: estimation?.manforceType ?? "" },
+                        timeEstimation: { value: estimation?.timeEstimation ?? 0, unit: estimation?.timeUnit ?? "" },
                       });
-                      await utils.estimations.getProjectEstimations.refetch({
-                        projectId,
-                      });
+                      await utils.estimations.getProjectEstimations.refetch({ projectId });
+                      setIsAccepting(false);
                     }}
                   >
                     Accept
                   </Button>
                   <Button
                     onClick={() =>
-                      setCurrentRecomendationIndex(
-                        (prev) =>
-                          (prev + 1) %
-                          (partialResponse?.estimations.length ?? 1),
-                      )
+                      setCurrentRecomendationIndex((prev) => (prev + 1) % (partialResponse?.estimations.length ?? 1))
                     }
                   >
                     Next
@@ -191,34 +159,16 @@ export default function Estimations({ projectId }: { projectId: number }) {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-sm">
-                {partialResponse?.estimations[currentRecomendationIndex]?.notes}
-              </p>
+              <p className="text-sm">{partialResponse?.estimations[currentRecomendationIndex]?.notes}</p>
               <div className="flex w-1/2 items-center justify-center space-y-2">
-                <div className="flex w-full">
-                  <Button variant="outline">
-                    {
-                      partialResponse?.estimations[currentRecomendationIndex]
-                        ?.timeEstimation
-                    }{" "}
-                    {
-                      partialResponse?.estimations[currentRecomendationIndex]
-                        ?.timeUnit
-                    }
-                  </Button>
-                </div>
-                <div className="flex w-full flex-wrap space-x-2">
-                  <Button variant="outline">
-                    {
-                      partialResponse?.estimations[currentRecomendationIndex]
-                        ?.manforceNumber
-                    }{" "}
-                    {
-                      partialResponse?.estimations[currentRecomendationIndex]
-                        ?.manforceType
-                    }
-                  </Button>
-                </div>
+                <Button variant="outline">
+                  {partialResponse?.estimations[currentRecomendationIndex]?.timeEstimation}{" "}
+                  {partialResponse?.estimations[currentRecomendationIndex]?.timeUnit}
+                </Button>
+                <Button variant="outline">
+                  {partialResponse?.estimations[currentRecomendationIndex]?.manforceNumber}{" "}
+                  {partialResponse?.estimations[currentRecomendationIndex]?.manforceType}
+                </Button>
               </div>
             </CardContent>
           </Card>

@@ -72,4 +72,44 @@ export const projectChecklistRouter = createTRPCRouter({
       const QueryKey = `project_checklist_${input.projectId}_${ctx.session.user.role}`;
       await ctx.cache.del(QueryKey);
     }),
+
+  // Nuevo procedimiento para enviar mensajes a la IA
+  sendMessageToAI: protectedProcedure
+    .input(z.object({ projectId: z.number(), message: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      const project = await ctx.db
+        .select()
+        .from(projects)
+        .where(eq(projects.id, input.projectId));
+
+      if (!project.length || !project[0]) {
+        return "No se encontró el proyecto.";
+      }
+
+      const openai = getOpenAI();
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          {
+            role: "system",
+            content:
+              "Eres un asistente especializado en listas de verificación de proyectos. Proporciona respuestas detalladas y específicas según las necesidades del usuario en relación con la completitud del proyecto.",
+          },
+          {
+            role: "user",
+            content:
+              "El proyecto se llama: " +
+              project[0].name +
+              ". Descripción: " +
+              project[0].description,
+          },
+          {
+            role: "user",
+            content: input.message,
+          },
+        ],
+      });
+
+      return response.choices[0]?.message?.content ?? "No se pudo obtener una respuesta de la IA.";
+    }),
 });
