@@ -1,4 +1,3 @@
-import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "techme/server/api/trpc";
 import { projects, peoplePerProject } from "techme/server/db/schema";
 import { eq } from "drizzle-orm";
