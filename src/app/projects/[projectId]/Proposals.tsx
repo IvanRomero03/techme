@@ -19,21 +19,15 @@ export default function Proposals({ projectId }: { projectId: string }) {
   const [estimateChat, setEstimateChat] = useState<{ role: string; content: string }[]>([]);
   const [checklistChat, setChecklistChat] = useState<{ role: string; content: string }[]>([]);
 
-  const [inputMessage, setInputMessage] = useState("");
+  const [inputProposals, setInputProposals] = useState("");
+  const [inputEstimates, setInputEstimates] = useState("");
+  const [inputChecklist, setInputChecklist] = useState("");
+
   const [isSending, setIsSending] = useState(false);
 
-  // Consultas y mutaciones de TRPC
-  const proposalsQuery = api.projectProposals.getProjectProposal.useQuery(
-    { projectId: Number(projectId) }
-  );
-
-  const estimatesQuery = api.projectEstimate.getProjectEstimate.useQuery(
-    { projectId: Number(projectId) }
-  );
-
-  const checklistQuery = api.projectChecklist.getProjectChecklist.useQuery(
-    { projectId: Number(projectId) }
-  );
+  const proposalsQuery = api.projectProposals.getProjectProposal.useQuery({ projectId: Number(projectId) });
+  const estimatesQuery = api.projectEstimate.getProjectEstimate.useQuery({ projectId: Number(projectId) });
+  const checklistQuery = api.projectChecklist.getProjectChecklist.useQuery({ projectId: Number(projectId) });
 
   const { mutateAsync: refreshProposals } = api.projectProposals.unsetCacheProjectProposal.useMutation();
   const { mutateAsync: refreshEstimates } = api.projectEstimate.unsetCacheProjectEstimate.useMutation();
@@ -42,33 +36,38 @@ export default function Proposals({ projectId }: { projectId: string }) {
 
   const utils = api.useContext();
 
-  // useEffect para actualizar el contenido cuando los datos sean recibidos
   useEffect(() => {
     if (proposalsQuery.data) {
-      console.log("Proposals Data:", proposalsQuery.data);
       setProposalsContent(proposalsQuery.data.join("") || "No content available.");
     }
   }, [proposalsQuery.data]);
 
   useEffect(() => {
     if (estimatesQuery.data) {
-      console.log("Estimates Data:", estimatesQuery.data);
       setEstimateContent(estimatesQuery.data.join("") || "No content available.");
     }
   }, [estimatesQuery.data]);
 
   useEffect(() => {
     if (checklistQuery.data) {
-      console.log("Checklist Data:", checklistQuery.data);
       setChecklistContent(checklistQuery.data.join("") || "No content available.");
     }
   }, [checklistQuery.data]);
 
   const handleSendMessage = async (section: "proposals" | "estimate" | "checklist") => {
+    let inputMessage = "";
+
+    if (section === "proposals") inputMessage = inputProposals;
+    else if (section === "estimate") inputMessage = inputEstimates;
+    else if (section === "checklist") inputMessage = inputChecklist;
+
     if (inputMessage.trim() === "") return;
 
     const newMessage = { role: "user", content: inputMessage };
-    setInputMessage("");
+    if (section === "proposals") setInputProposals("");
+    else if (section === "estimate") setInputEstimates("");
+    else if (section === "checklist") setInputChecklist("");
+
     setIsSending(true);
 
     try {
@@ -92,30 +91,85 @@ export default function Proposals({ projectId }: { projectId: string }) {
   };
 
   const handleExportToDocx = () => {
+    const processContent = (content: string) => {
+      const paragraphs: Paragraph[] = [];
+      const lines = content.split("\n").map((line) => line.trim()); // Normaliza y limpia espacios
+  
+      lines.forEach((line) => {
+        if (line.startsWith("- **") && line.endsWith("**")) {
+          // Encabezados con viñetas en negrita
+          paragraphs.push(
+            new Paragraph({
+              children: [new TextRun({ text: line.replace(/-\s\*\*|\*\*/g, ""), bold: true })],
+              bullet: { level: 0 },
+            })
+          );
+        } else if (line.startsWith("- ") || line.startsWith("• ")) {
+          // Viñetas simples
+          paragraphs.push(
+            new Paragraph({
+              children: [new TextRun({ text: line.replace(/^[-•]\s*/, "") })],
+              bullet: { level: 0 },
+            })
+          );
+        } else if (line.startsWith("  - ") || line.startsWith("  • ")) {
+          // Subviñetas
+          paragraphs.push(
+            new Paragraph({
+              children: [new TextRun({ text: line.replace(/^ {2}[-•]\s*/, "") })],
+              bullet: { level: 1 },
+            })
+          );
+        } else if (line.startsWith("[ ]") || line.startsWith("[x]")) {
+          // Casillas de verificación
+          paragraphs.push(
+            new Paragraph({
+              children: [
+                new TextRun({ text: line.startsWith("[x]") ? "☑ " : "☐ " }),
+                new TextRun({ text: line.replace(/\[.\]\s?/, "") }),
+              ],
+            })
+          );
+        } else if (line.startsWith("**") && line.endsWith("**")) {
+          // Texto en negrita
+          paragraphs.push(
+            new Paragraph({
+              children: [new TextRun({ text: line.replace(/\*\*/g, ""), bold: true })],
+            })
+          );
+        } else {
+          // Texto normal
+          paragraphs.push(new Paragraph({ text: line }));
+        }
+      });
+  
+      return paragraphs;
+    };
+  
     try {
       const doc = new Document({
         sections: [
           {
             children: [
               new Paragraph({ text: "Proposals", heading: "Heading1" }),
-              new Paragraph({ text: proposalsContent }),
+              ...processContent(proposalsContent),
               new Paragraph({ text: "Estimate", heading: "Heading1" }),
-              new Paragraph({ text: estimateContent }),
+              ...processContent(estimateContent),
               new Paragraph({ text: "Checklist", heading: "Heading1" }),
-              new Paragraph({ text: checklistContent }),
+              ...processContent(checklistContent),
             ],
           },
         ],
       });
-
-      void Packer.toBlob(doc).then((blob) => {
+  
+      Packer.toBlob(doc).then((blob) => {
         saveAs(blob, "Project_Responses.docx");
       });
     } catch (error) {
       console.error("Error generating DOCX file:", error);
       alert("Error generating DOCX file. Please check the console for more details.");
     }
-  };
+  };  
 
   return (
     <CardContent className="flex h-full w-full flex-col gap-8">
@@ -149,27 +203,17 @@ export default function Proposals({ projectId }: { projectId: string }) {
           )}
         </CardContent>
       </Card>
-
-      {/* Chat for Proposals */}
       <Card className="w-full bg-gray-100 rounded-lg p-4">
         <h2 className="text-lg font-bold mb-2">Chat with AI - Proposals</h2>
-        <div className="max-h-[150px] overflow-auto border p-2 mb-2 rounded bg-white">
-          {proposalsChat.map((msg, idx) => (
-            <p key={idx} className={`text-sm ${msg.role === "user" ? "text-blue-500" : "text-gray-700"}`}>
-              <strong>{msg.role === "user" ? "You: " : "AI: "}</strong>
-              {msg.content}
-            </p>
-          ))}
-        </div>
         <div className="flex items-center gap-2">
           <Input
             className="flex-grow"
             placeholder="Type your message..."
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
+            value={inputProposals}
+            onChange={(e) => setInputProposals(e.target.value)}
             disabled={isSending}
           />
-          <Button onClick={() => handleSendMessage("proposals")} disabled={isSending || !inputMessage.trim()}>
+          <Button onClick={() => handleSendMessage("proposals")} disabled={isSending || !inputProposals.trim()}>
             <Send className="h-4 w-4" />
           </Button>
         </div>
@@ -197,27 +241,17 @@ export default function Proposals({ projectId }: { projectId: string }) {
           )}
         </CardContent>
       </Card>
-
-      {/* Chat for Estimates */}
       <Card className="w-full bg-gray-100 rounded-lg p-4">
         <h2 className="text-lg font-bold mb-2">Chat with AI - Estimates</h2>
-        <div className="max-h-[150px] overflow-auto border p-2 mb-2 rounded bg-white">
-          {estimateChat.map((msg, idx) => (
-            <p key={idx} className={`text-sm ${msg.role === "user" ? "text-blue-500" : "text-gray-700"}`}>
-              <strong>{msg.role === "user" ? "You: " : "AI: "}</strong>
-              {msg.content}
-            </p>
-          ))}
-        </div>
         <div className="flex items-center gap-2">
           <Input
             className="flex-grow"
             placeholder="Type your message..."
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
+            value={inputEstimates}
+            onChange={(e) => setInputEstimates(e.target.value)}
             disabled={isSending}
           />
-          <Button onClick={() => handleSendMessage("estimate")} disabled={isSending || !inputMessage.trim()}>
+          <Button onClick={() => handleSendMessage("estimate")} disabled={isSending || !inputEstimates.trim()}>
             <Send className="h-4 w-4" />
           </Button>
         </div>
@@ -245,27 +279,17 @@ export default function Proposals({ projectId }: { projectId: string }) {
           )}
         </CardContent>
       </Card>
-
-      {/* Chat for Checklist */}
       <Card className="w-full bg-gray-100 rounded-lg p-4">
         <h2 className="text-lg font-bold mb-2">Chat with AI - Checklist</h2>
-        <div className="max-h-[150px] overflow-auto border p-2 mb-2 rounded bg-white">
-          {checklistChat.map((msg, idx) => (
-            <p key={idx} className={`text-sm ${msg.role === "user" ? "text-blue-500" : "text-gray-700"}`}>
-              <strong>{msg.role === "user" ? "You: " : "AI: "}</strong>
-              {msg.content}
-            </p>
-          ))}
-        </div>
         <div className="flex items-center gap-2">
           <Input
             className="flex-grow"
             placeholder="Type your message..."
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
+            value={inputChecklist}
+            onChange={(e) => setInputChecklist(e.target.value)}
             disabled={isSending}
           />
-          <Button onClick={() => handleSendMessage("checklist")} disabled={isSending || !inputMessage.trim()}>
+          <Button onClick={() => handleSendMessage("checklist")} disabled={isSending || !inputChecklist.trim()}>
             <Send className="h-4 w-4" />
           </Button>
         </div>
