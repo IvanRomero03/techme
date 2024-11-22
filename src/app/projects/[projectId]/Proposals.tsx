@@ -90,55 +90,44 @@ export default function Proposals({ projectId }: { projectId: string }) {
     }
   };
 
-  const handleExportToDocx = () => {
+  const handleExportToDocx = async () => {
     const processContent = (content: string) => {
       const paragraphs: Paragraph[] = [];
-      const lines = content.split("\n").map((line) => line.trim()); // Normaliza y limpia espacios
+      const lines = content.split("\n");
   
       lines.forEach((line) => {
-        if (line.startsWith("- **") && line.endsWith("**")) {
-          // Encabezados con viñetas en negrita
+        if (line.startsWith("### ")) {
           paragraphs.push(
             new Paragraph({
-              children: [new TextRun({ text: line.replace(/-\s\*\*|\*\*/g, ""), bold: true })],
-              bullet: { level: 0 },
+              text: line.replace("### ", ""),
+              heading: "Heading3",
             })
           );
-        } else if (line.startsWith("- ") || line.startsWith("• ")) {
-          // Viñetas simples
+        } else if (line.startsWith("#### ")) {
           paragraphs.push(
             new Paragraph({
-              children: [new TextRun({ text: line.replace(/^[-•]\s*/, "") })],
-              bullet: { level: 0 },
+              text: line.replace("#### ", ""),
+              heading: "Heading4",
             })
           );
-        } else if (line.startsWith("  - ") || line.startsWith("  • ")) {
-          // Subviñetas
+        } else if (line.startsWith("- ")) {
           paragraphs.push(
             new Paragraph({
-              children: [new TextRun({ text: line.replace(/^ {2}[-•]\s*/, "") })],
-              bullet: { level: 1 },
+              text: line.replace("- ", ""),
+              bullet: { level: 0 },
             })
           );
         } else if (line.startsWith("[ ]") || line.startsWith("[x]")) {
-          // Casillas de verificación
           paragraphs.push(
             new Paragraph({
               children: [
-                new TextRun({ text: line.startsWith("[x]") ? "☑ " : "☐ " }),
-                new TextRun({ text: line.replace(/\[.\]\s?/, "") }),
+                new TextRun({
+                  text: line.replace(/\[.\] /, ""),
+                }),
               ],
             })
           );
-        } else if (line.startsWith("**") && line.endsWith("**")) {
-          // Texto en negrita
-          paragraphs.push(
-            new Paragraph({
-              children: [new TextRun({ text: line.replace(/\*\*/g, ""), bold: true })],
-            })
-          );
-        } else {
-          // Texto normal
+        } else if (line.trim() !== "") {
           paragraphs.push(new Paragraph({ text: line }));
         }
       });
@@ -162,14 +151,13 @@ export default function Proposals({ projectId }: { projectId: string }) {
         ],
       });
   
-      Packer.toBlob(doc).then((blob) => {
-        saveAs(blob, "Project_Responses.docx");
-      });
-    } catch (error) {
-      console.error("Error generating DOCX file:", error);
-      alert("Error generating DOCX file. Please check the console for more details.");
-    }
-  };  
+      const blob = await Packer.toBlob(doc); // Usa await para manejar la promesa
+    saveAs(blob, "Project_Responses.docx");
+  } catch (error) {
+    console.error("Error generating DOCX file:", error);
+    alert("Error generating DOCX file. Please check the console for more details.");
+  }
+}; 
 
   return (
     <CardContent className="flex h-full w-full flex-col gap-8">
