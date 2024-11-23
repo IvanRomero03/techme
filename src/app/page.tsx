@@ -12,9 +12,14 @@ import SigninAzure from "./_components/SigninAzure";
 import SigninGoogle from "./_components/SigninGoogle";
 import SignOut from "./_components/SignOut";
 import { UserRole } from "techme/util/UserRole";
+import { redirect } from "next/navigation";
 
 export default async function Home() {
   const session = await getServerAuthSession();
+
+  if (session?.user && session.user.role !== UserRole.Unauthorized) {
+    redirect("/dashboard/");
+  }
 
   return (
     <Card className="m:10 mx-auto max-w-sm">
