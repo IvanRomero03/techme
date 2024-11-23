@@ -19,6 +19,7 @@ import type { Session } from "next-auth";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
 import React from "react";
+import { UserRole } from "techme/util/UserRole";
 
 interface SidebarProps {
   isCollapsed: boolean;
@@ -52,16 +53,20 @@ const Sidebar: React.FC<SidebarProps> = ({
       </div>
 
       <nav className="mt-4 flex flex-grow flex-col justify-center">
-        <Link
-          href={`/dashboard/${session?.user.role.toLowerCase()}`}
-          className="flex items-center justify-center px-6 py-3 transition hover:bg-gray-700"
-        >
-          <FontAwesomeIcon
-            icon={faTableColumns}
-            className="mr-3 h-5 w-5 self-center"
-          />
-          {!isCollapsed && <span className="flex-grow text-lg">Dashboard</span>}
-        </Link>
+        {session?.user.role && session.user.role !== UserRole.Unauthorized && (
+          <Link
+            href={`/dashboard/${session?.user.role.toLowerCase()}`}
+            className="flex items-center justify-center px-6 py-3 transition hover:bg-gray-700"
+          >
+            <FontAwesomeIcon
+              icon={faTableColumns}
+              className="mr-3 h-5 w-5 self-center"
+            />
+            {!isCollapsed && (
+              <span className="flex-grow text-lg">Dashboard</span>
+            )}
+          </Link>
+        )}
         <Link
           href="/projects"
           className="flex items-center justify-center px-6 py-3 transition hover:bg-gray-700"
@@ -72,22 +77,6 @@ const Sidebar: React.FC<SidebarProps> = ({
           />
           {!isCollapsed && <span className="flex-grow text-lg">Projects</span>}
         </Link>
-
-        <Link
-          href="/notifications"
-          className="flex items-center justify-center px-6 py-3 transition hover:bg-gray-700"
-        >
-          <FontAwesomeIcon icon={faBell} className="mr-3 h-5 w-5 self-center" />
-          {!isCollapsed && (
-            <span className="flex-grow text-lg">Notifications</span>
-          )}
-          {!isCollapsed && (
-            <span className="rounded-full bg-gray-600 px-2 py-1 text-xs">
-              2
-            </span>
-          )}
-        </Link>
-
         <Link
           href="/calendar"
           className="flex items-center justify-center px-6 py-3 transition hover:bg-gray-700"
@@ -98,59 +87,24 @@ const Sidebar: React.FC<SidebarProps> = ({
           />
           {!isCollapsed && <span className="flex-grow text-lg">Calendar</span>}
         </Link>
-
-        <Link
-          href="/documents"
-          className="flex items-center justify-center px-6 py-3 transition hover:bg-gray-700"
-        >
-          <FontAwesomeIcon
-            icon={faFileAlt}
-            className="mr-3 h-5 w-5 self-center"
-          />
-          {!isCollapsed && <span className="flex-grow text-lg">Documents</span>}
-        </Link>
-
-        <Link
-          href="/members"
-          className="flex items-center justify-center px-6 py-3 transition hover:bg-gray-700"
-        >
-          <FontAwesomeIcon icon={faUser} className="mr-3 h-5 w-5 self-center" />
-          {!isCollapsed && <span className="flex-grow text-lg">Members</span>}
-        </Link>
-
-        <Link
-          href="/settings"
-          className="mt-auto flex items-center px-6 py-3 transition hover:bg-gray-700"
-        >
-          <FontAwesomeIcon icon={faCog} className="mr-3 h-5 w-5 self-center" />
-          {!isCollapsed && <span className="flex-grow text-lg">Settings</span>}
-        </Link>
+        {session?.user.role === UserRole.Admin ||
+          (session?.user.role === UserRole.GDM && (
+            <Link
+              href="/members"
+              className="flex items-center justify-center px-6 py-3 transition hover:bg-gray-700"
+            >
+              <FontAwesomeIcon
+                icon={faUser}
+                className="mr-3 h-5 w-5 self-center"
+              />
+              {!isCollapsed && (
+                <span className="flex-grow text-lg">Members</span>
+              )}
+            </Link>
+          ))}
+        <div className="mt-auto flex items-center px-6 py-3 transition hover:bg-gray-700"></div>
 
         <div className="mt-4 border-t border-gray-600">
-          <Link
-            href="/help"
-            className="flex items-center justify-center px-6 py-3 transition hover:bg-gray-700"
-          >
-            <FontAwesomeIcon
-              icon={faQuestionCircle}
-              className="mr-3 h-5 w-5 self-center"
-            />
-            {!isCollapsed && <span className="flex-grow text-lg">Help</span>}
-          </Link>
-
-          <Link
-            href="/contact"
-            className="flex items-center justify-center px-6 py-3 transition hover:bg-gray-700"
-          >
-            <FontAwesomeIcon
-              icon={faEnvelope}
-              className="mr-3 h-5 w-5 self-center"
-            />
-            {!isCollapsed && (
-              <span className="flex-grow text-lg">Contact Us</span>
-            )}
-          </Link>
-
           <Link
             href="/"
             className="flex items-center justify-center px-6 py-3 transition hover:bg-gray-700"

@@ -18,5 +18,11 @@ export default async function Layout({
   if (!session?.user || session.user.role === UserRole.Unauthorized) {
     redirect("/");
   }
+  const desiredUrl = "/dashboard/" + session.user.role.toLowerCase();
+  const currentUrl = "/dashboard/cm";
+  if (currentUrl !== desiredUrl) {
+    redirect(desiredUrl);
+  }
+
   return children;
 }
