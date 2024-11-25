@@ -1,6 +1,6 @@
 "use client";
 
-import { RefreshCcw, Send, Download } from "lucide-react";
+import { RefreshCcw, Send, Download, Loader } from "lucide-react";
 import Markdown from "react-markdown";
 import { Button } from "t/components/ui/button";
 import { Card, CardContent } from "t/components/ui/card";
@@ -9,15 +9,23 @@ import { saveAs } from "file-saver";
 import { api } from "techme/trpc/react";
 import { useState, useEffect } from "react";
 import { Document, Packer, Paragraph, TextRun } from "docx";
+import { getOpenAIBrowser } from "techme/server/chatgpt/openai";
+import marpExporter from "./marpExporter";
 
 export default function Proposals({ projectId }: { projectId: string }) {
   const [proposalsContent, setProposalsContent] = useState<string>("");
   const [estimateContent, setEstimateContent] = useState<string>("");
   const [checklistContent, setChecklistContent] = useState<string>("");
 
-  const [proposalsChat, setProposalsChat] = useState<{ role: string; content: string }[]>([]);
-  const [estimateChat, setEstimateChat] = useState<{ role: string; content: string }[]>([]);
-  const [checklistChat, setChecklistChat] = useState<{ role: string; content: string }[]>([]);
+  const [proposalsChat, setProposalsChat] = useState<
+    { role: string; content: string }[]
+  >([]);
+  const [estimateChat, setEstimateChat] = useState<
+    { role: string; content: string }[]
+  >([]);
+  const [checklistChat, setChecklistChat] = useState<
+    { role: string; content: string }[]
+  >([]);
 
   const [inputProposals, setInputProposals] = useState("");
   const [inputEstimates, setInputEstimates] = useState("");
@@ -25,36 +33,54 @@ export default function Proposals({ projectId }: { projectId: string }) {
 
   const [isSending, setIsSending] = useState(false);
 
-  const proposalsQuery = api.projectProposals.getProjectProposal.useQuery({ projectId: Number(projectId) });
-  const estimatesQuery = api.projectEstimate.getProjectEstimate.useQuery({ projectId: Number(projectId) });
-  const checklistQuery = api.projectChecklist.getProjectChecklist.useQuery({ projectId: Number(projectId) });
+  const proposalsQuery = api.projectProposals.getProjectProposal.useQuery({
+    projectId: Number(projectId),
+  });
+  const estimatesQuery = api.projectEstimate.getProjectEstimate.useQuery({
+    projectId: Number(projectId),
+  });
+  const checklistQuery = api.projectChecklist.getProjectChecklist.useQuery({
+    projectId: Number(projectId),
+  });
 
-  const { mutateAsync: refreshProposals } = api.projectProposals.unsetCacheProjectProposal.useMutation();
-  const { mutateAsync: refreshEstimates } = api.projectEstimate.unsetCacheProjectEstimate.useMutation();
-  const { mutateAsync: refreshChecklist } = api.projectChecklist.unsetCacheProjectChecklist.useMutation();
-  const { mutateAsync: sendMessageToAI } = api.projectProposals.sendMessageToAI.useMutation();
+  const { mutateAsync: refreshProposals } =
+    api.projectProposals.unsetCacheProjectProposal.useMutation();
+  const { mutateAsync: refreshEstimates } =
+    api.projectEstimate.unsetCacheProjectEstimate.useMutation();
+  const { mutateAsync: refreshChecklist } =
+    api.projectChecklist.unsetCacheProjectChecklist.useMutation();
+  const { mutateAsync: sendMessageToAI } =
+    api.projectProposals.sendMessageToAI.useMutation();
 
   const utils = api.useContext();
 
   useEffect(() => {
     if (proposalsQuery.data) {
-      setProposalsContent(proposalsQuery.data.join("") || "No content available.");
+      setProposalsContent(
+        proposalsQuery.data.join("") || "No content available.",
+      );
     }
   }, [proposalsQuery.data]);
 
   useEffect(() => {
     if (estimatesQuery.data) {
-      setEstimateContent(estimatesQuery.data.join("") || "No content available.");
+      setEstimateContent(
+        estimatesQuery.data.join("") || "No content available.",
+      );
     }
   }, [estimatesQuery.data]);
 
   useEffect(() => {
     if (checklistQuery.data) {
-      setChecklistContent(checklistQuery.data.join("") || "No content available.");
+      setChecklistContent(
+        checklistQuery.data.join("") || "No content available.",
+      );
     }
   }, [checklistQuery.data]);
 
-  const handleSendMessage = async (section: "proposals" | "estimate" | "checklist") => {
+  const handleSendMessage = async (
+    section: "proposals" | "estimate" | "checklist",
+  ) => {
     let inputMessage = "";
 
     if (section === "proposals") inputMessage = inputProposals;
@@ -71,16 +97,31 @@ export default function Proposals({ projectId }: { projectId: string }) {
     setIsSending(true);
 
     try {
-      const response = await sendMessageToAI({ projectId: Number(projectId), message: inputMessage });
+      const response = await sendMessageToAI({
+        projectId: Number(projectId),
+        message: inputMessage,
+      });
 
       if (section === "proposals") {
-        setProposalsChat((prevMessages) => [...prevMessages, newMessage, { role: "assistant", content: response }]);
+        setProposalsChat((prevMessages) => [
+          ...prevMessages,
+          newMessage,
+          { role: "assistant", content: response },
+        ]);
         setProposalsContent(response);
       } else if (section === "estimate") {
-        setEstimateChat((prevMessages) => [...prevMessages, newMessage, { role: "assistant", content: response }]);
+        setEstimateChat((prevMessages) => [
+          ...prevMessages,
+          newMessage,
+          { role: "assistant", content: response },
+        ]);
         setEstimateContent(response);
       } else if (section === "checklist") {
-        setChecklistChat((prevMessages) => [...prevMessages, newMessage, { role: "assistant", content: response }]);
+        setChecklistChat((prevMessages) => [
+          ...prevMessages,
+          newMessage,
+          { role: "assistant", content: response },
+        ]);
         setChecklistContent(response);
       }
     } catch (error) {
@@ -94,28 +135,28 @@ export default function Proposals({ projectId }: { projectId: string }) {
     const processContent = (content: string) => {
       const paragraphs: Paragraph[] = [];
       const lines = content.split("\n");
-  
+
       lines.forEach((line) => {
         if (line.startsWith("### ")) {
           paragraphs.push(
             new Paragraph({
               text: line.replace("### ", ""),
               heading: "Heading3",
-            })
+            }),
           );
         } else if (line.startsWith("#### ")) {
           paragraphs.push(
             new Paragraph({
               text: line.replace("#### ", ""),
               heading: "Heading4",
-            })
+            }),
           );
         } else if (line.startsWith("- ")) {
           paragraphs.push(
             new Paragraph({
               text: line.replace("- ", ""),
               bullet: { level: 0 },
-            })
+            }),
           );
         } else if (line.startsWith("[ ]") || line.startsWith("[x]")) {
           paragraphs.push(
@@ -125,16 +166,16 @@ export default function Proposals({ projectId }: { projectId: string }) {
                   text: line.replace(/\[.\] /, ""),
                 }),
               ],
-            })
+            }),
           );
         } else if (line.trim() !== "") {
           paragraphs.push(new Paragraph({ text: line }));
         }
       });
-  
+
       return paragraphs;
     };
-  
+
     try {
       const doc = new Document({
         sections: [
@@ -150,28 +191,82 @@ export default function Proposals({ projectId }: { projectId: string }) {
           },
         ],
       });
-  
+
       const blob = await Packer.toBlob(doc); // Usa await para manejar la promesa
-    saveAs(blob, "Project_Responses.docx");
-  } catch (error) {
-    console.error("Error generating DOCX file:", error);
-    alert("Error generating DOCX file. Please check the console for more details.");
-  }
-}; 
+      saveAs(blob, "Project_Responses.docx");
+    } catch (error) {
+      console.error("Error generating DOCX file:", error);
+      alert(
+        "Error generating DOCX file. Please check the console for more details.",
+      );
+    }
+  };
+  const [isExporting, setIsExporting] = useState(false);
+  const handleExportToPptx = async () => {
+    if (isExporting) return;
+    setIsExporting(true);
+    const openai = getOpenAIBrowser();
+    const res = await openai.chat.completions.create({
+      model: "gpt-4o-2024-08-06",
+      messages: [
+        {
+          role: "system",
+          content:
+            "You are a markdown document to marp converter. conver the next content to a marp presentation, ONLY the content of the marp slides, not any other text and DONT wrap the content inside any ` or ```, just the marp code being directly to be rendered.",
+        },
+        { role: "user", content: proposalsContent },
+        { role: "user", content: estimateContent },
+        { role: "user", content: checklistContent },
+      ],
+    });
+    const content = res.choices[0]?.message.content;
+    console.log("Generated PPTX content:", content);
+    if (!content) {
+      alert(
+        "Error generating PPTX file. Please check the console for more details.",
+      );
+      setIsExporting(false);
+      return;
+    }
+    try {
+      const blob = new Blob([await marpExporter(content)], {
+        type: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+      });
+      const fileName = "Project_Responses.pptx";
+      saveAs(blob, fileName);
+    } catch (error) {
+      console.error("Error generating PPTX file:", error);
+      alert(
+        "Error generating PPTX file. Please check the console for more details.",
+      );
+    }
+    setIsExporting(false);
+  };
 
   return (
     <CardContent className="flex h-full w-full flex-col gap-8">
       {/* Botón de Exportación */}
-      <div className="flex justify-end mb-4">
+      <div className="mb-4 flex justify-end">
         <Button onClick={handleExportToDocx} variant="ghost">
-          <Download className="h-4 w-4 mr-2" />
+          <Download className="mr-2 h-4 w-4" />
           Export to DOCX
         </Button>
+        {!isExporting ? (
+          <Button onClick={handleExportToPptx} variant="ghost">
+            <Download className="mr-2 h-4 w-4" />
+            Export to PPTX
+          </Button>
+        ) : (
+          <Button variant="ghost" disabled>
+            <Loader className="mr-2 h-4 w-4 animate-spin" />
+            Exporting...
+          </Button>
+        )}
       </div>
 
       {/* Proposals Section */}
       <Card className="relative w-full overflow-auto">
-        <div className="flex justify-between items-center p-4">
+        <div className="flex items-center justify-between p-4">
           <h1 className="text-xl font-bold">Proposals</h1>
           <Button
             onClick={async () => {
@@ -191,8 +286,8 @@ export default function Proposals({ projectId }: { projectId: string }) {
           )}
         </CardContent>
       </Card>
-      <Card className="w-full bg-gray-100 rounded-lg p-4">
-        <h2 className="text-lg font-bold mb-2">Chat with AI - Proposals</h2>
+      <Card className="w-full rounded-lg bg-gray-100 p-4">
+        <h2 className="mb-2 text-lg font-bold">Chat with AI - Proposals</h2>
         <div className="flex items-center gap-2">
           <Input
             className="flex-grow"
@@ -201,7 +296,10 @@ export default function Proposals({ projectId }: { projectId: string }) {
             onChange={(e) => setInputProposals(e.target.value)}
             disabled={isSending}
           />
-          <Button onClick={() => handleSendMessage("proposals")} disabled={isSending || !inputProposals.trim()}>
+          <Button
+            onClick={() => handleSendMessage("proposals")}
+            disabled={isSending || !inputProposals.trim()}
+          >
             <Send className="h-4 w-4" />
           </Button>
         </div>
@@ -209,7 +307,7 @@ export default function Proposals({ projectId }: { projectId: string }) {
 
       {/* Estimates Section */}
       <Card className="relative w-full overflow-auto">
-        <div className="flex justify-between items-center p-4">
+        <div className="flex items-center justify-between p-4">
           <h1 className="text-xl font-bold">Estimate</h1>
           <Button
             onClick={async () => {
@@ -229,8 +327,8 @@ export default function Proposals({ projectId }: { projectId: string }) {
           )}
         </CardContent>
       </Card>
-      <Card className="w-full bg-gray-100 rounded-lg p-4">
-        <h2 className="text-lg font-bold mb-2">Chat with AI - Estimates</h2>
+      <Card className="w-full rounded-lg bg-gray-100 p-4">
+        <h2 className="mb-2 text-lg font-bold">Chat with AI - Estimates</h2>
         <div className="flex items-center gap-2">
           <Input
             className="flex-grow"
@@ -239,7 +337,10 @@ export default function Proposals({ projectId }: { projectId: string }) {
             onChange={(e) => setInputEstimates(e.target.value)}
             disabled={isSending}
           />
-          <Button onClick={() => handleSendMessage("estimate")} disabled={isSending || !inputEstimates.trim()}>
+          <Button
+            onClick={() => handleSendMessage("estimate")}
+            disabled={isSending || !inputEstimates.trim()}
+          >
             <Send className="h-4 w-4" />
           </Button>
         </div>
@@ -247,7 +348,7 @@ export default function Proposals({ projectId }: { projectId: string }) {
 
       {/* Checklist Section */}
       <Card className="relative w-full overflow-auto">
-        <div className="flex justify-between items-center p-4">
+        <div className="flex items-center justify-between p-4">
           <h1 className="text-xl font-bold">Checklist</h1>
           <Button
             onClick={async () => {
@@ -267,8 +368,8 @@ export default function Proposals({ projectId }: { projectId: string }) {
           )}
         </CardContent>
       </Card>
-      <Card className="w-full bg-gray-100 rounded-lg p-4">
-        <h2 className="text-lg font-bold mb-2">Chat with AI - Checklist</h2>
+      <Card className="w-full rounded-lg bg-gray-100 p-4">
+        <h2 className="mb-2 text-lg font-bold">Chat with AI - Checklist</h2>
         <div className="flex items-center gap-2">
           <Input
             className="flex-grow"
@@ -277,7 +378,10 @@ export default function Proposals({ projectId }: { projectId: string }) {
             onChange={(e) => setInputChecklist(e.target.value)}
             disabled={isSending}
           />
-          <Button onClick={() => handleSendMessage("checklist")} disabled={isSending || !inputChecklist.trim()}>
+          <Button
+            onClick={() => handleSendMessage("checklist")}
+            disabled={isSending || !inputChecklist.trim()}
+          >
             <Send className="h-4 w-4" />
           </Button>
         </div>
