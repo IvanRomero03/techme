@@ -21,13 +21,6 @@ export default async function marpExporter(mdContent: string): Promise<Blob> {
   // Initialize pptxgen
   const pres = new pptxgen();
 
-  // Convert CSS to PPTX theme
-  const theme = {
-    background: "#FFFFFF",
-    color: "#333333",
-    font_size: 18,
-  };
-
   // Parse CSS for theme properties
   const styleSheet = css.split("\n").reduce(
     (acc, line) => {
@@ -40,6 +33,17 @@ export default async function marpExporter(mdContent: string): Promise<Blob> {
     {} as Record<string, string>,
   );
 
+  // Extract theme properties from styleSheet
+  const theme = {
+    background: styleSheet.background_color ?? "#FFFFFF",
+    color: styleSheet.color ?? "#333333",
+    font_size: parseInt(styleSheet.font_size ?? "") ?? 18,
+    font_family: styleSheet.font_family ?? "Arial",
+    h1_size: parseInt(styleSheet.h1_font_size ?? "") ?? 36,
+    h2_size: parseInt(styleSheet.h2_font_size ?? "") ?? 30,
+    h3_size: parseInt(styleSheet.h3_font_size ?? "") ?? 24,
+  };
+
   // Apply theme
   pres.defineLayout({ name: "MARP", width: 10, height: 5.625 });
   pres.layout = "MARP";
@@ -47,45 +51,88 @@ export default async function marpExporter(mdContent: string): Promise<Blob> {
   // Helper function to process HTML content
   const processContent = (
     element: Element,
-  ): { text: string; level: number } => {
+  ): { text: string; level: number; className?: string } => {
+    const className = element.className;
+
     if (element.tagName === "H1")
-      return { text: element.textContent ?? "", level: 1 };
+      return { text: element.textContent ?? "", level: 1, className };
     if (element.tagName === "H2")
-      return { text: element.textContent ?? "", level: 2 };
+      return { text: element.textContent ?? "", level: 2, className };
     if (element.tagName === "H3")
-      return { text: element.textContent ?? "", level: 3 };
+      return { text: element.textContent ?? "", level: 3, className };
     if (element.tagName === "P")
-      return { text: element.textContent ?? "", level: 0 };
+      return { text: element.textContent ?? "", level: 0, className };
     if (element.tagName === "UL" || element.tagName === "OL") {
       const items = Array.from(element.children)
         .map((li) => `• ${li.textContent}`)
         .join("\n");
-      return { text: items, level: 0 };
+      return { text: items, level: 0, className };
     }
-    return { text: element.textContent ?? "", level: 0 };
+    return { text: element.textContent ?? "", level: 0, className };
+  };
+
+  // Function to get style properties for an element
+  const getStyleForElement = (className: string | undefined, level: number) => {
+    const classStyles = className
+      ? (styleSheet[className] ?? {})
+      : ({} as Record<string, string>);
+
+    const fontSize =
+      level === 1
+        ? theme.h1_size
+        : level === 2
+          ? theme.h2_size
+          : level === 3
+            ? theme.h3_size
+            : theme.font_size;
+
+    return {
+      fontSize,
+      color:
+        (typeof classStyles === "object" ? classStyles.color : undefined) ??
+        theme.color,
+      font_face:
+        (typeof classStyles === "object"
+          ? classStyles.font_family
+          : undefined) ?? theme.font_family,
+      align: level === 0 ? "left" : "center",
+      bold: level > 0,
+    };
   };
 
   // Process each slide
   slides.forEach((slide) => {
     const pptSlide = pres.addSlide();
 
+    // Get slide-specific background if it exists
+    const slideBackground =
+      slide.getAttribute("data-background") ??
+      styleSheet.slide_background ??
+      theme.background;
+
     // Process slide content
     let yPos = 2;
     Array.from(slide.children).forEach((element) => {
-      const { text, level } = processContent(element);
+      const { text, level, className } = processContent(element);
       if (text.trim()) {
-        const fontSize =
-          level === 0 ? theme.font_size : theme.font_size * (1.5 - level * 0.2);
+        const styleProps = getStyleForElement(className, level);
 
         pptSlide.addText(text, {
           x: 0.5,
           y: yPos,
           w: "90%",
           h: undefined,
-          fontSize: fontSize,
-          color: theme.color,
-          align: level === 0 ? "left" : "center",
-          bold: level > 0,
+          ...styleProps,
+          align:
+            styleProps.align == "left"
+              ? "left"
+              : styleProps.align == "center"
+                ? "center"
+                : styleProps.align == "right"
+                  ? "right"
+                  : styleProps.align == "justify"
+                    ? "justify"
+                    : "left",
         });
 
         yPos += 0.5;
@@ -109,7 +156,7 @@ export default async function marpExporter(mdContent: string): Promise<Blob> {
     });
 
     // Apply background
-    pptSlide.background = { color: theme.background };
+    pptSlide.background = { color: slideBackground };
   });
 
   // Generate PPTX as blob
