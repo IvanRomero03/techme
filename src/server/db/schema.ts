@@ -360,6 +360,7 @@ export const documentEmbeddings = createTable(
     id: serial("id").primaryKey(),
     documentId: varchar("document_id", { length: 255 }).references(
       () => projectDocuments.id,
+      { onDelete: "cascade" },
     ),
     text: text("text").notNull(),
     embedding: vector("embedding", { dimensions: 1536 }).notNull(), // text-embedding-3-large

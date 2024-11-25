@@ -60,8 +60,8 @@ export default function Details({ projectId }: { projectId: string }) {
             stage: proyectDetails?.project.stage ?? "",
             status: proyectDetails?.project.status ?? "",
             category: proyectDetails?.project.category ?? "",
-            startDate: proyectDetails?.project.startDate ?? "",
-            endDate: proyectDetails?.project.endDate ?? "",
+            startDate: proyectDetails?.project.startDate ?? new Date(),
+            endDate: proyectDetails?.project.endDate ?? new Date(),
             completionPercentage:
               proyectDetails?.project.completionPercentage ?? 0,
             members: proyectDetails?.members?.map((mem) => mem.user) ?? [],
@@ -93,6 +93,8 @@ export default function Details({ projectId }: { projectId: string }) {
               project_stage: values.stage,
               project_status: values.status,
               project_percentage: values.completionPercentage,
+              startDate: values.startDate,
+              endDate: values.endDate,
             });
             await utils.projects.getProyectInfo.invalidate();
           }}
