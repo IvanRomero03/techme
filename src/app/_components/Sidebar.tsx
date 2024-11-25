@@ -87,21 +87,19 @@ const Sidebar: React.FC<SidebarProps> = ({
           />
           {!isCollapsed && <span className="flex-grow text-lg">Calendar</span>}
         </Link>
-        {session?.user.role === UserRole.Admin ||
-          (session?.user.role === UserRole.GDM && (
-            <Link
-              href="/members"
-              className="flex items-center justify-center px-6 py-3 transition hover:bg-gray-700"
-            >
-              <FontAwesomeIcon
-                icon={faUser}
-                className="mr-3 h-5 w-5 self-center"
-              />
-              {!isCollapsed && (
-                <span className="flex-grow text-lg">Members</span>
-              )}
-            </Link>
-          ))}
+        {(session?.user.role === UserRole.Admin ||
+          session?.user.role === UserRole.GDM) && (
+          <Link
+            href="/members"
+            className="flex items-center justify-center px-6 py-3 transition hover:bg-gray-700"
+          >
+            <FontAwesomeIcon
+              icon={faUser}
+              className="mr-3 h-5 w-5 self-center"
+            />
+            {!isCollapsed && <span className="flex-grow text-lg">Members</span>}
+          </Link>
+        )}
         <div className="mt-auto flex items-center px-6 py-3 transition hover:bg-gray-700"></div>
 
         <div className="mt-4 border-t border-gray-600">
