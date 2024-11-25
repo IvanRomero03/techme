@@ -2,7 +2,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { createTRPCRouter, protectedProcedure } from "techme/server/api/trpc";
 import getOpenAI from "techme/server/chatgpt/openai";
-import { estimations, projects } from "techme/server/db/schema";
+import { estimations, projects, requirements } from "techme/server/db/schema";
 import { readableRole } from "techme/util/UserRole";
 import { zodResponseFormat } from "openai/helpers/zod.mjs";
 import { getSupabaseClient } from "techme/server/db/storage";
@@ -50,7 +50,46 @@ export const projectEstimatesRouter = createTRPCRouter({
       } catch (error) {
         console.error("Failed to get cache on getProjectEstimate", error);
       }
+      const reqs = await ctx.db
+        .select()
+        .from(requirements)
+        .where(eq(requirements.projectId, input.projectId));
 
+      const reqText = reqs
+        .map((req) => req.title + " == " + req.description)
+        .join("\n");
+
+      const estimates = await ctx.db
+        .select()
+        .from(estimations)
+        .where(eq(estimations.id, input.projectId));
+
+      const estText = estimates
+        .map(
+          (est) =>
+            est.phase +
+            " == " +
+            est.notes +
+            " == " +
+            est.manforce +
+            " : " +
+            est.manforceUnit +
+            " ; " +
+            est.timeEstimation +
+            " : " +
+            est.timeUnit,
+        )
+        .join("\n");
+
+      const context =
+        "El proyecto se llama: " +
+        project[0].name +
+        ". Descripción: " +
+        project[0].description +
+        ". Requerimientos: " +
+        reqText +
+        ". Estimaciones: " +
+        estText;
       // Initialize OpenAI and send a completion request
       const openai = getOpenAI();
       const estimate = await openai.chat.completions.create({
@@ -63,11 +102,7 @@ export const projectEstimatesRouter = createTRPCRouter({
           },
           {
             role: "user",
-            content:
-              "El proyecto se llama: " +
-              project[0].name +
-              " y su descripción es la siguiente: " +
-              project[0].description,
+            content: context,
           },
         ],
         stream: true,
