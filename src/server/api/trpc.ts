@@ -14,6 +14,7 @@ import { ZodError } from "zod";
 import { getServerAuthSession } from "techme/server/auth";
 import { db } from "techme/server/db";
 import { cache } from "techme/server/db/cache";
+import { UserRole } from "techme/util/UserRole";
 
 /**
  * 1. CONTEXT
@@ -123,7 +124,11 @@ export const publicProcedure = t.procedure.use(timingMiddleware);
 export const protectedProcedure = t.procedure
   .use(timingMiddleware)
   .use(({ ctx, next }) => {
-    if (!ctx.session || !ctx.session.user) {
+    if (
+      !ctx.session ||
+      !ctx.session.user ||
+      ctx.session.user.role === UserRole.Unauthorized
+    ) {
       throw new TRPCError({ code: "UNAUTHORIZED" });
     }
     return next({

@@ -11,7 +11,9 @@ import { Documents } from "./Documents";
 import Proposals from "./Proposals";
 import Analysis from "./Analysis";
 import Planning from "./Planning";
-import Validation from "./Validation"
+import Validation from "./Validation";
+import { UserRole } from "techme/util/UserRole";
+import { useSession } from "next-auth/react";
 
 const menuItems = [
   "Summary",
@@ -23,16 +25,85 @@ const menuItems = [
   "Estimations",
   "Proposals",
   "Validation",
-];
+] as const;
+
+type ObjectValues<T> = T[keyof T];
+
+type MenuItem = ObjectValues<typeof menuItems>;
+
+const permissions: Record<UserRole, MenuItem[]> = {
+  [UserRole.Admin]: [
+    "Summary",
+    "Details",
+    "Documentation",
+    "Requirements",
+    "Planning",
+    "Analysis",
+    "Estimations",
+    "Proposals",
+    "Validation",
+  ],
+  [UserRole.Comercial]: [
+    "Summary",
+    "Details",
+    "Documentation",
+    "Requirements",
+    "Planning",
+    "Proposals",
+    "Analysis",
+  ],
+  [UserRole.DigitalLead]: [
+    "Summary",
+    "Details",
+    "Documentation",
+    "Requirements",
+    "Planning",
+    "Proposals",
+    "Analysis",
+  ],
+  [UserRole.GDM]: [
+    "Summary",
+    "Details",
+    "Documentation",
+    "Requirements",
+    "Planning",
+    "Analysis",
+    "Estimations",
+    "Proposals",
+    "Validation",
+  ],
+  [UserRole.LeadPresales]: [
+    "Summary",
+    "Details",
+    "Documentation",
+    "Analysis",
+    "Proposals",
+  ],
+  [UserRole.ProjectManager]: [
+    "Summary",
+    "Details",
+    "Documentation",
+    "Analysis",
+    "Requirements",
+    "Estimations",
+    "Validation",
+  ],
+  [UserRole.Unauthorized]: [],
+};
 
 export default function Page({ params }: { params: { projectId: string } }) {
-  const [activeMenuItem, setActiveMenuItem] = useState(menuItems[0]);
+  const [activeMenuItem, setActiveMenuItem] = useState<MenuItem>(menuItems[0]);
   const { data: projectDetails, isLoading: isLoadingProjectDetails } =
     api.projects.getProyectInfo.useQuery({
       projectId: Number(params.projectId),
     });
 
-  const handleMenuClick = (item: string) => {
+  const session = useSession();
+
+  const userPermissions =
+    permissions[session?.data?.user.role ?? UserRole.Unauthorized];
+
+  const handleMenuClick = (item: MenuItem) => {
     setActiveMenuItem(item);
   };
 
@@ -48,8 +119,8 @@ export default function Page({ params }: { params: { projectId: string } }) {
       <div className="flex h-full w-full">
         <div className="my-4 w-1/5 rounded-2xl bg-gray-100 p-4">
           <ul className="space-y-2">
-            {menuItems.map((item) => (
-              <li key={item}>
+            {userPermissions.map((item) => (
+              <li key={String(item)}>
                 <button
                   className={cn(
                     "w-full rounded-md px-4 py-2 text-left transition-colors",
@@ -57,31 +128,40 @@ export default function Page({ params }: { params: { projectId: string } }) {
                   )}
                   onClick={() => handleMenuClick(item)}
                 >
-                  {item}
+                  {String(item)}
                 </button>
               </li>
             ))}
           </ul>
         </div>
         <div className="relative mx-6 w-3/4 rounded-2xl border p-8 shadow-md">
-          <h2 className="mb-4 text-2xl font-bold">{activeMenuItem}</h2>
-          {activeMenuItem === "Estimations" ? (
+          <h2 className="mb-4 text-2xl font-bold">{String(activeMenuItem)}</h2>
+          {activeMenuItem === "Estimations" &&
+          userPermissions.includes("Estimations") ? (
             <Estimations projectId={Number(params.projectId)} />
-          ) : activeMenuItem === "Details" ? (
+          ) : activeMenuItem === "Details" &&
+            userPermissions.includes("Details") ? (
             <Details projectId={params.projectId} />
-          ) : activeMenuItem === "Summary" ? (
+          ) : activeMenuItem === "Summary" &&
+            userPermissions.includes("Summary") ? (
             <Summary projectId={params.projectId} />
-          ) : activeMenuItem === "Requirements" ? (
+          ) : activeMenuItem === "Requirements" &&
+            userPermissions.includes("Requirements") ? (
             <Requirements projectId={Number(params.projectId)} />
-          ) : activeMenuItem === "Proposals" ? (
+          ) : activeMenuItem === "Proposals" &&
+            userPermissions.includes("Proposals") ? (
             <Proposals projectId={params.projectId} />
-          ) : activeMenuItem === "Documentation" ? (
+          ) : activeMenuItem === "Documentation" &&
+            userPermissions.includes("Documentation") ? (
             <Documents projectId={Number(params.projectId)} />
-          ) : activeMenuItem === "Analysis" ? (
+          ) : activeMenuItem === "Analysis" &&
+            userPermissions.includes("Analysis") ? (
             <Analysis projectId={params.projectId} />
-          ) : activeMenuItem === "Planning" ? (
+          ) : activeMenuItem === "Planning" &&
+            userPermissions.includes("Planning") ? (
             <Planning projectId={Number(params.projectId)} />
-          ) : activeMenuItem === "Validation" ? (
+          ) : activeMenuItem === "Validation" &&
+            userPermissions.includes("Validation") ? (
             <Validation validationId={Number(params.projectId)} />
           ) : null}
         </div>
