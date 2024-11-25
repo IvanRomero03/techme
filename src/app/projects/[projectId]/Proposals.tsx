@@ -10,7 +10,7 @@ import { api } from "techme/trpc/react";
 import { useState, useEffect } from "react";
 import { Document, Packer, Paragraph, TextRun } from "docx";
 import { getOpenAIBrowser } from "techme/server/chatgpt/openai";
-import marpExporter from "./marpExporter";
+import marpExporter, { marpExporterHTML } from "./marpExporter";
 
 export default function Proposals({ projectId }: { projectId: string }) {
   const [proposalsContent, setProposalsContent] = useState<string>("");
@@ -234,6 +234,12 @@ export default function Proposals({ projectId }: { projectId: string }) {
       });
       const fileName = "Project_Responses.pptx";
       saveAs(blob, fileName);
+
+      const htmlExp = new Blob([await marpExporterHTML(content)], {
+        type: "text/html",
+      });
+      const htmlFileName = "Project_Responses.html";
+      saveAs(htmlExp, htmlFileName);
     } catch (error) {
       console.error("Error generating PPTX file:", error);
       alert(

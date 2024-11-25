@@ -2,7 +2,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { createTRPCRouter, protectedProcedure } from "techme/server/api/trpc";
 import getOpenAI from "techme/server/chatgpt/openai";
-import { projects } from "techme/server/db/schema";
+import { estimations, projects, requirements } from "techme/server/db/schema";
 import { readableRole } from "techme/util/UserRole";
 
 export const projectProposalsRouter = createTRPCRouter({
@@ -30,6 +30,46 @@ export const projectProposalsRouter = createTRPCRouter({
         console.error("Failed to get cache on getProjectProposal", error);
       }
 
+      const reqs = await ctx.db
+        .select()
+        .from(requirements)
+        .where(eq(requirements.projectId, input.projectId));
+
+      const reqText = reqs
+        .map((req) => req.title + " == " + req.description)
+        .join("\n");
+
+      const estimates = await ctx.db
+        .select()
+        .from(estimations)
+        .where(eq(estimations.id, input.projectId));
+
+      const estText = estimates
+        .map(
+          (est) =>
+            est.phase +
+            " == " +
+            est.notes +
+            " == " +
+            est.manforce +
+            " : " +
+            est.manforceUnit +
+            " ; " +
+            est.timeEstimation +
+            " : " +
+            est.timeUnit,
+        )
+        .join("\n");
+
+      const context =
+        "El proyecto se llama: " +
+        project[0].name +
+        ". Descripción: " +
+        project[0].description +
+        ". Requerimientos: " +
+        reqText +
+        ". Estimaciones: " +
+        estText;
       const openai = getOpenAI();
       const proposal = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -45,11 +85,7 @@ export const projectProposalsRouter = createTRPCRouter({
           },
           {
             role: "user",
-            content:
-              "El proyecto se llama: " +
-              project[0].name +
-              " y su descripción es la siguiente: " +
-              project[0].description,
+            content: context,
           },
         ],
         stream: true,
@@ -117,7 +153,9 @@ export const projectProposalsRouter = createTRPCRouter({
         ],
       });
 
-      return response.choices[0]?.message?.content ?? "No se pudo obtener una respuesta de la IA.";
+      return (
+        response.choices[0]?.message?.content ??
+        "No se pudo obtener una respuesta de la IA."
+      );
     }),
 });
-

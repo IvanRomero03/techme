@@ -70,7 +70,7 @@ export default async function marpExporter(mdContent: string): Promise<Blob> {
     const pptSlide = pres.addSlide();
 
     // Process slide content
-    let yPos = 0.5;
+    let yPos = 2;
     Array.from(slide.children).forEach((element) => {
       const { text, level } = processContent(element);
       if (text.trim()) {
@@ -116,4 +116,22 @@ export default async function marpExporter(mdContent: string): Promise<Blob> {
   return (await pres.write({
     outputType: "blob",
   })) as Blob;
+}
+
+export async function marpExporterHTML(mdContent: string): Promise<Blob> {
+  // Initialize Marp
+  const marp = new Marp({
+    html: true,
+    markdown: {
+      breaks: true,
+    },
+  });
+
+  // Convert markdown to HTML/CSS using Marp
+  const { html, css } = marp.render(mdContent);
+
+  const newHtml = `${html}<style>${css}</style>`;
+  const blob = new Blob([newHtml], { type: "text/html" });
+
+  return blob;
 }
