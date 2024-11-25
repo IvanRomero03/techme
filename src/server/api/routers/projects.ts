@@ -75,7 +75,9 @@ export const projectsRouter = createTRPCRouter({
         id: projects.id,
         name: projects.name,
         completion_percentage: projects.completionPercentage,
-        days_left: sql<number>`EXTRACT(DAY FROM AGE(end_date, NOW()))`.as("days_left"),
+        days_left: sql<number>`EXTRACT(DAY FROM AGE(end_date, NOW()))`.as(
+          "days_left",
+        ),
       })
       .from(projects)
       .leftJoin(peoplePerProject, eq(projects.id, peoplePerProject.projectId))
@@ -116,6 +118,8 @@ export const projectsRouter = createTRPCRouter({
         project_category: z.string(),
         project_members: z.array(z.string()),
         project_percentage: z.number(),
+        startDate: z.date(),
+        endDate: z.date(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -128,6 +132,8 @@ export const projectsRouter = createTRPCRouter({
           status: input.project_status,
           category: input.project_category,
           completionPercentage: input.project_percentage,
+          startDate: input.startDate,
+          endDate: input.endDate,
         })
         .where(eq(projects.id, input.project_id));
       await ctx.db

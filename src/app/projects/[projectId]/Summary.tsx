@@ -20,7 +20,7 @@ export default function Summary({ projectId }: { projectId: string }) {
 
   return (
     <CardContent className="flex h-full w-full flex-col gap-4">
-      <Card className="relative h-1/3 w-1/2 overflow-auto pt-6">
+      <Card className="relative h-1/3 overflow-auto pt-6">
         <CardContent>
           <Button
             onClick={async () => {

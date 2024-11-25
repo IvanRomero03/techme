@@ -91,7 +91,7 @@ export const documentsRouter = createTRPCRouter({
         throw new Error("Document not found");
       }
       const chunksResponse = await fetch(
-        "https://281b-172-174-209-112.ngrok-free.app/convert",
+        "https://d461-172-174-209-112.ngrok-free.app/convert",
         {
           method: "POST",
           headers: {

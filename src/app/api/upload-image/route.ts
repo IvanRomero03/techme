@@ -70,6 +70,7 @@ export async function POST(req: NextRequest) {
     });
   }
   const caller = createCaller(ctx);
+  console.log(docId[0].id);
   await caller.documents.postProcessDocument({ documentId: docId[0].id });
   return new Response("Document uploaded", {
     status: 200,
