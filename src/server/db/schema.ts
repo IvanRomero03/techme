@@ -383,6 +383,7 @@ export const validation = createTable(
     id: serial("id").primaryKey(),
     name: varchar("name", { length: 255 }).notNull(),
     userId: varchar("user_id", { length: 255 }).references(() => users.id),
+    createdByName: varchar("created_by_name", { length: 255 }).notNull(), // Columna actualizada
     projectId: integer("project_id")
       .references(() => projects.id, {
         onDelete: "cascade",
@@ -404,6 +405,7 @@ export const validation = createTable(
   }),
 );
 
+
 export const validationDocuments = createTable(
   "validation_documents",
   {
@@ -421,6 +423,7 @@ export const validationDocuments = createTable(
     uploadedBy: varchar("uploaded_by", { length: 255 })
       .references(() => users.id)
       .notNull(),
+    uploadedByName: varchar("uploaded_by_name", { length: 255 }).notNull(), // Nuevo campo para almacenar el nombre del usuario que subió el documento
     uploadedAt: timestamp("uploaded_at", {
       mode: "date",
       withTimezone: true,
@@ -440,9 +443,10 @@ export const validationDocuments = createTable(
     validationIdIdx: index("Validation_document_validation_id_idx").on(
       document.validationId,
     ),
-    nameIdx: index("validation_documet_name_idx").on(document.name),
+    nameIdx: index("validation_document_name_idx").on(document.name),
   }),
 );
+
 
 export const validationDocumentNotes = createTable(
   "validation_document_notes",
@@ -454,9 +458,10 @@ export const validationDocumentNotes = createTable(
       })
       .notNull(),
     note: text("note").notNull(),
-    createdBy: varchar("created_by", { length: 255 }).references(
-      () => users.id,
-    ),
+    createdBy: varchar("created_by", { length: 255 })
+      .references(() => users.id)
+      .notNull(),
+    createdByName: varchar("created_by_name", { length: 255 }).notNull(), // Nuevo campo para guardar el nombre del creador
     createdAt: timestamp("created_at", {
       mode: "date",
       withTimezone: true,
@@ -468,6 +473,7 @@ export const validationDocumentNotes = createTable(
     resolvedBy: varchar("resolved_by", { length: 255 }).references(
       () => users.id,
     ),
+    resolvedByName: varchar("resolved_by_name", { length: 255 }), // Nuevo campo para guardar el nombre del usuario que resolvió
     resolvedAt: timestamp("resolved_at", {
       mode: "date",
       withTimezone: true,
@@ -477,6 +483,7 @@ export const validationDocumentNotes = createTable(
     documentIdIdx: index("validation_note_document_id_idx").on(note.documentId),
   }),
 );
+
 
 export const validationDocumentLikes = createTable(
   "validation_document_likes",
